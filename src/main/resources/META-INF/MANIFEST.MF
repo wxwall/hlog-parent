@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Specification-Title: Asiainfo Log Agent
+Specification-Version: 0.0.1
+Specification-Vendor: LogAgent
+Implementation-Title: com.asiainfo.hlog.agent
+Implementation-Version: 0.0.1
+Implementation-Vendor: HLogAgent
+Premain-Class: com.asiainfo.hlog.agent.HLogAgent
+Agent-Class: com.asiainfo.hlog.agent.HLogAgent
+Can-Redefine-Classes: true
