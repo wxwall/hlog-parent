@@ -20,6 +20,6 @@
  
 每个中间件服务器的设置大不相同，像tomcat需要在sh或bat的运行脚本上指定，而weblogc或websphere可以在控制台上配置。
 
-## :snail: 更多信息参数部门wiki
+## :snail: 更多信息访问部门wiki
 在[福州21楼](http://192.168.1.22:8083/xwiki/bin/view/Main/logPlatform)
 或[你出差了](http://110.90.126.242:8083/xwiki/bin/view/Main/logPlatform)
