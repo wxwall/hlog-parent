@@ -14,8 +14,10 @@
 日志代理是通过JVM的运行参数来启用能力。
 * 在java命令运行
 
+```java
  java HelloWorld -javaagent:hlog-agent.jar -noverify
- 
+```
+
  * 在中间件服务器上运行
  
 每个中间件服务器的设置大不相同，像tomcat需要在sh或bat的运行脚本上指定，而weblogc或websphere可以在控制台上配置。
