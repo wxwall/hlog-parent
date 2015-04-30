@@ -1,5 +1,7 @@
 package com.asiainfo.hlog.agent.bytecode.javassist;
 
+import com.asiainfo.hlog.client.config.Path;
+
 import java.util.List;
 
 /**
@@ -7,17 +9,17 @@ import java.util.List;
  */
 public class LogSwoopRule {
 
-    private String[] className ;
+    private Path path ;
     private List<LogSwoopMethodInfo> methodInfoList ;
 
     private List<ILogWeave> weaves ;
 
-    public String[] getClassName() {
-        return className;
+    public Path getPath() {
+        return path;
     }
 
-    public void setClassName(String[] className) {
-        this.className = className;
+    public void setPath(Path path) {
+        this.path = path;
     }
 
     public List<LogSwoopMethodInfo> getMethodInfoList() {

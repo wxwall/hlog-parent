@@ -100,6 +100,12 @@ public class Path {
         return result;
     }
 
+    public String getFullClassName(){
+        StringBuilder buff = new StringBuilder(packageName);
+        buff.append(".").append(className);
+        return buff.toString();
+    }
+
     @Override
     public String toString() {
         StringBuilder buff = new StringBuilder(packageName);

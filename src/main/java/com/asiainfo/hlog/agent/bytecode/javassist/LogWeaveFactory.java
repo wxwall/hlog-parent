@@ -22,6 +22,14 @@ public class LogWeaveFactory {
         ILogWeave weave2 = new RunningProcessesLogWeave();
         logWeaveName.put(weave2.getName(),RunningProcessesLogWeave.class.getName());
         logWeaveInst.put(weave2.getName(),weave2);
+
+        ILogWeave weave3 = new ErrorLogWeave();
+        logWeaveName.put(weave3.getName(),ErrorLogWeave.class.getName());
+        logWeaveInst.put(weave3.getName(),weave3);
+
+        ILogWeave weave4 = new LoggerLogWeave();
+        logWeaveName.put(weave4.getName(),LoggerLogWeave.class.getName());
+        logWeaveInst.put(weave4.getName(),weave4);
     }
 
     public static LogWeaveFactory getInstance(){

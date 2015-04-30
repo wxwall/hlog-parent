@@ -6,6 +6,8 @@ package com.asiainfo.hlog.agent.bytecode.javassist;
 public class LogIdWeave implements ILogWeave {
 
 
+    public static final String ID = new String("logId");
+
 
     public String toString() {
         return "LogIdWeave :" + getOrder();
@@ -18,7 +20,7 @@ public class LogIdWeave implements ILogWeave {
 
 
     public String getName() {
-        return "logId";
+        return ID;
     }
 
 
@@ -32,8 +34,11 @@ public class LogIdWeave implements ILogWeave {
         StringBuffer codeBuffer = new StringBuffer();
         codeBuffer.append("String _agent_Log_pId_ = com.asiainfo.hlog.agent.runtime.LogAgentContext.getThreadCurrentLogId();");
         codeBuffer.append("String _agent_Log_Id_ = com.asiainfo.hlog.client.helper.LogUtil.uuid();");
+        codeBuffer.append("if(_agent_Log_pId_==null){");
+        codeBuffer.append("com.asiainfo.hlog.agent.runtime.LogAgentContext.clear();");
+        codeBuffer.append("com.asiainfo.hlog.agent.runtime.LogAgentContext.setThreadLogGroupId(_agent_Log_Id_);");
+        codeBuffer.append("}");
         codeBuffer.append("com.asiainfo.hlog.agent.runtime.LogAgentContext.setThreadCurrentLogId(_agent_Log_Id_);");
-        codeBuffer.append("if(_agent_Log_pId_==null){com.asiainfo.hlog.agent.runtime.LogAgentContext.setThreadLogGroupId(_agent_Log_Id_);}");
         return codeBuffer.toString();
     }
 

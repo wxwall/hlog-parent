@@ -11,9 +11,6 @@ public class RPLogData extends LogData {
     private long spend ;
     private int status ;
 
-    public RPLogData(){
-        setType(2);
-    }
 
     public String getClazz() {
         return clazz;

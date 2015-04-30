@@ -1,5 +1,7 @@
 package com.asiainfo.hlog.client.helper;
 
+import com.asiainfo.hlog.client.config.Constants;
+
 import java.io.PrintStream;
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -14,7 +16,7 @@ public abstract class Logger {
 
     private static Map<String,Integer> levels = new HashMap<String,Integer>(5);
 
-    private static String evn_level = System.getProperty("hlogLevel","node");
+    private static String evn_level = System.getProperty(Constants.SYS_KEY_HLOG_LEVEL,"node");
 
     private static Integer i_evn_level = 0 ;
 
@@ -39,6 +41,21 @@ public abstract class Logger {
     private static void outprint(String level,String msg,Object ... objects){
 
         outprint(level,msg,null,objects);
+    }
+
+    public static boolean canOutprint(String curLevel,String setLevel){
+        if(curLevel==null || !levels.containsKey(curLevel)){
+            return false;
+        }
+        if(setLevel==null || !levels.containsKey(setLevel)){
+            return false;
+        }
+        int il1 = levels.get(curLevel);
+        int il2 = levels.get(setLevel);
+        if(il2<il1){
+            return false;
+        }
+        return true;
     }
 
     private static boolean canOutprint(int cur_level){
