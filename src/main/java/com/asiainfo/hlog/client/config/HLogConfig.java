@@ -13,6 +13,8 @@ import java.util.*;
  */
 public class HLogConfig {
 
+    public static final String tmpdir = System.getProperty("java.io.tmpdir");
+
     /**
      * 按key的降序排列
      * @param map
@@ -80,7 +82,7 @@ public class HLogConfig {
     /**
      * 代码织入的基础包名和需要织入的代码名称,不可动态
      */
-    private Map<String,String[]> basePaths = new HashMap<String,String[]>();
+    private Map<Path,String[]> basePaths = new HashMap<Path,String[]>();
 
 
     //-------运行时阶段配置----------------
@@ -216,7 +218,10 @@ public class HLogConfig {
             if(key.startsWith(Constants.KEY_BASE_PATH_PREFIX)){
                 String basePath = key.substring(Constants.KEY_BASE_PATH_PREFIX.length());
                 String[] weaves = propVal.split(",");
-                basePaths.put(basePath, weaves);
+                String[] strPaths = basePath.split(",");
+                for(int i=0;i<strPaths.length;i++){
+                    basePaths.put(Path.build(strPaths[i]), weaves);
+                }
             }else if(key.startsWith(Constants.KEY_HLOG_CAPTURE_ENABLE)){
                 //读取收集日志路径
                 String path = key.substring(Constants.KEY_HLOG_CAPTURE_ENABLE.length());
@@ -247,7 +252,7 @@ public class HLogConfig {
     }
 
 
-    public Map<String, String[]> getBasePaths() {
+    public Map<Path, String[]> getBasePaths() {
         return basePaths;
     }
 

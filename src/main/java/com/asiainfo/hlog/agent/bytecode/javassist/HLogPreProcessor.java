@@ -6,6 +6,8 @@ import com.asiainfo.hlog.agent.bytecode.javassist.process.BeforeAfterPreProcesso
 import com.asiainfo.hlog.agent.bytecode.javassist.process.IMethodPreProcessor;
 import com.asiainfo.hlog.agent.bytecode.javassist.process.RoundPreProcessor;
 import com.asiainfo.hlog.client.config.HLogConfig;
+import com.asiainfo.hlog.client.config.Path;
+import com.asiainfo.hlog.client.config.PathType;
 import com.asiainfo.hlog.client.helper.Logger;
 import javassist.*;
 
@@ -60,12 +62,12 @@ public class HLogPreProcessor extends AbstractPreProcessor {
         logWeaveActuator = new DefaultLogWeaveActuator();
         logSwoopRuleList = new ArrayList<LogSwoopRule>();
 
-        Set<String> basePaths = config.getBasePaths().keySet();
+        Set<Path> basePaths = config.getBasePaths().keySet();
 
-        for (String basePath : basePaths){
+        for (Path basePath : basePaths){
 
             LogSwoopRule logSwoopRule = new LogSwoopRule();
-            logSwoopRule.setClassName(new String[]{basePath});
+            logSwoopRule.setPath(basePath);
 
             String[] weaveNames = config.getBasePaths().get(basePath);
 
@@ -91,9 +93,14 @@ public class HLogPreProcessor extends AbstractPreProcessor {
     }
     private LogSwoopRule isSupportRule(String className){
         for(LogSwoopRule rule : logSwoopRuleList){
-            String[] classNames = rule.getClassName();
-            for (String name : classNames){
-                if(className.startsWith(name)){
+            //String[] classNames = rule.getClassName();
+            Path path = rule.getPath();
+            if(path.getType()== PathType.PACKAGE){
+                if(className.startsWith(path.toString())){
+                    return rule;
+                }
+            }else if(path.getType() == PathType.CLASS){
+                if(className.equals(path.getFullClassName())){
                     return rule;
                 }
             }
@@ -101,37 +108,41 @@ public class HLogPreProcessor extends AbstractPreProcessor {
         return null;
     }
     private ClassPool pool;
-    public byte[] preProcess(ClassLoader classLoader, String className, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
+    public byte[] preProcess(ClassLoader classLoader, String classFile, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
         //判断 该className是否有符合的 LogSwoopRule
-        if(className==null){
+        if(classFile==null){
             return null;
         }
 
-        if (className.indexOf("/") != -1) {
-            className = className.replaceAll("/", ".");
+        String clazz = classFile;
+        if (classFile.indexOf("/") != -1) {
+            clazz = classFile.replaceAll("/", ".");
         }
 
-        if(className.startsWith(exclude_path)){
+        if(clazz.startsWith(exclude_path)){
             return null;
         }
 
-        if(isExcludePath(className)){
+        if(isExcludePath(clazz)){
             return null;
         }
+
         //System.out.println("className="+className);
-        LogSwoopRule rule = isSupportRule(className);
+        LogSwoopRule rule = isSupportRule(clazz);
         if(rule==null || rule.getWeaves()==null || rule.getWeaves().size()==0){
             return null;
         }
         //构建 LogWeaveContext
         LogWeaveContext context = new LogWeaveContext();
-        context.setClassName(className);
+        context.setClassName(clazz);
         ByteArrayInputStream inp = new ByteArrayInputStream(classfileBuffer);
+        boolean weaved = false;
         //通过包名获取类文件
         try {
 
             if(Logger.isTrace()){
-                Logger.trace("正在处理[{0}]类字节码.当前Loader:{1},paramClassLoader:{2}", className, Thread.currentThread().getContextClassLoader().getClass(), classLoader);
+                Logger.trace("正在处理[{0}]类字节码.当前Loader:{1},paramClassLoader:{2}", clazz,
+                        Thread.currentThread().getContextClassLoader().getClass(), classLoader!=null?classLoader.getClass():"null");
             }
 
             //Thread.currentThread().getContextClassLoader().loadClass(className);
@@ -152,12 +163,13 @@ public class HLogPreProcessor extends AbstractPreProcessor {
 
             for (CtMethod ctMethod:ctMethods){
                 String methodName = ctMethod.getName();
-                if(ctMethod.isEmpty() || isExcludeMethod(methodName)){
+                if(isExcludeMethod(methodName)){
                     continue;
                 }
                 try{
 
                     context.setMethodName(methodName);
+                    context.setParamNumber(ctMethod.getParameterTypes().length);
 
                     //计算出该方法的代码块
                     LogWeaveCode logWeaveCode = logWeaveActuator.executeWeave(context, rule.getWeaves());
@@ -178,21 +190,21 @@ public class HLogPreProcessor extends AbstractPreProcessor {
                             roundPreProcessor.preProcessor(ctClass, ctMethod, context, logWeaveCode);
                             break;
                     }
-
+                    weaved = true;
                 }catch (Throwable e){
                     //e.printStackTrace();
                     //System.out.println("weave method["+methodName+"] error:"+e.getMessage());
-                    Logger.error("weave class [{0}] method[{1}]",e,className,methodName);
+                    Logger.error("weave class [{0}] method[{1}]",e,clazz,methodName);
                 }
             }
 
 
             byte[] code = ctClass.toBytecode();
-            /*
-            FileOutputStream fos = new FileOutputStream("d:/tmp/"+ctClass.getSimpleName()+".class");
-            fos.write(code);
-            fos.close();
-            */
+            //保存文件
+            if(weaved){
+                saveWaveClassFile(classFile,code);
+            }
+
             return code;
         } catch (Throwable e) {
             e.printStackTrace();

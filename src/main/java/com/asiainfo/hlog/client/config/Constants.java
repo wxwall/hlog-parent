@@ -19,9 +19,25 @@ public class Constants {
 
     //--------------------------系统属性key名称-----------------------------------
 
+    /**
+     * 系统域名称
+     */
     public static final String SYS_KEY_HLOG_DOMAIN = "hlogDomain";
 
+    /**
+     * 特定配置文件名称
+     */
     public static final String SYS_KEY_HLOG_CFG_NAME = "hlogCfgName";
+
+    /**
+     * 是否保存被织入代码的class到指定的目录下 ,yes输出其他不输出
+     */
+    public static final String SYS_KEY_HLOG_SAVE_WEAVE_CLASS = "hlogSaveWeaveClass";
+
+    /**
+     * 输出日志级别
+     */
+    public static final String SYS_KEY_HLOG_LEVEL = "hlogLevel";
 
     //--------------------------配置属性key名称-----------------------------------
 

@@ -44,9 +44,10 @@ public class RuntimeCall{
      * @param weaveName
      * @param clazz
      * @param method
+     * @param level
      * @return
      */
-    public boolean enable(String weaveName ,String clazz,String method){
+    public boolean enable(String weaveName ,String clazz,String method,String level){
 
         HLogConfig config = HLogConfig.getInstance();
 
@@ -56,10 +57,13 @@ public class RuntimeCall{
 
         //查收到是有直接是方法级的
         String classKey = clazz + "-" + weaveName;
+        if(("log4j".equals(weaveName) || "logback".equals(weaveName)) && level!=null){
+            classKey = classKey + "-" + level;
+        }
         if(runtimeSwitchMap.containsKey(classKey)){
             boolean b = runtimeSwitchMap.get(classKey);
             if(Logger.isTrace()){
-                Logger.trace("判断[{0}]是否是d在收集日志数据范围:{1}",classKey,b);
+                Logger.trace("判断[{0}]是否在收集日志数据范围:{1}",classKey,b);
             }
             return b;
         }else{
@@ -69,11 +73,21 @@ public class RuntimeCall{
                 List<String> captureWeaves = rule.getCaptureWeaves();
                 for (String weave : captureWeaves){
                     if(weave.equals(weaveName)){
-                        runtimeSwitchMap.put(classKey, true);
-                        if(Logger.isTrace()){
-                            Logger.trace("判断[{0}]是否是d在收集日志数据范围:{1}",classKey,true);
+                        boolean enable = false;
+                        if(("log4j".equals(weaveName) || "logback".equals(weaveName))
+                                && level!=null && rule.getLevel()!=null){
+                            if(Logger.canOutprint(level,rule.getLevel())){
+                                enable = true;
+                            }
+                        }else{
+                            enable = true;
                         }
-                        return true;
+
+                        runtimeSwitchMap.put(classKey, enable);
+                        if(Logger.isTrace()){
+                            Logger.trace("判断[{0}]是否在收集日志数据范围:{1}",classKey,enable);
+                        }
+                        return enable;
                     }
                 }
             }
@@ -85,7 +99,7 @@ public class RuntimeCall{
          */
         runtimeSwitchMap.put(classKey,false);
         if(Logger.isTrace()){
-            Logger.trace("判断[{0}]是否是d在收集日志数据范围:{1}",classKey,true);
+            Logger.trace("判断[{0}]是否在收集日志数据范围:{1}",classKey,true);
         }
         return false;
     }

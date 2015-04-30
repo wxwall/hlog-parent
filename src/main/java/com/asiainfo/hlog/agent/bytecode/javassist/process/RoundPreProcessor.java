@@ -4,6 +4,7 @@ import com.asiainfo.hlog.agent.bytecode.javassist.ILogWeave;
 import com.asiainfo.hlog.agent.bytecode.javassist.ILogWeaveActuator;
 import com.asiainfo.hlog.agent.bytecode.javassist.LogWeaveCode;
 import com.asiainfo.hlog.agent.bytecode.javassist.LogWeaveContext;
+import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 import com.asiainfo.hlog.client.helper.Logger;
 import javassist.*;
 import javassist.bytecode.AnnotationsAttribute;
@@ -19,14 +20,15 @@ import java.util.ListIterator;
  */
 public class RoundPreProcessor implements IMethodPreProcessor {
 
-    private CtClass exClass = null;
+    //private CtClass exClass = null;
 
     public RoundPreProcessor(){
+        /*
         try {
             exClass = ClassPool.getDefault().get("java.lang.Exception");
         } catch (NotFoundException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
 
@@ -38,7 +40,7 @@ public class RoundPreProcessor implements IMethodPreProcessor {
 
         String methodName = method.getName();
 
-        String oldMethodName = methodName+"$"+logWeaveContext.getHashCode() ;
+        String oldMethodName = methodName+"$$"+logWeaveContext.getHashCode() ;
         method.setName(oldMethodName);
 
 
@@ -82,9 +84,9 @@ public class RoundPreProcessor implements IMethodPreProcessor {
             bufferCode.append("return _reObj;");
         }
 
-        bufferCode.append("}catch(Exception _agentLogErr){");
+        bufferCode.append("}catch(Throwable ").append(LogAgentContext.S_AGENT_ERR_PARAM_NAME).append("){");
         bufferCode.append(logWeaveCode.getExceptionCode());
-        bufferCode.append("throw _agentLogErr;");
+        bufferCode.append("throw ").append(LogAgentContext.S_AGENT_ERR_PARAM_NAME).append(";");
         bufferCode.append("}finally{");
         bufferCode.append(logWeaveCode.getFinallyCode());
         bufferCode.append("}");

@@ -24,7 +24,7 @@ public class BeforeAfterPreProcessor implements IMethodPreProcessor {
 
         method.insertBefore(logWeaveCode.getBeforeCode().toString());
 
-        method.insertAfter(logWeaveCode.getBeforeCode().toString());
+        method.insertAfter(logWeaveCode.getAfterCode().toString());
 
         return null;
     }

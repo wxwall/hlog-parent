@@ -62,7 +62,7 @@ public class LogWeaveCode {
     }
 
     public void append(int position,String code){
-        if(code==null){
+        if(code==null || code.trim().length()==0){
             return ;
         }
         switch (position){

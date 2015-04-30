@@ -11,6 +11,8 @@ public class LogWeaveContext {
     private String methodName;
     private String[] paramNames;
 
+    private int paramNumber = 0;
+
     public String getClassName() {
         return className;
     }
@@ -35,10 +37,19 @@ public class LogWeaveContext {
         this.paramNames = paramNames;
     }
 
+    public int getParamNumber() {
+        return paramNumber;
+    }
+
+    public void setParamNumber(int paramNumber) {
+        this.paramNumber = paramNumber;
+    }
+
     public String getHashCode(){
         if(hashCode==null){
             hashCode = Integer.toString(Math.abs(className.hashCode()),32);
         }
         return hashCode;
     }
+
 }

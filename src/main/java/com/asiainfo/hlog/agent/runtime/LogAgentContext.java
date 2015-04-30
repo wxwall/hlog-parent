@@ -1,19 +1,36 @@
 package com.asiainfo.hlog.agent.runtime;
 
 /**
+ * 运行时的各类变量值
  * Created by c on 2015/3/17.
  */
 public class LogAgentContext {
 
-    public static final String S_AGENT_LOG_PID = "_agent_Log_pId_";
+    /**
+     * 日志上级ID
+     */
     public static final String S_AGENT_LOG_ID = "_agent_Log_Id_";
+    /**
+     * 日志ID
+     */
+    public static final String S_AGENT_LOG_PID = "_agent_Log_pId_";
+    /**
+     * 日志异常变量名称
+     */
+    public static final String S_AGENT_ERR_PARAM_NAME = "_agent_Log_Err";
 
-    //public static final String S_AGENT_ERR_PARAM_NAME = "_agent_Log_Err";
 
-
+    /**
+     * 日志组ID
+     */
     private static final ThreadLocal<String> threadLogGroupId = new ThreadLocal<String>();
+    /**
+     * 当前日志ID
+     */
     private static final ThreadLocal<String> threadCurrentLogId = new ThreadLocal<String>();
-
+    /**
+     * 当前日志序列
+     */
     private static final ThreadLocal<Integer> threadCurrentIndex = new ThreadLocal<Integer>();
 
     public static void setThreadLogGroupId(String logGroupId){
