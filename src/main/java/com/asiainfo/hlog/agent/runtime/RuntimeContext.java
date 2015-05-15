@@ -2,6 +2,7 @@ package com.asiainfo.hlog.agent.runtime;
 
 import com.asiainfo.hlog.agent.bytecode.javassist.ErrorLogWeave;
 import com.asiainfo.hlog.client.helper.ClassHelper;
+import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.helper.MethodCaller;
 
@@ -15,6 +16,8 @@ import java.lang.reflect.Method;
 public class RuntimeContext {
 
     private static MethodCaller enableMethodCaller = null;
+
+    private static MethodCaller logIdMehtodClass = null;
 
     private static Field messageField = null;
 
@@ -88,14 +91,27 @@ public class RuntimeContext {
         if (enableMethodCaller == null) {
             synchronized (RuntimeContext.class) {
                 Object obj = ClassHelper.newInstance(RuntimeCall.class.getName());
-                Method methed = ClassHelper.getMethod(obj.getClass(),"enable",String.class,String.class,String.class,String.class);
-                enableMethodCaller = new MethodCaller(methed,obj);
+                Method m = ClassHelper.getMethod(obj.getClass(),"enable",String.class,String.class,String.class,String.class);
+                enableMethodCaller = new MethodCaller(m,obj);
             }
         }
 
         boolean b = (Boolean)enableMethodCaller.invoke(weaveName,clazz,method,level);
 
         return b;
+    }
+
+    public static String logId(){
+        if(logIdMehtodClass==null){
+            Class logUtil = ClassHelper.loadClass(LogUtil.class.getName());
+            if(logUtil==null){
+                return "";
+            }
+            Method method = ClassHelper.getMethod(logUtil,"logId");
+            logIdMehtodClass = new MethodCaller(method,null);
+        }
+
+        return (String)logIdMehtodClass.invoke();
     }
 }
 

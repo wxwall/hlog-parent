@@ -43,7 +43,7 @@ public class ErrorLogWeave extends AbstractLogWeave {
         code.append("String error = com.asiainfo.hlog.agent.runtime.RuntimeContext.error("+LogAgentContext.S_AGENT_ERR_PARAM_NAME+");");
         buildIfEnable(ID,logWeaveContext,code).append("{");
         code.append("com.asiainfo.hlog.client.model.ErrorLogData data = new com.asiainfo.hlog.client.model.ErrorLogData();");
-        buildBaseLogData(logWeaveContext,"01","error",code);
+        buildBaseLogData(logWeaveContext,"h01","error",code);
         buildReveiceEvent(logWeaveContext,code);
         code.append("}}");
         return code.toString();

@@ -3,7 +3,9 @@ package com.asiainfo.hlog.client.reveiver;
 import com.asiainfo.hlog.client.IHLogReveiver;
 import com.asiainfo.hlog.client.ITransmitter;
 import com.asiainfo.hlog.client.TransmitterFactory;
+import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
+import com.asiainfo.hlog.client.config.jmx.HLogJMXReport;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.Event;
@@ -24,11 +26,21 @@ public class DefaultReveiver implements IHLogReveiver {
 
     private Map<String,BlockingQueue<LogData>> mapQueue = new ConcurrentHashMap<String,BlockingQueue<LogData>>();
 
-    //private BlockingQueue<Event<LogData>> logDataQueue = null;
+    /**
+     * 内存队列大小
+     */
+    private int memQueueSize = 2000 ;
 
-    private final String mem_queue_size = "mem.queue.size";
+    /**
+     * 每次处理量
+     */
+    private int eachQuantity = 200;
 
-    private int memQueueSize ;
+    /**
+     * 处理频率
+     */
+    private int frequency = 100;
+
 
     private ExecutorService service = null;
 
@@ -37,8 +49,17 @@ public class DefaultReveiver implements IHLogReveiver {
     private boolean start = false;
 
     public DefaultReveiver(){
-        String queueSize = HLogConfig.getInstance().getProperty(mem_queue_size,"2000");
+        String queueSize = HLogConfig.getInstance()
+                .getProperty(Constants.KEY_DEF_REV_MEM_QUEUE_SIZE, "2000");
+        String eachQuantityS = HLogConfig.getInstance()
+                .getProperty(Constants.KEY_DEF_REV_EACH_QUANTITY, "200");
+        String frequencyS = HLogConfig.getInstance()
+                .getProperty(Constants.KEY_DEF_REV_FREQUENCY, "100");
+
         memQueueSize = Integer.parseInt(queueSize);
+        eachQuantity = Integer.parseInt(eachQuantityS);
+        frequency = Integer.parseInt(frequencyS);
+
         service = Executors.newSingleThreadExecutor();
         task = new QueueConsumer();
     }
@@ -96,7 +117,8 @@ public class DefaultReveiver implements IHLogReveiver {
                 }
             }
         }
-
+        HLogJMXReport.getHLogJMXReport().getRunStatusMBean().incrementHlogTotalNum();
+        HLogJMXReport.getHLogJMXReport().getRunStatusMBean().incrementHlogNum();
         if (!start) {
             start();
         }
@@ -114,7 +136,7 @@ public class DefaultReveiver implements IHLogReveiver {
                 if (!Thread.currentThread().isInterrupted()) {
                     try {
                         //TODO 做成配置
-                        Thread.sleep(100);
+                        Thread.sleep(frequency);
                     } catch (InterruptedException e) {
                     }
                 }
@@ -122,14 +144,16 @@ public class DefaultReveiver implements IHLogReveiver {
                 Set<ConcurrentHashMap.Entry<String,BlockingQueue<LogData>>> entries
                         = mapQueue.entrySet();
 
+                int handNum = 0 ;
                 for (ConcurrentHashMap.Entry<String,BlockingQueue<LogData>> entry : entries){
                     BlockingQueue<LogData> queue = entry.getValue();
                     if(queue.isEmpty()){
                         continue;
                     }
                     //TODO 做成可配置 500
-                    List<LogData> dataList = new ArrayList<LogData>(500);
-                    queue.drainTo(dataList, 500);
+                    List<LogData> dataList = new ArrayList<LogData>(eachQuantity);
+                    queue.drainTo(dataList, eachQuantity);
+                    handNum = dataList.size();
                     if (!dataList.isEmpty()) {
                         ITransmitter transmitter = null;
                         try{
@@ -148,6 +172,8 @@ public class DefaultReveiver implements IHLogReveiver {
                         }
                     }
                 }
+                HLogJMXReport.getHLogJMXReport().getRunStatusMBean().incrementHlogHandleTotalNum(handNum);
+                HLogJMXReport.getHLogJMXReport().getRunStatusMBean().incrementHlogHandleNum(handNum);
             }
         }
     }

@@ -35,7 +35,7 @@ public class RoundPreProcessor implements IMethodPreProcessor {
     public CtMethod preProcessor(CtClass ctClass,CtMethod method,
                                  LogWeaveContext logWeaveContext ,LogWeaveCode logWeaveCode)
             throws Exception {
-        if(method==null)
+        if(method==null || ctClass.isFrozen())
             return method;
 
         String methodName = method.getName();

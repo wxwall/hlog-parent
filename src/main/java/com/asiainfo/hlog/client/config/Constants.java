@@ -23,6 +23,10 @@ public class Constants {
      * 系统域名称
      */
     public static final String SYS_KEY_HLOG_DOMAIN = "hlogDomain";
+    /**
+     * 系统服务节点别名
+     */
+    public static final String SYS_KEY_HLOG_SERVER_ALIAS = "hlogServerAlias";
 
     /**
      * 特定配置文件名称
@@ -39,10 +43,20 @@ public class Constants {
      */
     public static final String SYS_KEY_HLOG_LEVEL = "hlogLevel";
 
+    /**
+     * JMX启用配置
+     */
+    public static final String SYS_KEY_HLOG_JMX_ENABLE = "hlogJmxEnable";
+    /**
+     * JMX启用端口,系统默认为140001
+     */
+    public static final String SYS_KEY_HLOG_JMX_POST = "hlogJmxPost";
+
+
     //--------------------------配置属性key名称-----------------------------------
 
     /**
-     *全局开关
+     *全局开关,true打开
      */
     public static final String KEY_HLOG_ENABLE = "hlog.enable";
     /**
@@ -50,6 +64,10 @@ public class Constants {
      */
     public static final String KEY_BASE_PATH_PREFIX = "hlog.base.path.";
 
+    /**
+     * 排除路径
+     */
+    public static final String KEY_HLOG_EXCLUDE_METHODS = "hlog.exclude.methods";
     /**
      * 排除路径
      */
@@ -77,7 +95,21 @@ public class Constants {
     /**
      * 设置默认的日志接收器
      */
-    public static final String KEY_DEF_REVEIVER_CLASS = new String("hlog.reveriver.class");
+    public static final String KEY_DEF_REVEIVER_CLASS = "hlog.reveriver.class";
+
+    /**
+     * 默认日志接收器的内存队列大小
+     */
+    public static final String KEY_DEF_REV_MEM_QUEUE_SIZE = "hlog.reveriver.mem.queue.size";
+
+    /**
+     * 每次处理量
+     */
+    public static final String KEY_DEF_REV_EACH_QUANTITY = "hlog.reveriver.each.quantity";
+    /**
+     * 处理频率
+     */
+    public static final String KEY_DEF_REV_FREQUENCY = "hlog.reveriver.frequency";
 
 
     //--------------------------配置平台属性key名称---------------------------------

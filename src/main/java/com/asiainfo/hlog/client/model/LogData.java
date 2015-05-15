@@ -5,21 +5,39 @@ package com.asiainfo.hlog.client.model;
  * Created by c on 2015/3/17.
  */
 public class LogData {
-    private String type ;
+    private String ip;
+    private String server;
+    private String mc ;
     private long time;
     private String gId;
     private String id;
-    private String pid;
+    private String pId;
     //private int seq ;
 
     private String desc ;
 
-    public String getType() {
-        return type;
+    public String getIp() {
+        return ip;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public String getServer() {
+        return server;
+    }
+
+    public void setServer(String server) {
+        this.server = server;
+    }
+
+    public String getMc() {
+        return mc;
+    }
+
+    public void setMc(String type) {
+        this.mc = type;
     }
 
     public long getTime() {
@@ -46,12 +64,12 @@ public class LogData {
         this.id = id;
     }
 
-    public String getPid() {
-        return pid;
+    public String getPId() {
+        return pId;
     }
 
-    public void setPid(String pid) {
-        this.pid = pid;
+    public void setPId(String pId) {
+        this.pId = pId;
     }
 
 
@@ -67,11 +85,11 @@ public class LogData {
     public String toString() {
 
         return "LogData{" +
-                "type=" + type +
+                "mc=" + mc +
                 ", time=" + time +
-                ", groupId='" + gId + '\'' +
+                ", gId='" + gId + '\'' +
                 ", id='" + id + '\'' +
-                ", pid='" + pid + '\'' +
+                ", pid='" + pId + '\'' +
                 ", desc='" + desc + '\'' +
                 '}';
     }

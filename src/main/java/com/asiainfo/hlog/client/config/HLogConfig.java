@@ -3,6 +3,7 @@ package com.asiainfo.hlog.client.config;
 import com.asiainfo.hlog.client.helper.Logger;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.*;
@@ -13,8 +14,7 @@ import java.util.*;
  */
 public class HLogConfig {
 
-    public static final String tmpdir = System.getProperty("java.io.tmpdir");
-
+    //=======================================类属性=================================
     /**
      * 按key的降序排列
      * @param map
@@ -59,10 +59,46 @@ public class HLogConfig {
         }
     };
 
+
     /**
-     * 配置节点名称
+     * 随机产生一个终端码
+     */
+    public static String hlogCode = new String("0");
+
+
+    /**
+     * 维持配置数据池
+     */
+    private Properties configProps = null;
+
+
+    private static HLogConfig instance = null;
+
+
+    //=======================================从JVM参数设置的数据=================================
+    //====这些参数不可动态变更
+    public static final String tmpdir = System.getProperty("java.io.tmpdir");
+
+    /**
+     * 是否启用JMX,默认为true
+     */
+    public static final boolean jmxEnable = "true".equals(
+        System.getProperty(Constants.SYS_KEY_HLOG_JMX_ENABLE, "true"));
+
+    public static final String jmxPost =  System.getProperty(Constants.SYS_KEY_HLOG_JMX_POST, "14002");
+
+    //public static final int defJMXPost = 14001 ;
+
+    /**
+     * 配置节点名称,可以用于系统模块同类,如受理类服务、PPM类服务,同时这个也是用于配置平台的domain
      */
     public static String hlogDomain = System.getProperty(Constants.SYS_KEY_HLOG_DOMAIN,"hlog");
+    /**
+     * 配置服务节点别名,如在同一台服务器上,多个节点的domain为受理(bizhall)服务节点,
+     * 如果想区分节点名称可以通过serverAlias来取服务节点名称,最大长度只能为12个
+     */
+    public static String hlogServerAlias = System.getProperty(Constants.SYS_KEY_HLOG_SERVER_ALIAS,"hlogServ0000");
+
 
     /**
      * 特定配置名称的配置信息</br>
@@ -72,12 +108,11 @@ public class HLogConfig {
     public static String hlogCfgName = System.getProperty(Constants.SYS_KEY_HLOG_CFG_NAME,null);
 
     public static String hlogCfgNamePix = hlogCfgName+".";
-    /**
-     * 随机产生一个终端码
-     */
-    public static String hlogCode = new String("0");
 
-    //-------织入阶段配置----------------
+
+    //=======================================从配置文件或配置平台猎取的数据=========================
+
+    //----------------------------织入阶段配置----------------------------
 
     /**
      * 代码织入的基础包名和需要织入的代码名称,不可动态
@@ -85,7 +120,7 @@ public class HLogConfig {
     private Map<Path,String[]> basePaths = new HashMap<Path,String[]>();
 
 
-    //-------运行时阶段配置----------------
+    //----------------------------运行时阶段配置----------------------------
     /**
      * 运行时的路径规则和开关配置
      */
@@ -101,19 +136,22 @@ public class HLogConfig {
      */
     private Map<Path,Set<String>> runtimeHandlerCofnig = new TreeMap<Path,Set<String>>(treeMapComparator);
 
-    /**
-     * 维持配置数据池
-     */
-    private Properties configProps = null;
-
-
-    private static HLogConfig instance = null;
+    private String serverIp;
 
     private HLogConfig(){
-        //产生终端码
-        hlogCode = Long.toString(((Math.abs(hlogDomain.hashCode())+
+
+        try{
+            InetAddress addr = InetAddress.getLocalHost();
+            //获得本机IP
+            serverIp=addr.getHostAddress().toString();
+        }catch (Exception e){
+            Logger.error(e);
+        }
+        //产生终端码 ip的hashcode +
+        hlogCode = Long.toString(((Math.abs(serverIp.hashCode())+
                 Math.round(Math.random() * 39999999999l + 10000000000l))+
-                System.currentTimeMillis())>>32,32);
+                System.currentTimeMillis())>>16,32);
+        System.out.println(hlogCode);
     }
 
     public static HLogConfig getInstance(){
@@ -125,6 +163,10 @@ public class HLogConfig {
             }
         }
         return instance;
+    }
+
+    public Properties getProperties(){
+        return configProps;
     }
 
     /**
@@ -208,7 +250,6 @@ public class HLogConfig {
             }
         }
 
-
         //下面是完成代码织入配置信息和运行时开关信息的加载
         Enumeration<?> en = configProps.propertyNames();
         while (en.hasMoreElements()) {
@@ -248,7 +289,7 @@ public class HLogConfig {
             }
         }
         //读取全局开关
-        enable="on".equals(getProperty(Constants.KEY_HLOG_ENABLE));
+        enable="true".equals(getProperty(Constants.KEY_HLOG_ENABLE));
     }
 
 
@@ -264,10 +305,17 @@ public class HLogConfig {
         return runtimeHandlerCofnig;
     }
 
-
+    public void setEnable(boolean enable){
+        this.enable = enable;
+    }
     public boolean isEnable() {
         return enable;
     }
+
+    public String getServerIp() {
+        return serverIp;
+    }
+
 
     public String getProperty(String key,String defVal){
         String val = getProperty(key);
@@ -284,15 +332,15 @@ public class HLogConfig {
             String tmpKey = HLogConfig.hlogCfgNamePix+key;
             val = configProps.getProperty(tmpKey);
             if(val!=null){
-                if(Logger.isTrace()){
-                    Logger.trace("property key={0} ,value={1}",tmpKey,val);
+                if(Logger.isDebug()){
+                    Logger.debug("property key={0} ,value={1}", tmpKey, val);
                 }
                 return val;
             }
         }else{
             val = configProps.getProperty(key);
-            if(Logger.isTrace()) {
-                Logger.trace("property key={0} ,value={1}", key, val);
+            if(Logger.isDebug()) {
+                Logger.debug("property key={0} ,value={1}", key, val);
             }
         }
 

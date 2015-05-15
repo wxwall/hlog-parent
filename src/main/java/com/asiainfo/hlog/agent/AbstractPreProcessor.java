@@ -57,34 +57,49 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
         excludeMethods.add("wait");
 
         //排除get/set方法
-        excludeMethodRegulars.add("^[s|g]et[A-Z]{1}.*");
+        excludeMethodRegulars.add(".*\\.[s|g]et[A-Z].*");
+
+        //加载配置文件的方法排除信息
+        String excludeMethodCfg = HLogConfig.getInstance()
+                .getProperty(Constants.KEY_HLOG_EXCLUDE_METHODS);
+
+        if(excludeMethodCfg!=null){
+            addRules(excludeMethodCfg,excludeMethodRegulars);
+        }
 
         //加载配置文件的排除信息
-
+        //排除类
         String excludePaths = HLogConfig.getInstance()
                 .getProperty(Constants.KEY_HLOG_EXCLUDE_PATHS);
         if(excludePaths!=null){
-            String[] excludePathArray = excludePaths.split(",");
-            for (String ep : excludePathArray){
-                if(!excludePathRegulars.contains(ep)){
-                    excludePathRegulars.add(ep);
-                }
+            addRules(excludePaths,excludePathRegulars);
+        }
+    }
+
+    private void addRules(String rules,Set<String> set){
+        String[] ruleArray = rules.split(",");
+        for (String ep : ruleArray){
+            if(!set.contains(ep)){
+                set.add(ep);
             }
         }
     }
 
     /**
      * 判断方法是否在排除范围
-     * @param name
+     * @param className
+     * @param methodName
      * @return
      */
-    protected boolean isExcludeMethod(String name){
+    protected boolean isExcludeMethod(String className,String methodName){
         boolean b ;
-        b = excludeMethods.contains(name);
+        b = excludeMethods.contains(methodName);
+
         if(!b){
+            String full = className+"."+methodName;
             for(String p : excludeMethodRegulars){
                 Pattern pattern = Pattern.compile(p);
-                Matcher matcher = pattern.matcher(name);
+                Matcher matcher = pattern.matcher(full);
                 b= matcher.matches();
                 if(b){
                     break;
@@ -119,7 +134,6 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
      */
     protected void saveWaveClassFile(String name,byte[] code){
 
-
         if(!isSaveWeaveClass){
             return;
         }
@@ -142,7 +156,15 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
                 }
             }catch (IOException ii){}
         }
+    }
 
+    public static void main(String[] args) {
+        String pp= ".*\\.[s|g]et[A-Z].*";
+        String str = "com.Test.setasss";
+        Pattern pattern = Pattern.compile(pp,Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(str);
+        boolean b = matcher.find();
+        System.out.println(b);
     }
 
 

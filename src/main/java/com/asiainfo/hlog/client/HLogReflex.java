@@ -1,5 +1,6 @@
 package com.asiainfo.hlog.client;
 
+import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.ClassHelper;
 import com.asiainfo.hlog.client.helper.LoaderHelper;
 import com.asiainfo.hlog.client.helper.Logger;
@@ -59,6 +60,8 @@ public abstract class HLogReflex {
             }
         }
         if(reveiverCaller!=null){
+            event.getData().setIp(HLogConfig.getInstance().getServerIp());
+            event.getData().setServer(HLogConfig.hlogServerAlias);
             reveiverCaller.invoke(event);
         }
 

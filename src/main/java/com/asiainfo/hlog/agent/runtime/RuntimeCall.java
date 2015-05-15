@@ -2,12 +2,12 @@ package com.asiainfo.hlog.agent.runtime;
 
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.config.HLogConfigRule;
-import com.asiainfo.hlog.client.config.Path;
-import com.asiainfo.hlog.client.config.Weave;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by chenfeng on 2015/4/17.
@@ -22,21 +22,10 @@ public class RuntimeCall{
      * com.asiainfo.test.TestApp=[{name:process,enable:true},{name:logger,enable:false}]
      *
      */
-    private static Map<String,List<Weave>> runtimeConfigSwitch = new HashMap<String,List<Weave>>();
+    //private static Map<String,List<Weave>> runtimeConfigSwitch = new HashMap<String,List<Weave>>();
 
     private static Map<String,Boolean> runtimeSwitchMap = new HashMap<String,Boolean>(200);
 
-    public void sort(){
-        /*
-        List<Map.Entry<String,List<Weave>>> mappingList =
-                new ArrayList<>(runtimeConfigSwitch.entrySet());
-        Collections.sort(mappingList, new Comparator<Map.Entry<String,List<Weave>>>() {
-            public int compare(Map.Entry<String,List<Weave>> entry1,
-                               Map.Entry<String,List<Weave>> entry2) {
-                return entry1.getKey().compareTo(entry2.getKey());
-            }
-        });*/
-    }
 
 
     /**
@@ -57,7 +46,7 @@ public class RuntimeCall{
 
         //查收到是有直接是方法级的
         String classKey = clazz + "-" + weaveName;
-        if(("log4j".equals(weaveName) || "logback".equals(weaveName)) && level!=null){
+        if("logger".equals(weaveName) && level!=null){
             classKey = classKey + "-" + level;
         }
         if(runtimeSwitchMap.containsKey(classKey)){
@@ -74,7 +63,7 @@ public class RuntimeCall{
                 for (String weave : captureWeaves){
                     if(weave.equals(weaveName)){
                         boolean enable = false;
-                        if(("log4j".equals(weaveName) || "logback".equals(weaveName))
+                        if(("logger".equals(weaveName))
                                 && level!=null && rule.getLevel()!=null){
                             if(Logger.canOutprint(level,rule.getLevel())){
                                 enable = true;

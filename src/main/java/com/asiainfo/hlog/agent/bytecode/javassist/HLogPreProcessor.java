@@ -8,6 +8,7 @@ import com.asiainfo.hlog.agent.bytecode.javassist.process.RoundPreProcessor;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.config.Path;
 import com.asiainfo.hlog.client.config.PathType;
+import com.asiainfo.hlog.client.config.jmx.HLogJMXReport;
 import com.asiainfo.hlog.client.helper.Logger;
 import javassist.*;
 
@@ -151,19 +152,24 @@ public class HLogPreProcessor extends AbstractPreProcessor {
                 pool = ClassPool.getDefault();
                 pool.insertClassPath(new LoaderClassPath(Thread.currentThread().getContextClassLoader()));
             }
-
-            CtClass ctClass = pool.makeClass(inp);
+            CtClass ctClass = null;
+            try{
+                ctClass = pool.get(clazz);
+            }catch (Exception e){}
+            if(ctClass==null){
+                ctClass = pool.makeClass(inp);
+            }
 
             //如果是接口直接返回
-            if(ctClass.isInterface()){
+            if(ctClass.isInterface() || ctClass.isFrozen()){
                 return null;
             }
 
             CtMethod[] ctMethods = ctClass.getDeclaredMethods();
-
+            HLogJMXReport.getHLogJMXReport().getRunStatusMBean().incrementWeaveClassNum();
             for (CtMethod ctMethod:ctMethods){
                 String methodName = ctMethod.getName();
-                if(isExcludeMethod(methodName)){
+                if(isExcludeMethod(null,methodName)){
                     continue;
                 }
                 try{
@@ -194,6 +200,7 @@ public class HLogPreProcessor extends AbstractPreProcessor {
                 }catch (Throwable e){
                     //e.printStackTrace();
                     //System.out.println("weave method["+methodName+"] error:"+e.getMessage());
+                    HLogJMXReport.getHLogJMXReport().getRunStatusMBean().incrementweaveErrClassNum();
                     Logger.error("weave class [{0}] method[{1}]",e,clazz,methodName);
                 }
             }

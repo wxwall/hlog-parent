@@ -14,7 +14,7 @@ public class AfterPreProcessor implements IMethodPreProcessor {
                                  LogWeaveContext logWeaveContext ,LogWeaveCode logWeaveCode)
             throws Exception {
 
-        if(method==null)
+        if(method==null || ctClass.isFrozen())
             return method;
 
 

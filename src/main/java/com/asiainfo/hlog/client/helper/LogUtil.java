@@ -1,25 +1,45 @@
 package com.asiainfo.hlog.client.helper;
 
-import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.config.Path;
-import com.asiainfo.hlog.client.config.PathType;
+import com.asiainfo.hlog.comm.uuid.UUIDGen;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by c on 2015/3/17.
  */
 public abstract class LogUtil {
 
-    public static String uuid() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(HLogConfig.hlogCode);
-        sb.append(Thread.currentThread().getId())
-                .append(Long.toString(System.nanoTime()>>32,32))
-                .append(Long.toString(Math.round(Math.random() * 8999999 + 1000000), 32));
+    private static long clockSeqAndNode = -1;
+    private static String sClockSeqAndNode = null;
+    private static AtomicLong incrementId = new AtomicLong(0);
+
+    public static String logId(){
+        if(sClockSeqAndNode==null){
+            createClockSeqAndNode();
+        }
+        StringBuilder sb = new StringBuilder(sClockSeqAndNode);
+        long incrId = incrementId.incrementAndGet();
+        //这里没有999999999是预留足够的多线程情况下容错空间
+        if(incrId>989999999){
+            createClockSeqAndNode();
+        }
+        String sIncrId = UUIDGen.toUnsignedString(incrId,6);
+        int repairSize = 5 - sIncrId.length();
+        for(int i=0;i<repairSize;i++){
+            sb.append("0");
+        }
+        sb.append(sIncrId);
         return sb.toString();
     }
+
+    private static synchronized void createClockSeqAndNode(){
+        clockSeqAndNode = UUIDGen.getClockSeqAndNode();
+        sClockSeqAndNode = UUIDGen.toUnsignedString(clockSeqAndNode,6);
+    }
+
 
     /**
      * 寻找最适合自己的它
@@ -77,7 +97,6 @@ public abstract class LogUtil {
 
         return config;
     }
-
 
 }
 

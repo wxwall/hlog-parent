@@ -51,9 +51,9 @@ public abstract class AbstractLogWeave implements ILogWeave {
      * @param codeBuffer
      */
     protected StringBuilder buildBaseLogData(LogWeaveContext logWeaveContext,String type,String desc,StringBuilder codeBuffer){
-        codeBuffer.append("data.setType(\"").append(type).append("\");");
+        codeBuffer.append("data.setMc(\"").append(type).append("\");");
         codeBuffer.append("data.setId("+ LogAgentContext.S_AGENT_LOG_ID+");");
-        codeBuffer.append("data.setPid("+ LogAgentContext.S_AGENT_LOG_PID+");");
+        codeBuffer.append("data.setPId("+ LogAgentContext.S_AGENT_LOG_PID+");");
         codeBuffer.append("data.setGId(com.asiainfo.hlog.agent.runtime.LogAgentContext.getThreadLogGroupId());");
         codeBuffer.append("data.setTime(System.currentTimeMillis());");
         if(desc!=null){

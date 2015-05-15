@@ -56,7 +56,7 @@ public class RunningProcessesLogWeave extends AbstractLogWeave {
 
         codeBuffer.append("com.asiainfo.hlog.client.model.RPLogData data = new com.asiainfo.hlog.client.model.RPLogData();");
 
-        buildBaseLogData(logWeaveContext,"02",codeBuffer);
+        buildBaseLogData(logWeaveContext,"h02",codeBuffer);
 
         codeBuffer.append("data.setStatus(happenErr);");
         codeBuffer.append("data.setClazz(\""+logWeaveContext.getClassName()+"\");");

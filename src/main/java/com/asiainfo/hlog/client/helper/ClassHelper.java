@@ -6,7 +6,13 @@ import java.lang.reflect.Method;
  * Created by chenfeng on 2015/4/15.
  */
 public abstract class ClassHelper {
-
+    public static Class<?> loadClass(String name){
+        try{
+            return LoaderHelper.loadClass(name);
+        }catch (ClassNotFoundException cc){
+        }
+        return null;
+    }
     public static Object newInstance(String clazz){
         try{
             return LoaderHelper.getLoader().loadClass(clazz).newInstance();

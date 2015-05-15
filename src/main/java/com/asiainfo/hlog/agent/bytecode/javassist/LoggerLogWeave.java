@@ -61,14 +61,17 @@ public class LoggerLogWeave extends AbstractLogWeave {
             codeBuffer.append("if(com.asiainfo.hlog.agent.runtime.RuntimeContext.enable")
                     .append("(\"").append(ID).append("\",ste.getClassName(),ste.getMethodName(),\"" + methodName + "\")){");
             codeBuffer.append("String _agent_Log_pId_ = com.asiainfo.hlog.agent.runtime.LogAgentContext.getThreadCurrentLogId();");
-            codeBuffer.append("String _agent_Log_Id_ = com.asiainfo.hlog.client.helper.LogUtil.uuid();");
+            codeBuffer.append("String _agent_Log_Id_ = com.asiainfo.hlog.agent.runtime.RuntimeContext.logId();");
             codeBuffer.append("com.asiainfo.hlog.client.model.ParamObjs params = new com.asiainfo.hlog.client.model.ParamObjs("+logWeaveContext.getParamNumber()+");");
             for(int i=1;i<=logWeaveContext.getParamNumber();i++){
                 codeBuffer.append("params.addParam("+(i-1)+",$"+i+");");
             }
             codeBuffer.append("com.asiainfo.hlog.client.model.LoggerLogData data = new com.asiainfo.hlog.client.model.LoggerLogData();");
             codeBuffer.append("data.setLevel(\"" + methodName + "\");");
-            buildBaseLogData(logWeaveContext,"03","params.toString()",codeBuffer);
+            //StackTraceElement ste;
+            codeBuffer.append("String desc = new StringBuilder(ste.getClassName()).append(\"(\").append(ste.getLineNumber()).append(\")\").append(params.toString()).toString();");
+            //codeBuffer.append("String desc = ste.getClassName()+\"(\"+ste.getLineNumber()+\")\"+params.toString();");
+            buildBaseLogData(logWeaveContext, "h03", "desc",codeBuffer);
             buildReveiceEvent(codeBuffer);
             codeBuffer.append("}");
             return codeBuffer.toString();

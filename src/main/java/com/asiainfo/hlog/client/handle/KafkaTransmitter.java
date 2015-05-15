@@ -2,15 +2,18 @@ package com.asiainfo.hlog.client.handle;
 
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.Logger;
+import com.asiainfo.hlog.client.model.BatchLogData;
 import com.asiainfo.hlog.client.model.LogData;
-
-import java.util.List;
-import java.util.Properties;
-
 import kafka.common.FailedToSendMessageException;
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
+import scala.Int;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Created by chenfeng on 2015/4/15.
@@ -31,6 +34,12 @@ public class KafkaTransmitter extends AbstractTransmitter {
     private final String key_serializer_class = "serializer.class";
 
     private final String key_request_timeout_ms = "request.timeout.ms";
+
+    private final String key_keyed_message_size = "keyed.message.size";
+
+    private final int defKeyedMessageSize = 20;
+
+    private int keyedMessageSize = defKeyedMessageSize;
 
     public KafkaTransmitter(){
         name = "kafka";
@@ -67,6 +76,15 @@ public class KafkaTransmitter extends AbstractTransmitter {
         }
         properties.put(key_request_timeout_ms,val);
 
+        //
+        wrapKey = getWrapKey(key_keyed_message_size);
+        val = config.getProperty(wrapKey);
+        if(val!=null){
+            keyedMessageSize = Integer.parseInt(val);
+        }
+
+        properties.put("partitioner.class", "com.asiainfo.hlog.client.handle.KafkaPartitioner");
+
         //构造生产者属性
         ProducerConfig producerconfig = new ProducerConfig(properties);
         //构造实例
@@ -88,15 +106,67 @@ public class KafkaTransmitter extends AbstractTransmitter {
             //TODO 考虑建立重连
             return;
         }
-        //消息
-        String msg = messageConver.convert(datas);
-        //构造消息体
-        KeyedMessage<String, String> data = new KeyedMessage<String, String>(topic, msg);
-        //消息发送
-        try{
-            producer.send(data);
-        }catch (FailedToSendMessageException ex){
-            Logger.error("kafka发送消息到[{0}]服务异常",ex,kafka_server_list);
+
+        //将datas拆分成多个KeyedMessage来发送,默认是20条一个KeyedMessage
+        int size = datas.size();
+
+        if(size==0){
+            return;
         }
+        int batchNum = size/keyedMessageSize + (size%keyedMessageSize==0?0:1);
+        List messageList = new ArrayList<KeyedMessage<String, String>>(batchNum);
+        LogData[] batchDatas = datas.toArray(new LogData[size]);
+        LogData[] batchList = new LogData[keyedMessageSize];
+        for (int num=0;num<batchNum;num++){
+            int bsize = size - (num*keyedMessageSize);
+            if(bsize>keyedMessageSize){
+                bsize = keyedMessageSize;
+                batchList = new LogData[bsize];
+            }
+            System.arraycopy(batchDatas,num*keyedMessageSize,batchList,0,bsize);
+            String msg = messageConver.convert(batchList);
+            //构造消息体
+            KeyedMessage<String, String> data = new KeyedMessage<String, String>(topic,String.valueOf(num+1) ,msg);
+            messageList.add(data);
+        }
+        try{
+            if(Logger.isTrace()){
+                Logger.trace("kafka list size={0} send data：{1}",messageList.size(),messageList);
+            }
+            //消息发送
+            producer.send(messageList);
+    }catch (FailedToSendMessageException ex){
+        Logger.error("kafka发送消息到[{0}]服务异常",ex,kafka_server_list);
+    }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        Thread.sleep(15000);
+        List<LogData> list =  new ArrayList<LogData>(1000000);
+        for (int i=0;i<1000000;i++){
+            LogData data = new LogData();
+            data.setIp("------"+i);
+            data.setServer("======="+i);
+            data.setId("-=-==-=-=-=-=-=-=-="+i);
+            data.setGId("00000000000000000000"+i);
+            data.setPId("99999999999999999999"+i);
+            data.setDesc("7777777777777777777777777777"+i);
+            list.add(data);
+        }
+        System.out.println("--add finished");
+        Thread.sleep(5000);
+        /*
+        LogData[] datas = list.toArray(new LogData[1000000]);
+        LogData[] ds = new LogData[10];
+        for (int i=0;i<1000;i++){
+            System.out.println(i);
+            for(int j=1;j<=10;j++){
+                System.arraycopy(datas,(j-1)*10,ds,0,10);
+
+            }
+            Thread.sleep(1000);
+        }*/
+
+        Thread.sleep(5000*1000);
     }
 }
