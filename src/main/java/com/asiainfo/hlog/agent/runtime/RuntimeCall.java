@@ -1,5 +1,9 @@
 package com.asiainfo.hlog.agent.runtime;
 
+import com.al.common.context.IPropertyListener;
+import com.al.common.context.PropertyEvent;
+import com.al.common.context.PropertyHolder;
+import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.config.HLogConfigRule;
 import com.asiainfo.hlog.client.helper.LogUtil;
@@ -26,7 +30,17 @@ public class RuntimeCall{
 
     private static Map<String,Boolean> runtimeSwitchMap = new HashMap<String,Boolean>(200);
 
-
+    public RuntimeCall(){
+        PropertyHolder.addListener(new IPropertyListener() {
+            @Override
+            public void changed(PropertyEvent event) {
+                String key = event.getKey();
+                if(key.startsWith(Constants.KEY_HLOG_CAPTURE_ENABLE)){
+                    runtimeSwitchMap.clear();
+                }
+            }
+        });
+    }
 
     /**
      * 判断某个类某个方法是否启用某个采集日志数据

@@ -1,6 +1,5 @@
 package com.asiainfo.hlog.agent.bytecode.javassist;
 
-import com.asiainfo.hlog.agent.bytecode.javassist.process.AbstractLogWeave;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 
 /**
@@ -27,6 +26,11 @@ public class ErrorLogWeave extends AbstractLogWeave {
     }
 
     @Override
+    protected String getMcode() {
+        return "h01";
+    }
+
+    @Override
     public String beforWeave(LogWeaveContext logWeaveContext) {
         return null;
     }
@@ -40,10 +44,10 @@ public class ErrorLogWeave extends AbstractLogWeave {
     public String exceptionWeave(LogWeaveContext logWeaveContext) {
         StringBuilder code  = new StringBuilder();
         code.append("if(_agent_Log_pId_==null){");
-        code.append("String error = com.asiainfo.hlog.agent.runtime.RuntimeContext.error("+LogAgentContext.S_AGENT_ERR_PARAM_NAME+");");
+        code.append("String errorMsg = com.asiainfo.hlog.agent.runtime.RuntimeContext.error("+LogAgentContext.S_AGENT_ERR_PARAM_NAME+");");
         buildIfEnable(ID,logWeaveContext,code).append("{");
         code.append("com.asiainfo.hlog.client.model.ErrorLogData data = new com.asiainfo.hlog.client.model.ErrorLogData();");
-        buildBaseLogData(logWeaveContext,"h01","error",code);
+        buildBaseLogData(logWeaveContext,getMcode(logWeaveContext),"errorMsg",code);
         buildReveiceEvent(logWeaveContext,code);
         code.append("}}");
         return code.toString();

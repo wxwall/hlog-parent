@@ -70,7 +70,7 @@ public class RuntimeContext {
         String detailMessage = t.getMessage();
         if(messageField!=null){
             try{
-                messageField.set(t,"["+LogAgentContext.getThreadCurrentLogId()+"]"+detailMessage);
+                messageField.set(t,"["+LogAgentContext.getThreadLogGroupId()+"]"+detailMessage);
             }catch (Exception e){
                 if(Logger.isError()){
                     Logger.error("在给异常对象写入日志ID时异常,logId={0}",e,LogAgentContext.getThreadCurrentLogId());

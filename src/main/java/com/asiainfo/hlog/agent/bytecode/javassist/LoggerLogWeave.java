@@ -1,7 +1,5 @@
 package com.asiainfo.hlog.agent.bytecode.javassist;
 
-import com.asiainfo.hlog.agent.bytecode.javassist.process.AbstractLogWeave;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,15 +15,18 @@ public class LoggerLogWeave extends AbstractLogWeave {
 
     private Set<String> methods = new HashSet<String>();
 
+    private String[] depends ;
+
     public LoggerLogWeave(){
         methods.add("debug");
         methods.add("info");
         methods.add("warn");
         methods.add("error");
+        //depends = new String[]{DefinitionInParamLogWeave.ID};
     }
 
     public String[] getDependLogWeave() {
-        return new String[0];
+        return depends;
     }
 
 
@@ -33,9 +34,13 @@ public class LoggerLogWeave extends AbstractLogWeave {
         return ID;
     }
 
+    @Override
+    protected String getMcode() {
+        return "h03";
+    }
 
     public int getOrder() {
-        return 10003;
+        return 10005;
     }
 
 
@@ -62,16 +67,15 @@ public class LoggerLogWeave extends AbstractLogWeave {
                     .append("(\"").append(ID).append("\",ste.getClassName(),ste.getMethodName(),\"" + methodName + "\")){");
             codeBuffer.append("String _agent_Log_pId_ = com.asiainfo.hlog.agent.runtime.LogAgentContext.getThreadCurrentLogId();");
             codeBuffer.append("String _agent_Log_Id_ = com.asiainfo.hlog.agent.runtime.RuntimeContext.logId();");
-            codeBuffer.append("com.asiainfo.hlog.client.model.ParamObjs params = new com.asiainfo.hlog.client.model.ParamObjs("+logWeaveContext.getParamNumber()+");");
-            for(int i=1;i<=logWeaveContext.getParamNumber();i++){
-                codeBuffer.append("params.addParam("+(i-1)+",$"+i+");");
-            }
+
             codeBuffer.append("com.asiainfo.hlog.client.model.LoggerLogData data = new com.asiainfo.hlog.client.model.LoggerLogData();");
             codeBuffer.append("data.setLevel(\"" + methodName + "\");");
+            codeBuffer.append("com.asiainfo.hlog.client.model.ParamObjs _inParams = null;");
+            getInParams(logWeaveContext,codeBuffer,false);
             //StackTraceElement ste;
-            codeBuffer.append("String desc = new StringBuilder(ste.getClassName()).append(\"(\").append(ste.getLineNumber()).append(\")\").append(params.toString()).toString();");
+            codeBuffer.append("String desc = new StringBuilder(ste.getClassName()).append(\"(\").append(ste.getLineNumber()).append(\")\").append(_inParams.toString()).toString();");
             //codeBuffer.append("String desc = ste.getClassName()+\"(\"+ste.getLineNumber()+\")\"+params.toString();");
-            buildBaseLogData(logWeaveContext, "h03", "desc",codeBuffer);
+            buildBaseLogData(logWeaveContext, getMcode(logWeaveContext), "desc",codeBuffer);
             buildReveiceEvent(codeBuffer);
             codeBuffer.append("}");
             return codeBuffer.toString();

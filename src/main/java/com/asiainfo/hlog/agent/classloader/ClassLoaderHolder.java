@@ -1,7 +1,7 @@
 package com.asiainfo.hlog.agent.classloader;
 
-import com.asiainfo.hlog.client.config.Constants;
-import com.asiainfo.hlog.client.config.HLogConfig;
+//import com.asiainfo.hlog.client.config.Constants;
+//import com.asiainfo.hlog.client.config.HLogConfig;
 
 import java.io.*;
 import java.net.URL;
@@ -17,6 +17,8 @@ import java.util.zip.ZipEntry;
  * Created by c on 2015/4/9.
  */
 public class ClassLoaderHolder  {
+
+    public static final String tmpdir = System.getProperty("java.io.tmpdir");
 
     private static  ClassLoader loader = null;
 
@@ -37,7 +39,7 @@ public class ClassLoaderHolder  {
     }
 
     private ClassLoaderHolder(){
-        String libs = HLogConfig.tmpdir + File.separator + "log-agent";
+        String libs = tmpdir + File.separator + "log-agent";
         File libsFile = new File(libs);
         libsFile.mkdirs();
         URL url = ClassLoaderHolder.class.getResource("");
