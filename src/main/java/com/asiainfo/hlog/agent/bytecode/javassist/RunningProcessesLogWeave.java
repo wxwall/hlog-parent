@@ -1,8 +1,5 @@
 package com.asiainfo.hlog.agent.bytecode.javassist;
 
-import com.asiainfo.hlog.agent.bytecode.javassist.process.AbstractLogWeave;
-import com.asiainfo.hlog.agent.runtime.LogAgentContext;
-
 /**
  * Created by c on 2015/3/17.
  */
@@ -20,6 +17,10 @@ public class RunningProcessesLogWeave extends AbstractLogWeave {
         return "process";
     }
 
+    @Override
+    protected String getMcode() {
+        return "h02";
+    }
 
     public int getOrder() {
         return 10001;
@@ -56,7 +57,7 @@ public class RunningProcessesLogWeave extends AbstractLogWeave {
 
         codeBuffer.append("com.asiainfo.hlog.client.model.RPLogData data = new com.asiainfo.hlog.client.model.RPLogData();");
 
-        buildBaseLogData(logWeaveContext,"02",codeBuffer);
+        buildBaseLogData(logWeaveContext,getMcode(logWeaveContext),codeBuffer);
 
         codeBuffer.append("data.setStatus(happenErr);");
         codeBuffer.append("data.setClazz(\""+logWeaveContext.getClassName()+"\");");

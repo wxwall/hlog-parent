@@ -18,7 +18,7 @@ public class BeforePreProcessor implements IMethodPreProcessor {
     public CtMethod preProcessor(CtClass ctClass,CtMethod method,
                                  LogWeaveContext logWeaveContext ,LogWeaveCode logWeaveCode)
             throws Exception {
-        if(method==null)
+        if(method==null || ctClass.isFrozen())
             return method;
 
         method.insertBefore(logWeaveCode.getBeforeCode().toString());

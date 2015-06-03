@@ -1,15 +1,13 @@
 package com.asiainfo.hlog.agent.bytecode.javassist.process;
 
-import com.asiainfo.hlog.agent.bytecode.javassist.ILogWeave;
-import com.asiainfo.hlog.agent.bytecode.javassist.ILogWeaveActuator;
 import com.asiainfo.hlog.agent.bytecode.javassist.LogWeaveCode;
 import com.asiainfo.hlog.agent.bytecode.javassist.LogWeaveContext;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
-import com.asiainfo.hlog.client.helper.Logger;
-import javassist.*;
+import javassist.CtClass;
+import javassist.CtMethod;
+import javassist.CtNewMethod;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.AttributeInfo;
-import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.ParameterAnnotationsAttribute;
 
 import java.util.List;
@@ -35,7 +33,7 @@ public class RoundPreProcessor implements IMethodPreProcessor {
     public CtMethod preProcessor(CtClass ctClass,CtMethod method,
                                  LogWeaveContext logWeaveContext ,LogWeaveCode logWeaveCode)
             throws Exception {
-        if(method==null)
+        if(method==null || ctClass.isFrozen())
             return method;
 
         String methodName = method.getName();

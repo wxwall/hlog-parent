@@ -1,4 +1,4 @@
-package com.asiainfo.hlog.agent.bytecode.javassist.process;
+package com.asiainfo.hlog.agent.bytecode.javassist;
 
 import com.asiainfo.hlog.agent.bytecode.javassist.ILogWeave;
 import com.asiainfo.hlog.agent.bytecode.javassist.LogWeaveContext;
@@ -9,6 +9,21 @@ import com.asiainfo.hlog.agent.runtime.LogAgentContext;
  */
 public abstract class AbstractLogWeave implements ILogWeave {
 
+    protected StringBuilder getInParams(LogWeaveContext logWeaveContext,StringBuilder codeBuffer,boolean setName){
+
+        if(!logWeaveContext.isCreateInParams()){
+            codeBuffer.append("_inParams = new com.asiainfo.hlog.client.model.ParamObjs("+logWeaveContext.getParamNumber()+");");
+            String[] names = logWeaveContext.getParamNames();
+            for(int i=1;i<=logWeaveContext.getParamNumber();i++){
+                codeBuffer.append("_inParams.addParam("+(i-1)+",$"+i+");");
+                if(setName){
+                    codeBuffer.append("_inParams.addParamName("+(i-1)+",\""+names[i-1]+"\");");
+                }
+            }
+            logWeaveContext.setCreateInParams(true);
+        }
+        return codeBuffer;
+    }
 
     /**
      * build一个类型是否启用的开关
@@ -51,9 +66,9 @@ public abstract class AbstractLogWeave implements ILogWeave {
      * @param codeBuffer
      */
     protected StringBuilder buildBaseLogData(LogWeaveContext logWeaveContext,String type,String desc,StringBuilder codeBuffer){
-        codeBuffer.append("data.setType(\"").append(type).append("\");");
+        codeBuffer.append("data.setMc(\"").append(type).append("\");");
         codeBuffer.append("data.setId("+ LogAgentContext.S_AGENT_LOG_ID+");");
-        codeBuffer.append("data.setPid("+ LogAgentContext.S_AGENT_LOG_PID+");");
+        codeBuffer.append("data.setPId("+ LogAgentContext.S_AGENT_LOG_PID+");");
         codeBuffer.append("data.setGId(com.asiainfo.hlog.agent.runtime.LogAgentContext.getThreadLogGroupId());");
         codeBuffer.append("data.setTime(System.currentTimeMillis());");
         if(desc!=null){
@@ -86,5 +101,23 @@ public abstract class AbstractLogWeave implements ILogWeave {
         codeBuffer.append("event.setData(data);");
         codeBuffer.append("com.asiainfo.hlog.client.HLogReflex.reveice(event);");
         return codeBuffer;
+    }
+
+    /**
+     * 返回管理编码
+     * @return
+     */
+    protected abstract String getMcode();
+
+    protected String getMcode(LogWeaveContext logWeaveContext){
+        String mcode = logWeaveContext.getRule().getMcodeMap().get(getName());
+        if(mcode==null){
+            mcode = getMcode();
+        }
+
+        if(mcode==null || mcode.trim().length()==0){
+            mcode="h99";
+        }
+        return mcode;
     }
 }

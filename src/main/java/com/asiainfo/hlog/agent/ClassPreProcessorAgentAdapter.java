@@ -2,6 +2,7 @@ package com.asiainfo.hlog.agent;
 
 import com.asiainfo.hlog.agent.bytecode.javassist.HLogPreProcessor;
 import com.asiainfo.hlog.client.config.HLogConfig;
+import com.asiainfo.hlog.client.config.jmx.HLogJMXReport;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -23,6 +24,17 @@ public class ClassPreProcessorAgentAdapter implements ClassFileTransformer {
         HLogConfig config = HLogConfig.getInstance();
         //初始化配置信息,后需要从properties文件或服务端来获取
         config.initConfig();
+
+        /*
+        //注册JMX观察
+        if(HLogConfig.jmxEnable){
+            MBeanServerAgent agent = new MBeanServerAgent("HLogMBeanServer");
+            agent.registerBean(new PropMbean(),new PropMbeanExportBuilder());
+            String url = agent.startServer(Integer.parseInt(HLogConfig.jmxPost));
+            Logger.debug("开启JMX服务:{0}",url);
+        }
+        */
+        HLogJMXReport.getHLogJMXReport().start();
 
         //TODO 可根据配置来创建不同的实现
         preProcessor = new HLogPreProcessor();
