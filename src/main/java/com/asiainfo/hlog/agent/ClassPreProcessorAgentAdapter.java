@@ -1,9 +1,14 @@
 package com.asiainfo.hlog.agent;
 
 import com.asiainfo.hlog.agent.bytecode.javassist.HLogPreProcessor;
+import com.asiainfo.hlog.agent.classloader.ClassLoaderHolder;
+import com.asiainfo.hlog.agent.runtime.HLogOutputStream;
+import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.config.jmx.HLogJMXReport;
+import com.asiainfo.hlog.client.helper.LoaderHelper;
 
+import java.io.PrintStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
@@ -20,6 +25,9 @@ public class ClassPreProcessorAgentAdapter implements ClassFileTransformer {
     private IHLogPreProcessor preProcessor;
 
     public ClassPreProcessorAgentAdapter(){
+
+        LoaderHelper.setLoader(this.getClass().getClassLoader());
+
         //获取配置实例
         HLogConfig config = HLogConfig.getInstance();
         //初始化配置信息,后需要从properties文件或服务端来获取
@@ -35,6 +43,18 @@ public class ClassPreProcessorAgentAdapter implements ClassFileTransformer {
         }
         */
         HLogJMXReport.getHLogJMXReport().start();
+
+        //是否开启System.out/System.err
+        if(HLogConfig.getInstance().isSystemOutEnable() ){
+            HLogOutputStream hLogOutputStream = new HLogOutputStream(Constants.MCODE_SYSTEM_OUT);
+            PrintStream printStream = new PrintStream(hLogOutputStream);
+            System.setOut(printStream);
+        }
+        if(HLogConfig.getInstance().isSystemErrEnable()){
+            HLogOutputStream hLogOutputStream = new HLogOutputStream(Constants.MCODE_SYSTEM_ERR);
+            PrintStream printStream = new PrintStream(hLogOutputStream);
+            System.setErr(printStream);
+        }
 
         //TODO 可根据配置来创建不同的实现
         preProcessor = new HLogPreProcessor();

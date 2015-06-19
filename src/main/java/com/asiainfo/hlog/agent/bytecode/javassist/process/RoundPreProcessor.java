@@ -3,6 +3,7 @@ package com.asiainfo.hlog.agent.bytecode.javassist.process;
 import com.asiainfo.hlog.agent.bytecode.javassist.LogWeaveCode;
 import com.asiainfo.hlog.agent.bytecode.javassist.LogWeaveContext;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
+import com.asiainfo.hlog.client.helper.Logger;
 import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
@@ -66,14 +67,19 @@ public class RoundPreProcessor implements IMethodPreProcessor {
 
         bufferCode.append(logWeaveCode.getBeforeCode().toString());
 
+        CtClass returnCtClass = method.getReturnType();
+
+        boolean haveReturn = !"void".equals(returnCtClass.getName());
+        if(haveReturn) {
+            bufferCode.append(returnCtClass.getName()).append(" _reObj ;");
+        }
+
         bufferCode.append("try{");
 
         bufferCode.append(logWeaveCode.getTryCode().toString());
 
-        CtClass returnCtClass = method.getReturnType();
-        boolean haveReturn = !"void".equals(returnCtClass.getName());
         if(haveReturn){
-            bufferCode.append(" Object _reObj =  ");
+            bufferCode.append("_reObj =  ");
         }
         bufferCode.append(oldMethodName + "($$);\n");
 
@@ -88,10 +94,14 @@ public class RoundPreProcessor implements IMethodPreProcessor {
         bufferCode.append("}finally{");
         bufferCode.append(logWeaveCode.getFinallyCode());
         bufferCode.append("}");
-        if(!"void".equals(returnCtClass.getName())){
-            bufferCode.append(" return null;");
+        if(haveReturn){
+            bufferCode.append(" return _reObj;");
         }
         bufferCode.append("}");
+
+        if(Logger.isTrace()){
+            Logger.trace("植入{0}的{1}方法代码:{2}",ctClass.getName(),methodName,bufferCode);
+        }
 
         logAgentMethod.setBody(bufferCode.toString());
         ctClass.addMethod(logAgentMethod);

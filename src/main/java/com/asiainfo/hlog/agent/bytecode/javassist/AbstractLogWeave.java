@@ -1,7 +1,5 @@
 package com.asiainfo.hlog.agent.bytecode.javassist;
 
-import com.asiainfo.hlog.agent.bytecode.javassist.ILogWeave;
-import com.asiainfo.hlog.agent.bytecode.javassist.LogWeaveContext;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 
 /**
@@ -9,6 +7,10 @@ import com.asiainfo.hlog.agent.runtime.LogAgentContext;
  */
 public abstract class AbstractLogWeave implements ILogWeave {
 
+    public static final String Q = "\"";
+    public static final String D = ",";
+    public static final String S = ";";
+    public static final String E = " = ";
     protected StringBuilder getInParams(LogWeaveContext logWeaveContext,StringBuilder codeBuffer,boolean setName){
 
         if(!logWeaveContext.isCreateInParams()){
