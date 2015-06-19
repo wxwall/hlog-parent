@@ -37,8 +37,12 @@ public class LogWeaveFactory {
         logWeaveInst.put(weave5.getName(),weave5);
 
         ILogWeave weave6 = new InterceptParamLogWeave();
-        logWeaveName.put(weave6.getName(),DefinitionInParamLogWeave.class.getName());
+        logWeaveName.put(weave6.getName(),InterceptParamLogWeave.class.getName());
         logWeaveInst.put(weave6.getName(),weave6);
+
+        ILogWeave weave7 = new ClassMethodNameWeave();
+        logWeaveName.put(weave7.getName(),ClassMethodNameWeave.class.getName());
+        logWeaveInst.put(weave7.getName(),weave7);
 
 
     }

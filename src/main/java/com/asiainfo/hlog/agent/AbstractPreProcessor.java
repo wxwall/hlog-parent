@@ -66,6 +66,9 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
         if(excludeMethodCfg!=null){
             addRules(excludeMethodCfg,excludeMethodRegulars);
         }
+        if(Logger.isDebug()){
+            Logger.debug("配置方法级别的排除规则:{0}",excludeMethodRegulars);
+        }
 
         //加载配置文件的排除信息
         //排除类
@@ -73,6 +76,9 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
                 .getProperty(Constants.KEY_HLOG_EXCLUDE_PATHS);
         if(excludePaths!=null){
             addRules(excludePaths,excludePathRegulars);
+        }
+        if(Logger.isDebug()){
+            Logger.debug("配置文件路径的排除规则:{0}",excludePathRegulars);
         }
     }
 
@@ -106,6 +112,9 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
                 }
             }
         }
+        if(Logger.isTrace()){
+            Logger.trace("判断类{0}.{1}是否排除范围:{2}",className,methodName,b);
+        }
         return b;
     }
 
@@ -123,6 +132,9 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
             if(b){
                 break;
             }
+        }
+        if(Logger.isTrace()){
+            Logger.trace("判断类{0}是否排除范围:{1}",name,b);
         }
         return b;
     }
@@ -160,11 +172,31 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
 
     public static void main(String[] args) {
         String pp= ".*\\.[s|g]et[A-Z].*";
-        String str = "com.Test.setasss";
+        String str = "setAsss";
         Pattern pattern = Pattern.compile(pp,Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         Matcher matcher = pattern.matcher(str);
         boolean b = matcher.find();
         System.out.println(b);
+
+        String cl1 = "com.al.ec.sm.smo.impl.StaffManageSMOImpl$$EnhancerByCGLIB$$6ac3feb6";
+        //"$$EnhancerByCGLIB$$"
+        System.out.println(cl1.indexOf("$EnhancerByCGLIB$"));
+        String p2 = ".*\\$EnhancerByCGLIB+.*";
+        String[] ps = p2.split(",");
+        System.out.println(ps.length);
+        System.out.println(ps[0]);
+        pattern = Pattern.compile(ps[0]);
+        matcher = pattern.matcher(cl1);
+        b = matcher.matches();
+        System.out.println(b);
+
+        String cl2 = "al.ec.sm.interceptor.Test";
+
+        pattern = Pattern.compile("al.ec.sm.interceptor.*");
+        matcher = pattern.matcher(cl2);
+        b = matcher.matches();
+        System.out.println(b);
+
     }
 
 

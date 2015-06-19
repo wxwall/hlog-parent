@@ -1,11 +1,13 @@
 package com.asiainfo.hlog.agent.bytecode.javassist;
 
+import com.asiainfo.hlog.agent.runtime.LogAgentContext;
+
 /**
  * Created by c on 2015/3/17.
  */
 public class RunningProcessesLogWeave extends AbstractLogWeave {
 
-    private String[] depends = new String[]{LogIdWeave.ID};
+    private String[] depends = new String[]{LogIdWeave.ID,ClassMethodNameWeave.ID};
 
 
     public String[] getDependLogWeave() {
@@ -52,20 +54,28 @@ public class RunningProcessesLogWeave extends AbstractLogWeave {
 
     public String finallyWeave(LogWeaveContext logWeaveContext) {
         StringBuilder codeBuffer = new StringBuilder();
+        codeBuffer.append("com.asiainfo.hlog.agent.runtime.RuntimeContext.writeProcessLog(");
+        codeBuffer.append(Q).append(getMcode(logWeaveContext)).append(Q).append(D);
+        codeBuffer.append(LogAgentContext.S_AGENT_LOG_ID).append(D);
+        codeBuffer.append(LogAgentContext.S_AGENT_LOG_PID).append(D);
+        codeBuffer.append(LogAgentContext.S_AGENT_CLASS_NAME).append(D);
+        codeBuffer.append(LogAgentContext.S_AGENT_METHOD_NAME).append(D);
+        codeBuffer.append("happenErr").append(D);
+        codeBuffer.append("time1").append(");");
+
         //增加开关配置信息
-        buildIfEnable(this.getName(),logWeaveContext,codeBuffer).append("{");
+        //buildIfEnable(this.getName(), logWeaveContext, codeBuffer).append("{");
 
-        codeBuffer.append("com.asiainfo.hlog.client.model.RPLogData data = new com.asiainfo.hlog.client.model.RPLogData();");
+        //codeBuffer.append("com.asiainfo.hlog.client.model.RPLogData data = new com.asiainfo.hlog.client.model.RPLogData();");
 
-        buildBaseLogData(logWeaveContext,getMcode(logWeaveContext),codeBuffer);
+        //buildBaseLogData(logWeaveContext,getMcode(logWeaveContext),codeBuffer);
 
-        codeBuffer.append("data.setStatus(happenErr);");
-        codeBuffer.append("data.setClazz(\""+logWeaveContext.getClassName()+"\");");
-        codeBuffer.append("data.setMethod(\""+logWeaveContext.getMethodName()+"\");");
-        codeBuffer.append("data.setSpend(System.currentTimeMillis()-time1);");
+        //codeBuffer.append("data.setStatus(happenErr);");
+        //codeBuffer.append("data.setClazz(\""+logWeaveContext.getClassName()+"\");");
+        //codeBuffer.append("data.setMethod(\""+logWeaveContext.getMethodName()+"\");");
+        //codeBuffer.append("data.setSpend(System.currentTimeMillis()-time1);");
 
-        buildReveiceEvent(logWeaveContext,codeBuffer).append("}");
-
+        //buildReveiceEvent(logWeaveContext,codeBuffer).append("}");
 
         /*
         codeBuffer.append("if(com.asiainfo.hlog.agent.runtime.RuntimeContext.enable" +

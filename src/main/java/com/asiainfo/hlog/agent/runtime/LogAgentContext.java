@@ -14,6 +14,16 @@ public class LogAgentContext {
      * 日志ID
      */
     public static final String S_AGENT_LOG_PID = "_agent_Log_pId_";
+
+    /**
+     * 日志上级ID
+     */
+    public static final String S_AGENT_CLASS_NAME = "_agent_className";
+    /**
+     * 日志ID
+     */
+    public static final String S_AGENT_METHOD_NAME = "_agent_methodName";
+
     /**
      * 日志异常变量名称
      */

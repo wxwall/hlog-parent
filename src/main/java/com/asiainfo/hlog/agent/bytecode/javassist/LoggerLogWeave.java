@@ -56,13 +56,15 @@ public class LoggerLogWeave extends AbstractLogWeave {
                                     methodName.equals("isWarnEnabled")?"warn":
                                             methodName.equals("isErrorEnabled")?"error":"none";
 
-            codeBuffer.append("StackTraceElement ste = Thread.currentThread().getStackTrace()[2];");
+            codeBuffer.append("StackTraceElement ste = Thread.currentThread().getStackTrace()[")
+                    .append(logWeaveContext.getLoggerStackDepth()).append("];");
             codeBuffer.append("if(com.asiainfo.hlog.agent.runtime.RuntimeContext.enable")
                     .append("(\"").append(ID).append("\",ste.getClassName(),ste.getMethodName(),\""+level+"\")){");
             codeBuffer.append("return true;}");
             return codeBuffer.toString();
         }else if(methods.contains(methodName)){
-            codeBuffer.append("StackTraceElement ste = Thread.currentThread().getStackTrace()[2];");
+            codeBuffer.append("StackTraceElement ste = Thread.currentThread().getStackTrace()[")
+                    .append(logWeaveContext.getLoggerStackDepth()).append("];");
             codeBuffer.append("if(com.asiainfo.hlog.agent.runtime.RuntimeContext.enable")
                     .append("(\"").append(ID).append("\",ste.getClassName(),ste.getMethodName(),\"" + methodName + "\")){");
             codeBuffer.append("String _agent_Log_pId_ = com.asiainfo.hlog.agent.runtime.LogAgentContext.getThreadCurrentLogId();");

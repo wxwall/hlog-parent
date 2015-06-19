@@ -12,6 +12,10 @@ public class LogWeaveContext {
     private String[] paramNames;
 
     private boolean isCreateInParams;
+    /**
+     * 第三方日志框架的采集栈深度
+     */
+    private int loggerStackDepth = 2;
 
     private int paramNumber = 0;
 
@@ -61,6 +65,14 @@ public class LogWeaveContext {
 
     public void setCreateInParams(boolean isCreateInParams) {
         this.isCreateInParams = isCreateInParams;
+    }
+
+    public int getLoggerStackDepth() {
+        return loggerStackDepth;
+    }
+
+    public void setLoggerStackDepth(int loggerStackDepth) {
+        this.loggerStackDepth = loggerStackDepth;
     }
 
     public String getHashCode(){

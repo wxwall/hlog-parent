@@ -5,6 +5,7 @@ import com.asiainfo.hlog.agent.bytecode.javassist.process.AfterPreProcessor;
 import com.asiainfo.hlog.agent.bytecode.javassist.process.BeforeAfterPreProcessor;
 import com.asiainfo.hlog.agent.bytecode.javassist.process.IMethodPreProcessor;
 import com.asiainfo.hlog.agent.bytecode.javassist.process.RoundPreProcessor;
+import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.config.Path;
 import com.asiainfo.hlog.client.config.PathType;
@@ -16,7 +17,6 @@ import javassist.bytecode.LocalVariableAttribute;
 import javassist.bytecode.MethodInfo;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
 import java.security.ProtectionDomain;
 import java.util.*;
 
@@ -39,6 +39,10 @@ public class HLogPreProcessor extends AbstractPreProcessor {
     private IMethodPreProcessor roundPreProcessor = null;
 
     private IMethodPreProcessor beforeAfterPreProcessor = null;
+    /**
+     * 第三方日志框架的采集栈深度
+     */
+    private int loggerStackDepth = 2;
 
     //private ClassPool pool = null;
 
@@ -67,6 +71,9 @@ public class HLogPreProcessor extends AbstractPreProcessor {
 
     public void initialize(){
         HLogConfig config = HLogConfig.getInstance();
+
+        String depth=config.getProperty(Constants.KEY_LOGGER_STACK_DEPTH,"2");
+        loggerStackDepth = Integer.parseInt(depth);
 
         logSwoopRuleList = new ArrayList<LogSwoopRule>();
         Set<Path> basePaths = config.getBasePaths().keySet();
@@ -135,6 +142,10 @@ public class HLogPreProcessor extends AbstractPreProcessor {
         CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
         LocalVariableAttribute attr = (LocalVariableAttribute) codeAttribute.getAttribute(LocalVariableAttribute.tag);
 
+        if(attr==null){
+            return new String[0];
+        }
+
         String[] paramNames = null;
         try {
             paramNames = new String[cm.getParameterTypes().length];
@@ -156,13 +167,12 @@ public class HLogPreProcessor extends AbstractPreProcessor {
         if(classFile==null){
             return null;
         }
-
         String clazz = classFile;
         if (classFile.indexOf("/") != -1) {
             clazz = classFile.replaceAll("/", ".");
         }
 
-        if(clazz.startsWith(exclude_path)){
+        if(clazz.startsWith(exclude_path) || clazz.indexOf("$EnhancerByCGLIB$")!=-1){
             return null;
         }
 
@@ -183,6 +193,7 @@ public class HLogPreProcessor extends AbstractPreProcessor {
         }
         //构建 LogWeaveContext
         LogWeaveContext context = new LogWeaveContext();
+        context.setLoggerStackDepth(loggerStackDepth);
         context.setClassName(clazz);
         ByteArrayInputStream inp = new ByteArrayInputStream(classfileBuffer);
         boolean weaved = false;
@@ -271,7 +282,7 @@ public class HLogPreProcessor extends AbstractPreProcessor {
                     //e.printStackTrace();
                     //System.out.println("weave method["+methodName+"] error:"+e.getMessage());
                     HLogJMXReport.getHLogJMXReport().getRunStatusInfo().incrementweaveErrClassNum();
-                    Logger.error("weave class [{0}] method[{1}]",e,clazz,methodName);
+                    Logger.error("weave class error [{0}] method[{1}]",e,clazz,methodName);
                 }
             }
 

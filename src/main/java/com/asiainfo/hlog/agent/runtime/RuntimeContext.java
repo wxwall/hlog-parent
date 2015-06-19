@@ -1,13 +1,16 @@
 package com.asiainfo.hlog.agent.runtime;
 
 import com.asiainfo.hlog.agent.bytecode.javassist.ErrorLogWeave;
+import com.asiainfo.hlog.client.HLogReflex;
 import com.asiainfo.hlog.client.helper.ClassHelper;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.helper.MethodCaller;
+import com.asiainfo.hlog.client.model.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * 运行状态下的各种上下文判断
@@ -112,6 +115,96 @@ public class RuntimeContext {
         }
 
         return (String)logIdMehtodClass.invoke();
+    }
+    public static String buildLogPId(String _agent_Log_Id_){
+        //获取上级日志id
+        String _agent_Log_pId = LogAgentContext.getThreadCurrentLogId();
+        if(_agent_Log_pId==null){
+            LogAgentContext.clear();
+            LogAgentContext.setThreadLogGroupId(_agent_Log_Id_);
+        }
+        LogAgentContext.setThreadCurrentLogId(_agent_Log_Id_);
+        return _agent_Log_pId;
+    }
+
+
+    public static void writeEvent(String clazz,String method,LogData logData){
+        Event event = new Event();
+        event.setClassName(clazz);
+        event.setMethodName(method);
+        event.setData(logData);
+        HLogReflex.reveice(event);
+    }
+
+    //写入参数据
+    public static void writeInterceptParam(String mcode,String id,String pId,
+                                           String clazz,String method,ParamObjs paramObjs){
+        if(enable("interceptParam", clazz, method)){
+            //如果有参数信息的话
+            if(paramObjs!=null && paramObjs.getParamNames()!=null && paramObjs.getParamNames().length>0){
+                LogData logData = new LogData();
+                logData.setMc(mcode);
+                logData.setId(id);
+                logData.setPId(pId);
+                logData.setGId(LogAgentContext.getThreadLogGroupId());
+                long time = System.currentTimeMillis();
+                logData.setTime(time);
+                Map map = LogUtil.paramToJson(paramObjs);
+                logData.putAll(map);
+                writeEvent(clazz, method, logData);
+            }
+        }
+    }
+
+    //写第三方日志
+    public static void writeLogger(String mcode,String id,String pId,
+                                   String clazz,String method,String desc,String level){
+        if(enable("logger", clazz, method,level)){
+            LoggerLogData logData = new LoggerLogData();
+            logData.setMc(mcode);
+            logData.setId(id);
+            logData.setPId(pId);
+            logData.setGId(LogAgentContext.getThreadLogGroupId());
+            long time = System.currentTimeMillis();
+            logData.setTime(time);
+            logData.setDesc(desc);
+            logData.setLevel(level);
+            writeEvent(clazz, method, logData);
+        }
+    }
+
+    //写process日志
+    public static void writeProcessLog(String mcode,String id,String pId,
+                                       String clazz,String method,int status,long startTime){
+        if(enable("process", clazz, method)){
+            RPLogData logData = new RPLogData();
+            logData.setMc(mcode);
+            logData.setId(id);
+            logData.setPId(pId);
+            logData.setGId(LogAgentContext.getThreadLogGroupId());
+            long time = System.currentTimeMillis();
+            logData.setTime(time);
+            logData.setStatus(status);
+            logData.setClazz(clazz);
+            logData.setMethod(method);
+            logData.setSpend(time - startTime);
+            writeEvent(clazz,method,logData);
+        }
+    }
+    //写error日志
+    public static void writeErrorLog(String mcode,String id,String pId,String clazz,String method,Throwable t){
+        if(pId==null && enable("error", clazz, method)){
+            ErrorLogData logData = new ErrorLogData();
+            logData.setMc(mcode);
+            logData.setId(id);
+            logData.setPId(pId);
+            logData.setGId(LogAgentContext.getThreadLogGroupId());
+            long time = System.currentTimeMillis();
+            logData.setTime(time);
+            String errMsg = RuntimeContext.error(t);
+            logData.setDesc(errMsg);
+            writeEvent(clazz,method,logData);
+        }
     }
 }
 
