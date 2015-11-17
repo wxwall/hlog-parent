@@ -11,6 +11,9 @@ public abstract class AbstractLogWeave implements ILogWeave {
     public static final String D = ",";
     public static final String S = ";";
     public static final String E = " = ";
+    public static final String BL = "(";
+    public static final String BR = ")";
+
     protected StringBuilder getInParams(LogWeaveContext logWeaveContext,StringBuilder codeBuffer,boolean setName){
 
         if(!logWeaveContext.isCreateInParams()){
@@ -27,36 +30,6 @@ public abstract class AbstractLogWeave implements ILogWeave {
         return codeBuffer;
     }
 
-    /**
-     * build一个类型是否启用的开关
-     * @param name
-     * @param logWeaveContext
-     * @param codeBuffer
-     */
-    protected StringBuilder buildIfEnable(String name,LogWeaveContext logWeaveContext,StringBuilder codeBuffer){
-        //StringBuffer codeBuffer = new StringBuffer();
-        //生成开关配置信息
-        codeBuffer.append("if(com.asiainfo.hlog.agent.runtime.RuntimeContext.enable")
-                .append("(\"").append(name).append("\",\"")
-                .append(logWeaveContext.getClassName()).append("\",\"")
-                .append(logWeaveContext.getMethodName()).append("\"))");
-        return codeBuffer;
-    }
-
-    /**
-     * 构建基本日志对象信息:</br>
-     * 1、日志ID</br>
-     * 2、日志归属ID</br>
-     * 3、日志组ID</br>
-     * 4、日志类型</br>
-     * @param logWeaveContext
-     * @param type
-     * @param codeBuffer
-     */
-    protected StringBuilder buildBaseLogData(LogWeaveContext logWeaveContext,String type,StringBuilder codeBuffer){
-
-        return buildBaseLogData(logWeaveContext,type,null,codeBuffer);
-    }
     /**
      * 构建基本日志对象信息:</br>
      * 1、日志ID</br>
@@ -79,15 +52,6 @@ public abstract class AbstractLogWeave implements ILogWeave {
         return codeBuffer;
     }
 
-    /**
-     * 构建和发送一个事件
-     * @param logWeaveContext
-     * @param codeBuffer
-     */
-    protected StringBuilder buildReveiceEvent(LogWeaveContext logWeaveContext,StringBuilder codeBuffer){
-        return buildReveiceEvent(logWeaveContext.getClassName(),logWeaveContext.getMethodName(),codeBuffer);
-    }
-
     protected StringBuilder buildReveiceEvent(String className,String methodName,StringBuilder codeBuffer){
         codeBuffer.append("com.asiainfo.hlog.client.model.Event event = new com.asiainfo.hlog.client.model.Event();");
         codeBuffer.append("event.setClassName(\"" + className + "\");");
@@ -98,8 +62,8 @@ public abstract class AbstractLogWeave implements ILogWeave {
     }
     protected StringBuilder buildReveiceEvent(StringBuilder codeBuffer){
         codeBuffer.append("com.asiainfo.hlog.client.model.Event event = new com.asiainfo.hlog.client.model.Event();");
-        codeBuffer.append("event.setClassName(ste.getClassName());");
-        codeBuffer.append("event.setMethodName(ste.getMethodName());");
+        codeBuffer.append("event.setClassName(name);");
+        codeBuffer.append("event.setMethodName(null);");
         codeBuffer.append("event.setData(data);");
         codeBuffer.append("com.asiainfo.hlog.client.HLogReflex.reveice(event);");
         return codeBuffer;
@@ -121,5 +85,10 @@ public abstract class AbstractLogWeave implements ILogWeave {
             mcode="h99";
         }
         return mcode;
+    }
+
+    @Override
+    public boolean interrupt() {
+        return false;
     }
 }

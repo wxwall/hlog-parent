@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by c on 2015/4/10.
+ * ILogWeave实例的生厂者
+ * Created by chenfeng on 2015/4/10.
  */
 public class LogWeaveFactory {
 
@@ -39,6 +40,10 @@ public class LogWeaveFactory {
         ILogWeave weave6 = new InterceptParamLogWeave();
         logWeaveName.put(weave6.getName(),InterceptParamLogWeave.class.getName());
         logWeaveInst.put(weave6.getName(),weave6);
+
+        ILogWeave weave62 = new InterceptParam2LogWeave();
+        logWeaveName.put(weave62.getName(),InterceptParam2LogWeave.class.getName());
+        logWeaveInst.put(weave62.getName(),weave62);
 
         ILogWeave weave7 = new ClassMethodNameWeave();
         logWeaveName.put(weave7.getName(),ClassMethodNameWeave.class.getName());

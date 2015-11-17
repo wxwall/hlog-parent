@@ -8,7 +8,7 @@ import java.util.Set;
  * 对类二进制字节流进行预处理</br>
  * 所有被classloader加载的class二进制都将经过preProcess方法</br>
  * 对类字节码操作可以有多种实现比如javassist、asm等
- * Created by c on 2015/4/10.
+ * Created by chenfeng on 2015/4/10.
  */
 public interface IHLogPreProcessor {
 

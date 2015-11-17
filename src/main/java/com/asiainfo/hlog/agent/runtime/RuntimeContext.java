@@ -139,71 +139,111 @@ public class RuntimeContext {
     //写入参数据
     public static void writeInterceptParam(String mcode,String id,String pId,
                                            String clazz,String method,ParamObjs paramObjs){
-        if(enable("interceptParam", clazz, method)){
-            //如果有参数信息的话
-            if(paramObjs!=null && paramObjs.getParamNames()!=null && paramObjs.getParamNames().length>0){
-                LogData logData = new LogData();
-                logData.setMc(mcode);
-                logData.setId(id);
-                logData.setPId(pId);
-                logData.setGId(LogAgentContext.getThreadLogGroupId());
-                long time = System.currentTimeMillis();
-                logData.setTime(time);
-                Map map = LogUtil.paramToJson(paramObjs);
-                logData.putAll(map);
-                writeEvent(clazz, method, logData);
+        try{
+            if(enable("interceptParam", clazz, method)){
+                //如果有参数信息的话
+                if(paramObjs!=null && paramObjs.getParamNames()!=null && paramObjs.getParamNames().length>0){
+                    LogData logData = new LogData();
+                    logData.setMc(mcode);
+                    logData.setId(id);
+                    logData.setPId(pId);
+                    logData.setGId(LogAgentContext.getThreadLogGroupId());
+                    long time = System.currentTimeMillis();
+                    logData.setTime(time);
+                    Map map = LogUtil.paramToJson(paramObjs);
+                    logData.putAll(map);
+                    writeEvent(clazz, method, logData);
+                }
             }
+        }catch (Throwable t){
+            Logger.error("构建日志异常,主要入参:{0},{1},{2},{3}",t,mcode,id,clazz,method);
+        }
+    }
+    //写入参数据
+    public static void writeInterceptParam2(String mcode,String id,String pId,
+                                           String clazz,String method,ParamObjs paramObjs){
+
+        try{
+            if(enable("interceptParam2", clazz, method)){
+                //如果有参数信息的话
+                if(paramObjs!=null && paramObjs.getParamNames()!=null && paramObjs.getParamNames().length>0){
+                    LogData logData = new LogData();
+                    logData.setMc(mcode);
+                    logData.setId(id);
+                    logData.setPId(pId);
+                    logData.setGId(LogAgentContext.getThreadLogGroupId());
+                    long time = System.currentTimeMillis();
+                    logData.setTime(time);
+                    Map map = LogUtil.paramToJson(paramObjs);
+                    logData.putAll(map);
+                    writeEvent(clazz, method, logData);
+                }
+            }
+        }catch (Throwable t){
+            Logger.error("构建日志异常,主要入参:{0},{1},{2},{3}",t,mcode,id,clazz,method);
         }
     }
 
     //写第三方日志
     public static void writeLogger(String mcode,String id,String pId,
                                    String clazz,String method,String desc,String level){
-        if(enable("logger", clazz, method,level)){
-            LoggerLogData logData = new LoggerLogData();
-            logData.setMc(mcode);
-            logData.setId(id);
-            logData.setPId(pId);
-            logData.setGId(LogAgentContext.getThreadLogGroupId());
-            long time = System.currentTimeMillis();
-            logData.setTime(time);
-            logData.setDesc(desc);
-            logData.setLevel(level);
-            writeEvent(clazz, method, logData);
+        try{
+            if(enable("logger", clazz, method,level)){
+                LoggerLogData logData = new LoggerLogData();
+                logData.setMc(mcode);
+                logData.setId(id);
+                logData.setPId(pId);
+                logData.setGId(LogAgentContext.getThreadLogGroupId());
+                long time = System.currentTimeMillis();
+                logData.setTime(time);
+                logData.setDesc(desc);
+                logData.setLevel(level);
+                writeEvent(clazz, method, logData);
+            }
+        }catch (Throwable t){
+            Logger.error("构建日志异常,主要入参:{0},{1},{2},{3}",t,mcode,id,clazz,method);
         }
     }
 
     //写process日志
     public static void writeProcessLog(String mcode,String id,String pId,
                                        String clazz,String method,int status,long startTime){
-        if(enable("process", clazz, method)){
-            RPLogData logData = new RPLogData();
-            logData.setMc(mcode);
-            logData.setId(id);
-            logData.setPId(pId);
-            logData.setGId(LogAgentContext.getThreadLogGroupId());
-            long time = System.currentTimeMillis();
-            logData.setTime(time);
-            logData.setStatus(status);
-            logData.setClazz(clazz);
-            logData.setMethod(method);
-            logData.setSpend(time - startTime);
-            writeEvent(clazz,method,logData);
+        try{
+            if(enable("process", clazz, method)){
+                RPLogData logData = new RPLogData();
+                logData.setMc(mcode);
+                logData.setId(id);
+                logData.setPId(pId);
+                logData.setGId(LogAgentContext.getThreadLogGroupId());
+                long time = System.currentTimeMillis();
+                logData.setTime(time);
+                logData.setStatus(status);
+                logData.setClazz(clazz);
+                logData.setMethod(method);
+                logData.setSpend(time - startTime);
+                writeEvent(clazz,method,logData);
+            }
+        }catch (Throwable t){
+            Logger.error("构建日志异常,主要入参:{0},{1},{2},{3}",t,mcode,id,clazz,method);
         }
     }
     //写error日志
     public static void writeErrorLog(String mcode,String id,String pId,String clazz,String method,Throwable t){
-        if(pId==null && enable("error", clazz, method)){
-            ErrorLogData logData = new ErrorLogData();
-            logData.setMc(mcode);
-            logData.setId(id);
-            logData.setPId(pId);
-            logData.setGId(LogAgentContext.getThreadLogGroupId());
-            long time = System.currentTimeMillis();
-            logData.setTime(time);
-            String errMsg = RuntimeContext.error(t);
-            logData.setDesc(errMsg);
-            writeEvent(clazz,method,logData);
+        try{
+            if(pId==null && enable("error", clazz, method)){
+                ErrorLogData logData = new ErrorLogData();
+                logData.setMc(mcode);
+                logData.setId(id);
+                logData.setPId(pId);
+                logData.setGId(LogAgentContext.getThreadLogGroupId());
+                long time = System.currentTimeMillis();
+                logData.setTime(time);
+                String errMsg = RuntimeContext.error(t);
+                logData.setDesc(errMsg);
+                writeEvent(clazz,method,logData);
+            }
+        }catch (Throwable tt){
+            Logger.error("构建日志异常,主要入参:{0},{1},{2},{3}",tt,mcode,id,clazz,method);
         }
     }
 }

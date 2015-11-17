@@ -26,9 +26,6 @@ public class DefinitionInParamLogWeave implements ILogWeave {
     public String beforWeave(LogWeaveContext logWeaveContext) {
         StringBuilder codeBuffer = new StringBuilder();
         codeBuffer.append("com.asiainfo.hlog.client.model.ParamObjs _inParams = null;");
-        //for(int i=1;i<=logWeaveContext.getParamNumber();i++){
-        //    codeBuffer.append("_inParams.addParam("+(i-1)+",$"+i+");");
-        //}
         return codeBuffer.toString();
     }
 
@@ -50,5 +47,10 @@ public class DefinitionInParamLogWeave implements ILogWeave {
     @Override
     public String finallyWeave(LogWeaveContext logWeaveContext) {
         return null;
+    }
+
+    @Override
+    public boolean interrupt() {
+        return false;
     }
 }

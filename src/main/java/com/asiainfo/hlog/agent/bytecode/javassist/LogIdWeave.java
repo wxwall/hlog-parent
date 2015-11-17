@@ -1,7 +1,8 @@
 package com.asiainfo.hlog.agent.bytecode.javassist;
 
 /**
- * Created by c on 2015/3/17.
+ * 声明hlog的id,superid等
+ * Created by chenfeng on 2015/3/17.
  */
 public class LogIdWeave implements ILogWeave {
 
@@ -34,14 +35,6 @@ public class LogIdWeave implements ILogWeave {
         StringBuffer codeBuffer = new StringBuffer();
         codeBuffer.append("String _agent_Log_Id_ = com.asiainfo.hlog.agent.runtime.RuntimeContext.logId();");
         codeBuffer.append("String _agent_Log_pId_ = com.asiainfo.hlog.agent.runtime.RuntimeContext.buildLogPId(_agent_Log_Id_);");
-        /*
-        codeBuffer.append("String _agent_Log_pId_ = com.asiainfo.hlog.agent.runtime.LogAgentContext.getThreadCurrentLogId();");
-        codeBuffer.append("if(_agent_Log_pId_==null){");
-        codeBuffer.append("com.asiainfo.hlog.agent.runtime.LogAgentContext.clear();");
-        codeBuffer.append("com.asiainfo.hlog.agent.runtime.LogAgentContext.setThreadLogGroupId(_agent_Log_Id_);");
-        codeBuffer.append("}");
-        codeBuffer.append("com.asiainfo.hlog.agent.runtime.LogAgentContext.setThreadCurrentLogId(_agent_Log_Id_);");
-        */
         return codeBuffer.toString();
     }
 
@@ -65,5 +58,10 @@ public class LogIdWeave implements ILogWeave {
         StringBuffer codeBuffer = new StringBuffer();
         codeBuffer.append("com.asiainfo.hlog.agent.runtime.LogAgentContext.setThreadCurrentLogId(_agent_Log_pId_);");
         return codeBuffer.toString();
+    }
+
+    @Override
+    public boolean interrupt() {
+        return false;
     }
 }

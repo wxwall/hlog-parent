@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by c on 2015/3/16.
+ * Created by chenfeng on 2015/3/16.
  */
 public class LogSwoopRule {
 

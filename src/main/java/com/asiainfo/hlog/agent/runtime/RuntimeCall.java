@@ -3,6 +3,7 @@ package com.asiainfo.hlog.agent.runtime;
 import com.al.common.context.IPropertyListener;
 import com.al.common.context.PropertyEvent;
 import com.al.common.context.PropertyHolder;
+import com.asiainfo.hlog.agent.ExcludeRuleUtils;
 import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.config.HLogConfigRule;
@@ -52,58 +53,69 @@ public class RuntimeCall{
      */
     public boolean enable(String weaveName ,String clazz,String method,String level){
 
-        HLogConfig config = HLogConfig.getInstance();
+        try{
+            HLogConfig config = HLogConfig.getInstance();
 
-        if(!config.isEnable()){
-            return false;
-        }
-
-        //查收到是有直接是方法级的
-        String classKey = clazz + "-" + weaveName;
-        if("logger".equals(weaveName) && level!=null){
-            classKey = classKey + "-" + level;
-        }
-        if(runtimeSwitchMap.containsKey(classKey)){
-            boolean b = runtimeSwitchMap.get(classKey);
-            if(Logger.isTrace()){
-                Logger.trace("判断[{0}]是否在收集日志数据范围:{1}",classKey,b);
+            if(!config.isEnable()){
+                return false;
             }
-            return b;
-        }else{
-            //寻找最合适的配置
-            HLogConfigRule rule = LogUtil.suitableConfig(clazz, method, config.getRuntimeCaptureCofnigRule());
-            if(rule!=null){
-                List<String> captureWeaves = rule.getCaptureWeaves();
-                for (String weave : captureWeaves){
-                    if(weave.equals(weaveName)){
-                        boolean enable = false;
-                        if(("logger".equals(weaveName))
-                                && level!=null && rule.getLevel()!=null){
-                            if(Logger.canOutprint(level,rule.getLevel())){
-                                enable = true;
-                            }
-                        }else{
-                            enable = true;
-                        }
 
-                        runtimeSwitchMap.put(classKey, enable);
-                        if(Logger.isTrace()){
-                            Logger.trace("判断[{0}]是否在收集日志数据范围:{1}",classKey,enable);
+            //查收到是有直接是方法级的
+            String classKey = clazz + "-" + weaveName;
+            if("logger".equals(weaveName) && level!=null){
+                classKey = classKey + "-" + level;
+            }
+            if(runtimeSwitchMap.containsKey(classKey)){
+                boolean b = runtimeSwitchMap.get(classKey);
+                if(Logger.isTrace()){
+                    Logger.trace("判断[{0}]是否在收集日志数据范围:{1}",classKey,b);
+                }
+                return b;
+            }else{
+                //寻找最合适的配置
+                HLogConfigRule rule = LogUtil.suitableConfig(clazz, method, config.getRuntimeCaptureCofnigRule());
+                if(rule!=null){
+                    List<String> captureWeaves = rule.getCaptureWeaves();
+                    if(captureWeaves!=null){
+                        for (String weave : captureWeaves){
+                            if(weave.equals(weaveName)){
+                                boolean enable = false;
+                                if(("logger".equals(weaveName))
+                                        && level!=null && rule.getLevel()!=null){
+                                    //看是否是被排除的类
+                                    if(ExcludeRuleUtils.isExcludePath(clazz)){
+                                        enable = false;
+                                    }else if(Logger.canOutprint(level,rule.getLevel())){
+                                        enable = true;
+                                    }
+                                }else{
+                                    enable = true;
+                                }
+
+                                runtimeSwitchMap.put(classKey, enable);
+                                if(Logger.isTrace()){
+                                    Logger.trace("判断[{0}]是否在收集日志数据范围:{1}",classKey,enable);
+                                }
+                                return enable;
+                            }
                         }
-                        return enable;
                     }
                 }
             }
-        }
 
         /*
         hlog.level.com.asiainfo.test.TestApp=debug
         capture.enable.com.asiainfo.test.TestApp=log4j,process
          */
-        runtimeSwitchMap.put(classKey,false);
-        if(Logger.isTrace()){
-            Logger.trace("判断[{0}]是否在收集日志数据范围:{1}",classKey,true);
+            runtimeSwitchMap.put(classKey,false);
+            if(Logger.isTrace()){
+                Logger.trace("判断[{0}]是否在收集日志数据范围:{1}",classKey,false);
+            }
+            return false;
+        }catch (Throwable t){
+            Logger.error("判断{0}的{1}的{2}方法是否启用收集日志时异常",t,weaveName ,clazz,method);
+            return false;
         }
-        return false;
+
     }
 }

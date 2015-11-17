@@ -78,13 +78,20 @@ public class RoundPreProcessor implements IMethodPreProcessor {
 
         bufferCode.append(logWeaveCode.getTryCode().toString());
 
-        if(haveReturn){
-            bufferCode.append("_reObj =  ");
+        if(!logWeaveCode.isInterrupt()){
+            if(haveReturn){
+                bufferCode.append("_reObj =  ");
+            }
+            bufferCode.append(oldMethodName + "($$);\n");
+        }else{
+            bufferCode.append("int _i=0;");
         }
-        bufferCode.append(oldMethodName + "($$);\n");
 
         bufferCode.append(logWeaveCode.getAfterCode().toString());
         if(haveReturn){
+            //if(Logger.isTrace() && !returnCtClass.isPrimitive()){
+            //    bufferCode.append("if(_reObj!=null){System.out.println(\"执行["+ctClass.getSimpleName()+"."+methodName+"]返回结果:\"+_reObj.getClass()+\":\"+_reObj);}");
+            //}
             bufferCode.append("return _reObj;");
         }
 
