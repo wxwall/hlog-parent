@@ -33,15 +33,7 @@ public class ClassPreProcessorAgentAdapter implements ClassFileTransformer {
         //初始化配置信息,后需要从properties文件或服务端来获取
         config.initConfig();
 
-        /*
         //注册JMX观察
-        if(HLogConfig.jmxEnable){
-            MBeanServerAgent agent = new MBeanServerAgent("HLogMBeanServer");
-            agent.registerBean(new PropMbean(),new PropMbeanExportBuilder());
-            String url = agent.startServer(Integer.parseInt(HLogConfig.jmxPost));
-            Logger.debug("开启JMX服务:{0}",url);
-        }
-        */
         HLogJMXReport.getHLogJMXReport().start();
 
         //是否开启System.out/System.err

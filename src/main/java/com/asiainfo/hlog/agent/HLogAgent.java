@@ -11,9 +11,15 @@ import java.lang.instrument.UnmodifiableClassException;
 /**
  * 日志代理,将负责应用jvm的agent操作</br>
  * 一切从此开始....
- * Created by c on 2015/3/16.
+ * Created by chenfeng on 2015/3/16.
  */
 public class HLogAgent {
+
+    /**
+     * 默认的ClassFileTransformer实现类
+     */
+    private static final String DEF_CLASS_PRE_AGENT_ADAPTER = "com.asiainfo.hlog.agent.ClassPreProcessorAgentAdapter";
+
     static ClassFileTransformer classPreProcessorAgentAdapter;
     static Instrumentation inst;
 
@@ -53,10 +59,10 @@ public class HLogAgent {
     private static ClassFileTransformer createClassFileTransformer() {
         try{
             Class c = ClassLoaderHolder.getInstance()
-                    .loadClass("com.asiainfo.hlog.agent.ClassPreProcessorAgentAdapter");
+                    .loadClass(DEF_CLASS_PRE_AGENT_ADAPTER);
             ClassFileTransformer classFileTransformer = (ClassFileTransformer) c.newInstance();
             return classFileTransformer;
-        }catch (Exception e){
+        }catch (Throwable e){
             Logger.error("构建ClassPreProcessorAgentAdapter异常",e);
         }
         return null;

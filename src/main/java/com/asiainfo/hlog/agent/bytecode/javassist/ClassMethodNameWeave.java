@@ -3,6 +3,7 @@ package com.asiainfo.hlog.agent.bytecode.javassist;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 
 /**
+ * 声音类和方法的变量
  * Created by c on 2015/3/17.
  */
 public class ClassMethodNameWeave implements ILogWeave {
@@ -29,7 +30,6 @@ public class ClassMethodNameWeave implements ILogWeave {
     public int getOrder() {
         return -1;
     }
-
 
 
     public String beforWeave(LogWeaveContext logWeaveContext) {
@@ -59,5 +59,10 @@ public class ClassMethodNameWeave implements ILogWeave {
 
     public String finallyWeave(LogWeaveContext logWeaveContext) {
         return null;
+    }
+
+    @Override
+    public boolean interrupt() {
+        return false;
     }
 }

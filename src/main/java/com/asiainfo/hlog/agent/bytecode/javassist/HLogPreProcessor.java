@@ -19,16 +19,19 @@ import javassist.bytecode.MethodInfo;
 import java.io.ByteArrayInputStream;
 import java.security.ProtectionDomain;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 日志代理处理器,Javassist实现:</br>
- * Created by c on 2015/4/9.
+ * Created by chenfeng on 2015/4/9.
  */
 public class HLogPreProcessor extends AbstractPreProcessor {
 
     private final String exclude_path = "com.asiainfo.hlog";
     //增加排序功能
     private List<LogSwoopRule> logSwoopRuleList = null;
+
+    private List<String> fullClass = new ArrayList<String>();
 
     private ILogWeaveActuator logWeaveActuator = null;
 
@@ -45,6 +48,12 @@ public class HLogPreProcessor extends AbstractPreProcessor {
     private int loggerStackDepth = 2;
 
     //private ClassPool pool = null;
+
+    private Set<Integer> existsHashCode = new TreeSet<Integer>();
+
+    /**
+     * 存储被织入类的字节码
+     */
 
     private Map<String,String> addLogWeaveAndReturnMcode(List<ILogWeave> weaves,String[] depends){
 
@@ -91,6 +100,9 @@ public class HLogPreProcessor extends AbstractPreProcessor {
             logSwoopRule.setWeaves(weaves);
             logSwoopRule.setMcodeMap(mcodeMap);
             logSwoopRuleList.add(logSwoopRule);
+            if(basePath.getType()==PathType.METHOD || basePath.getType()==PathType.CLASS){
+                fullClass.add(basePath.getFullClassName());
+            }
         }
 
         logWeaveActuator = new DefaultLogWeaveActuator();
@@ -99,7 +111,6 @@ public class HLogPreProcessor extends AbstractPreProcessor {
         roundPreProcessor = new RoundPreProcessor();
         beforeAfterPreProcessor = new BeforeAfterPreProcessor();
 
-        //QueueHolder.getHolder().start();
     }
     private boolean isSupportMethodRule(String className){
         for(LogSwoopRule rule : logSwoopRuleList){
@@ -124,9 +135,13 @@ public class HLogPreProcessor extends AbstractPreProcessor {
                 if(className.equals(path.getFullClassName())){
                     return rule;
                 }
-            }else if(path.getType() == PathType.METHOD && methodName!=null){
-                if(methodName.equals(path.getMethodName())){
-                    if(className.equals(path.getFullClassName())){
+            }else if(path.getType() == PathType.METHOD){
+                if(className.equals(path.getFullClassName())){
+                    if(methodName!=null){
+                        if(methodName.equals(path.getMethodName())){
+                            return rule;
+                        }
+                    }else{
                         return rule;
                     }
                 }
@@ -135,7 +150,7 @@ public class HLogPreProcessor extends AbstractPreProcessor {
         return null;
     }
     private ClassPool pool;
-    private static String[] getMethodParamNames(CtMethod cm){
+    private String[] getMethodParamNames(CtMethod cm){
         if(cm==null)
             return null;
         MethodInfo methodInfo = cm.getMethodInfo();
@@ -162,12 +177,20 @@ public class HLogPreProcessor extends AbstractPreProcessor {
         }
         return paramNames;
     }
+    private boolean isCanWeaveMethod(CtMethod ctMethod){
+        int accessFlag = ctMethod.getMethodInfo().getAccessFlags();
+        if(accessFlag>1000){
+            return false;
+        }
+        return true;
+    }
     public byte[] preProcess(ClassLoader classLoader, String classFile, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
         //判断 该className是否有符合的 LogSwoopRule
         if(classFile==null){
             return null;
         }
         String clazz = classFile;
+
         if (classFile.indexOf("/") != -1) {
             clazz = classFile.replaceAll("/", ".");
         }
@@ -176,11 +199,10 @@ public class HLogPreProcessor extends AbstractPreProcessor {
             return null;
         }
 
-        if(isExcludePath(clazz)){
+        if(isExcludePath(clazz) && !fullClass.contains(clazz)){
             return null;
         }
 
-        //System.out.println("className="+className);
         LogSwoopRule rule = isSupportRule(clazz,null);
         boolean havClassRule = false;
         if(rule!=null && rule.getWeaves()!=null || rule.getWeaves().size()>0){
@@ -212,24 +234,38 @@ public class HLogPreProcessor extends AbstractPreProcessor {
                 }
                 return null;
             }
-
-
-            //Thread.currentThread().getContextClassLoader().loadClass(className);
-
+            ClassLoader threaClassLoader = Thread.currentThread().getContextClassLoader();
             if(pool==null){
                 pool = ClassPool.getDefault();
-                pool.insertClassPath(new LoaderClassPath(Thread.currentThread().getContextClassLoader()));
+                //pool = new ClassPool(true);
             }
-            CtClass ctClass = null;
-            try{
-                ctClass = pool.get(clazz);
-            }catch (Exception e){}
-            if(ctClass==null){
-                ctClass = pool.makeClass(inp);
+            int threadCLHash = threaClassLoader.hashCode();
+            if(!existsHashCode.contains(threadCLHash)){
+                //weakClassLoader.put(threadCLHash, threaClassLoader);
+                existsHashCode.add(threadCLHash);
+                pool.insertClassPath(new LoaderClassPath(threaClassLoader));
+                if(Logger.isDebug()){
+                    Logger.debug("当前线程中新的类加载器[{0}]:{1}",threadCLHash,threaClassLoader);
+                }
+            }
+            int clHash = classLoader.hashCode();
+            if(!existsHashCode.contains(clHash)){
+                //weakClassLoader.put(clHash, classLoader);
+                existsHashCode.add(clHash);
+                pool.insertClassPath(new LoaderClassPath(classLoader));
+                if(Logger.isDebug()){
+                    Logger.debug("新的类加载器[{0}]:{1}",clHash,classLoader);
+                }
             }
 
+            CtClass ctClass = pool.makeClass(inp,false);
+
+
             //如果是接口直接返回
-            if(ctClass.isInterface() || ctClass.isFrozen()){
+            if(ctClass==null || ctClass.isInterface() || ctClass.isAnnotation() || ctClass.isEnum() || ctClass.isFrozen() ){
+                if(Logger.isDebug()){
+                    Logger.debug("{0}类可能是接口、注释类、枚举或者被冻结{1}",clazz,ctClass.isFrozen());
+                }
                 return null;
             }
 
@@ -237,18 +273,25 @@ public class HLogPreProcessor extends AbstractPreProcessor {
             HLogJMXReport.getHLogJMXReport().getRunStatusInfo().incrementWeaveClassNum();
             for (CtMethod ctMethod:ctMethods){
                 String methodName = ctMethod.getName();
+                if(!isCanWeaveMethod(ctMethod)){
+                    if(Logger.isTrace()){
+                        Logger.trace("{0}.{1}方法不支持织入,accessFlag={2}",clazz,methodName,ctMethod.getMethodInfo().getAccessFlags());
+                    }
+                    continue;
+                }
+
                 LogSwoopRule methodRule = isSupportRule(clazz,methodName);
                 if(methodRule==null || methodRule.getWeaves()==null || methodRule.getWeaves().size()==0){
                     if(!havClassRule){
                         methodRule = rule;
                     }else{
-                        return null;
+                        continue;
                     }
                 }
                 context.setRule(methodRule);
                 context.setCreateInParams(false);
 
-                if(isExcludeMethod(null,methodName)){
+                if(isExcludeMethod(clazz,methodName)){
                     continue;
                 }
                 try{
@@ -286,8 +329,11 @@ public class HLogPreProcessor extends AbstractPreProcessor {
                 }
             }
 
-
+            if(Logger.isDebug()){
+                Logger.trace("{0}类织入代码完成.",clazz);
+            }
             byte[] code = ctClass.toBytecode();
+            //classByteMap.put(key,code);
             //保存文件
             if(weaved){
                 saveWaveClassFile(classFile,code);
@@ -299,5 +345,4 @@ public class HLogPreProcessor extends AbstractPreProcessor {
         }
         return null;
     }
-
 }

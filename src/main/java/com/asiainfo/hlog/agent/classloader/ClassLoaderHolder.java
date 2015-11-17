@@ -1,7 +1,6 @@
 package com.asiainfo.hlog.agent.classloader;
 
-//import com.asiainfo.hlog.client.config.Constants;
-//import com.asiainfo.hlog.client.config.HLogConfig;
+import com.asiainfo.hlog.client.helper.Logger;
 
 import java.io.*;
 import java.net.URL;
@@ -14,7 +13,9 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
 /**
- * Created by c on 2015/4/9.
+ * 自定义类加载器,主要职责让agent端加载和使用第三方的jar</br>
+ *
+ * Created by chenf on 2015/4/9.
  */
 public class ClassLoaderHolder  {
 
@@ -23,8 +24,6 @@ public class ClassLoaderHolder  {
     private static  ClassLoader loader = null;
 
     private static ClassLoaderHolder holder;
-
-    //private static ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
 
     public Class<?> loadClass(String name) throws ClassNotFoundException {
         return loader.loadClass(name);
@@ -58,17 +57,17 @@ public class ClassLoaderHolder  {
                 while (jarEntrys.hasMoreElements()) {
                     BufferedInputStream in = null;
                     BufferedOutputStream out = null;
+                    File desTemp = null;
                     try {
                         ZipEntry entryTemp = jarEntrys.nextElement();
                         if (entryTemp.isDirectory() || !entryTemp.getName().endsWith(".jar")) {
                             continue;
                         }
-                        File desTemp = new File(libs + File.separator + entryTemp.getName());
+                        desTemp = new File(libs + File.separator + entryTemp.getName());
 
                         if (!desTemp.getParentFile().exists()) {
                             desTemp.getParentFile().mkdirs();
                         }
-
                         in = new BufferedInputStream(agentJar.getInputStream(entryTemp));
                         out = new BufferedOutputStream(new FileOutputStream(desTemp));
                         int len = in.read(bytes, 0, bytes.length);
@@ -78,7 +77,7 @@ public class ClassLoaderHolder  {
                         }
                         jarList.add(desTemp.toURI().toURL());
                     } catch (Exception ee) {
-                        ee.printStackTrace();
+                        Logger.error("从hlog-agent中解压{0}资源失败",ee,desTemp);
                     } finally {
                         if (in != null) {
                             try {
@@ -119,7 +118,7 @@ public class ClassLoaderHolder  {
                     }
                 };
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.error("从hlog-agent中获取依赖资源失败", e);
             } finally {
                 try {
                     agentJar.close();

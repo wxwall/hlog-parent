@@ -3,7 +3,8 @@ package com.asiainfo.hlog.agent.bytecode.javassist;
 import com.asiainfo.hlog.agent.bytecode.javassist.process.IMethodPreProcessor;
 
 /**
- * Created by c on 2015/3/17.
+ * 组织生成需要植入的java代码
+ * Created by chenfeng on 2015/3/17.
  */
 public class LogWeaveCode {
 
@@ -29,6 +30,8 @@ public class LogWeaveCode {
 
     private int type ;
 
+    private boolean interrupt;
+
     public LogWeaveCode(){
         this.beforeCode = new StringBuffer();
         this.exceptionCode = new StringBuffer();
@@ -39,6 +42,14 @@ public class LogWeaveCode {
 
     public int getType() {
         return type;
+    }
+
+    public void setInterrupt(boolean interrupt) {
+        this.interrupt = interrupt;
+    }
+
+    public boolean isInterrupt() {
+        return interrupt;
     }
 
     public StringBuffer getBeforeCode() {
@@ -92,16 +103,4 @@ public class LogWeaveCode {
                 break;
         }
     }
-    /*
-    public void setExceptionCode(StringBuffer exceptionCode) {
-        this.exceptionCode = exceptionCode;
-    }
-
-    public StringBuffer getAfterCode() {
-        return afterCode;
-    }
-
-    public void setAfterCode(StringBuffer afterCode) {
-        this.afterCode = afterCode;
-    }*/
 }

@@ -1,7 +1,7 @@
 package com.asiainfo.hlog.agent.bytecode.javassist;
 
 /**
- * Created by c on 2015/3/16.
+ * Created by chenfeng on 2015/3/16.
  */
 public class LogSwoopMethodInfo {
 

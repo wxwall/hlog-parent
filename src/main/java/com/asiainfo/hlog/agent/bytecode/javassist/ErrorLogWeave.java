@@ -43,22 +43,13 @@ public class ErrorLogWeave extends AbstractLogWeave {
     @Override
     public String exceptionWeave(LogWeaveContext logWeaveContext) {
         StringBuilder code  = new StringBuilder();
-        code.append("com.asiainfo.hlog.agent.runtime.RuntimeContext.writeErrorLog(");
+        code.append(METHOD_WriteErrorLog).append(BL);
         code.append(Q).append(getMcode(logWeaveContext)).append(Q).append(D);
         code.append(LogAgentContext.S_AGENT_LOG_ID).append(D);
         code.append(LogAgentContext.S_AGENT_LOG_PID).append(D);
         code.append(LogAgentContext.S_AGENT_CLASS_NAME).append(D);
         code.append(LogAgentContext.S_AGENT_METHOD_NAME).append(D);
-        code.append(LogAgentContext.S_AGENT_ERR_PARAM_NAME).append(");");
-        /*
-        code.append("if(_agent_Log_pId_==null){");
-        code.append("String errorMsg = com.asiainfo.hlog.agent.runtime.RuntimeContext.error("+LogAgentContext.S_AGENT_ERR_PARAM_NAME+");");
-        buildIfEnable(ID,logWeaveContext,code).append("{");
-        code.append("com.asiainfo.hlog.client.model.ErrorLogData data = new com.asiainfo.hlog.client.model.ErrorLogData();");
-        buildBaseLogData(logWeaveContext,getMcode(logWeaveContext),"errorMsg",code);
-        buildReveiceEvent(logWeaveContext,code);
-        code.append("}}");
-        */
+        code.append(LogAgentContext.S_AGENT_ERR_PARAM_NAME).append(BR).append(S);
         return code.toString();
     }
 

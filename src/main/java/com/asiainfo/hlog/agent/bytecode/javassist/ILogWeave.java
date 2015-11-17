@@ -3,9 +3,25 @@ package com.asiainfo.hlog.agent.bytecode.javassist;
 /**
  * 在不同的代码位置织入不同代码块</br>
  *
- * Created by chenf on 2015/3/16.
+ * Created by chenfeng on 2015/3/16.
  */
 public interface ILogWeave extends java.io.Serializable {
+
+    static final String METHOD_WriteInterceptParam = "com.asiainfo.hlog.agent.runtime.RuntimeContext.writeInterceptParam";
+
+    static final String METHOD_WriteInterceptParam2 = "com.asiainfo.hlog.agent.runtime.RuntimeContext.writeInterceptParam2";
+
+    static final String METHOD_WriteLogger = "com.asiainfo.hlog.agent.runtime.RuntimeContext.writeLogger";
+
+    static final String METHOD_WriteProcessLog = "com.asiainfo.hlog.agent.runtime.RuntimeContext.writeProcessLog";
+
+    static final String METHOD_WriteErrorLog = "com.asiainfo.hlog.agent.runtime.RuntimeContext.writeErrorLog";
+
+    /**
+     * 中断执行原来的方法
+     * @return
+     */
+    boolean interrupt();
 
     /**
      * 获取依赖的织入器

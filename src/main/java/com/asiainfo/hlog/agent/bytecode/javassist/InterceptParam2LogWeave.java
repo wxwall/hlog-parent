@@ -3,12 +3,12 @@ package com.asiainfo.hlog.agent.bytecode.javassist;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 
 /**
- * 拦截记录入参,并继续执行
+ * 拦截记录入参,并直接返回
  * Created by chenfeng on 2015/5/31.
  */
-public class InterceptParamLogWeave extends AbstractLogWeave{
+public class InterceptParam2LogWeave extends AbstractLogWeave{
 
-    public static final String ID = "interceptParam";
+    public static final String ID = "interceptParam2";
 
     private final String DEF_MC = "h04";
 
@@ -33,13 +33,14 @@ public class InterceptParamLogWeave extends AbstractLogWeave{
     public String beforWeave(LogWeaveContext logWeaveContext) {
         StringBuilder codeBuffer = new StringBuilder();
         getInParams(logWeaveContext, codeBuffer, true);
-        codeBuffer.append(METHOD_WriteInterceptParam).append(BL);
+        codeBuffer.append(METHOD_WriteInterceptParam2).append(BL);
         codeBuffer.append(Q).append(getMcode(logWeaveContext)).append(Q).append(D);
         codeBuffer.append(LogAgentContext.S_AGENT_LOG_ID).append(D);
         codeBuffer.append(LogAgentContext.S_AGENT_LOG_PID).append(D);
         codeBuffer.append(LogAgentContext.S_AGENT_CLASS_NAME).append(D);
         codeBuffer.append(LogAgentContext.S_AGENT_METHOD_NAME).append(D);
         codeBuffer.append("_inParams);");
+
         return codeBuffer.toString();
     }
 
@@ -66,5 +67,10 @@ public class InterceptParamLogWeave extends AbstractLogWeave{
     @Override
     protected String getMcode() {
         return DEF_MC;
+    }
+
+    @Override
+    public boolean interrupt() {
+        return true;
     }
 }

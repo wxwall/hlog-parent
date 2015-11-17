@@ -3,7 +3,8 @@ package com.asiainfo.hlog.agent.bytecode.javassist;
 import java.util.List;
 
 /**
- * Created by c on 2015/3/23.
+ * 组装代码段
+ * Created by chenfeng on 2015/3/23.
  */
 public class DefaultLogWeaveActuator implements ILogWeaveActuator {
 
@@ -17,6 +18,9 @@ public class DefaultLogWeaveActuator implements ILogWeaveActuator {
             logWeaveCode.append(LogWeaveCode.EXCEPTION,logWeave.exceptionWeave(logWeaveContext));
             logWeaveCode.append(LogWeaveCode.AFTER,logWeave.afterWeave(logWeaveContext));
             logWeaveCode.append(LogWeaveCode.FINALLY,logWeave.finallyWeave(logWeaveContext));
+            if(logWeave.interrupt()){
+                logWeaveCode.setInterrupt(logWeave.interrupt());
+            }
         }
 
         return logWeaveCode;

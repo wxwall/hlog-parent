@@ -19,6 +19,7 @@ public class AfterPreProcessor implements IMethodPreProcessor {
 
 
         method.insertAfter(logWeaveCode.getAfterCode().toString());
+
         /*
         for (ILogWeave logWeave : logWeaves){
             method.insertAfter(logWeave.beforWeave(logWeaveContext));
