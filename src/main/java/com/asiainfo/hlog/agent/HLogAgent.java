@@ -23,9 +23,7 @@ public class HLogAgent {
     static ClassFileTransformer classPreProcessorAgentAdapter;
     static Instrumentation inst;
 
-    public static void premain(String agentArgs, Instrumentation inst)
-            throws ClassNotFoundException, UnmodifiableClassException {
-
+    private static void domain(Instrumentation inst){
         if (HLogAgent.inst == null) {
             HLogAgent.inst = inst;
         }
@@ -37,22 +35,15 @@ public class HLogAgent {
 
         LoaderHelper.setLoader(ClassLoaderHolder.getInstance().getClassLoader());
 
-        System.out.println("Asiainfo HLog Agent start!!");
+    }
+
+    public static void premain(String agentArgs, Instrumentation inst)
+            throws ClassNotFoundException, UnmodifiableClassException {
+        domain(inst);
     }
 
     public static void agentmain(String options, Instrumentation inst) {
-        if (HLogAgent.inst == null) {
-            HLogAgent.inst = inst;
-        }
-
-        if (classPreProcessorAgentAdapter == null) {
-            classPreProcessorAgentAdapter = createClassFileTransformer();
-        }
-        inst.addTransformer(classPreProcessorAgentAdapter);
-
-        LoaderHelper.setLoader(ClassLoaderHolder.getInstance().getClassLoader());
-
-        System.out.println("Asiainfo HLog Agent start!!");
+        domain(inst);
     }
 
 

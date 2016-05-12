@@ -33,7 +33,6 @@ public class RuntimeCall{
 
     public RuntimeCall(){
         PropertyHolder.addListener(new IPropertyListener() {
-            @Override
             public void changed(PropertyEvent event) {
                 String key = event.getKey();
                 if(key.startsWith(Constants.KEY_HLOG_CAPTURE_ENABLE)){
@@ -103,10 +102,6 @@ public class RuntimeCall{
                 }
             }
 
-        /*
-        hlog.level.com.asiainfo.test.TestApp=debug
-        capture.enable.com.asiainfo.test.TestApp=log4j,process
-         */
             runtimeSwitchMap.put(classKey,false);
             if(Logger.isTrace()){
                 Logger.trace("判断[{0}]是否在收集日志数据范围:{1}",classKey,false);
