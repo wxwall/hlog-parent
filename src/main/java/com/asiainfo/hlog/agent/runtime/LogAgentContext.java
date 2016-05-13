@@ -6,29 +6,6 @@ package com.asiainfo.hlog.agent.runtime;
  */
 public class LogAgentContext {
 
-    /**
-     * 日志上级ID
-     */
-    public static final String S_AGENT_LOG_ID = "_agent_Log_Id_";
-    /**
-     * 日志ID
-     */
-    public static final String S_AGENT_LOG_PID = "_agent_Log_pId_";
-
-    /**
-     * 日志上级ID
-     */
-    public static final String S_AGENT_CLASS_NAME = "_agent_className";
-    /**
-     * 日志ID
-     */
-    public static final String S_AGENT_METHOD_NAME = "_agent_methodName";
-
-    /**
-     * 日志异常变量名称
-     */
-    public static final String S_AGENT_ERR_PARAM_NAME = "_agent_Log_Err";
-
 
     /**
      * 日志组ID
@@ -59,9 +36,6 @@ public class LogAgentContext {
 
     public static String getThreadCurrentLogId(){
         return threadCurrentLogId.get();
-    }
-    public static void clearCurrentLogId(){
-        threadCurrentLogId.remove();
     }
 
     public static void clear(){

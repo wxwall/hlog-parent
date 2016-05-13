@@ -56,6 +56,7 @@ public abstract class ExcludeRuleUtils {
         }
 
         //加载配置文件的排除信息
+        addRules("java.lang.*,sun.*",excludePathRegulars);
         //排除类
         String excludePaths = HLogConfig.getInstance()
                 .getProperty(Constants.KEY_HLOG_EXCLUDE_PATHS);

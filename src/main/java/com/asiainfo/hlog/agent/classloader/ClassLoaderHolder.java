@@ -44,11 +44,15 @@ public class ClassLoaderHolder  {
         URL url = ClassLoaderHolder.class.getResource("");
         if (url != null) {
             String agentJarPath = url.getFile();
-            agentJarPath = agentJarPath.substring(5, agentJarPath.indexOf("!"));
-
+            int index = agentJarPath.indexOf("!");
+            if(index>-1){
+                agentJarPath = agentJarPath.substring(5, agentJarPath.indexOf("!"));
+            }
+            String jarDir = null;
             JarFile agentJar = null;
             try {
                 File jar = new File(agentJarPath);
+                jarDir = jar.getParent();
                 agentJar = new JarFile(agentJarPath);
                 Enumeration<JarEntry> jarEntrys = agentJar.entries();
                 List<URL> jarList = new ArrayList<URL>();
@@ -60,6 +64,7 @@ public class ClassLoaderHolder  {
                     File desTemp = null;
                     try {
                         ZipEntry entryTemp = jarEntrys.nextElement();
+
                         if (entryTemp.isDirectory() || !entryTemp.getName().endsWith(".jar")) {
                             continue;
                         }
@@ -95,6 +100,21 @@ public class ClassLoaderHolder  {
                     }
 
                 }
+                //加载扩展的jar
+                File extJarFile = new File(jarDir+"/ext/lib");
+                if(extJarFile.exists()){
+                    File[] fiels = extJarFile.listFiles();
+                    for(File file : fiels){
+                        if(file.getName().endsWith(".jar")){
+                            jarList.add(file.toURI().toURL());
+                        }
+                    }
+                }
+                File extClassesFile = new File(jarDir+"/ext/classes");
+                if(extClassesFile.exists()){
+                    jarList.add(extClassesFile.toURI().toURL());
+                }
+
                 //jarLis
                 URL[] urls = jarList.toArray(new URL[jarList.size()]);
                 loader = new URLClassLoader(urls, null){
