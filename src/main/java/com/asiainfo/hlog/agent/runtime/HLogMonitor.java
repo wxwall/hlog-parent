@@ -28,6 +28,7 @@ public class HLogMonitor {
         //private final Object[] params;
         private final long beginTime;
         private long speed = 0;
+        private int isError = 0;
         private boolean enableProcess;
         private boolean enableError ;
 
@@ -56,7 +57,8 @@ public class HLogMonitor {
             return className == null;
         }
     }
-    private static ThreadLocal<Stack<Node>> local = new ThreadLocal();
+    private static ThreadLocal<Stack<Node>> local = new ThreadLocal<Stack<Node>>();
+    private static ThreadLocal<Stack<Node>> subNodes = new ThreadLocal<Stack<Node>>();
 
     public static void start(String className,String methodName,String desc,String[] paramNames,Object[] params){
 
@@ -96,6 +98,15 @@ public class HLogMonitor {
         stack.push(node);
     }
 
+    private static void pushSubNode(Node node){
+        Stack<Node> stack = subNodes.get();
+        if(stack == null){
+            stack = new Stack<Node>();
+            subNodes.set(stack);
+        }
+        stack.push(node);
+    }
+
     public static void end(String mcode,Object returnObj,boolean isError){
 
         Stack<Node> stack = null;
@@ -113,15 +124,28 @@ public class HLogMonitor {
             //如果产生多个日志,这里的logId保持一致
             String id = node.logId ;
             String pid = node.logPid;
-            //boolean isUsed = false;
+            node.isError = isError?1:0;
+            boolean havWriteLog = false;
             //耗时达到某值是记录
             if(node.enableProcess && node.speed>RuntimeContext.processTime){
                 //记录运行耗时超过
-                doSendProcessLog(node,id,pid,isError?1:0);
+                doSendProcessLog(node,id,pid,node.isError);
+                //如果本节点超过预警值,追加写已经执行过的子过程节点
+                if(RuntimeContext.enableSaveWithoutSubs){
+                    doWriteSubNode();
+                }
+                havWriteLog = true;
+            }else if(node.enableProcess){
+                pushSubNode(node);
             }
             //发生异常时记录
             if(isError && stack.isEmpty() && node.enableError){
                 doSendErrorLog(node, id, pid, (Throwable) returnObj);
+                havWriteLog = true;
+            }
+            //保存入参
+            if(havWriteLog && RuntimeContext.enableSaveWithoutParams){
+                doWriteMethodParams(node);
             }
 
             if(pid!=null){
@@ -131,8 +155,36 @@ public class HLogMonitor {
             //如果上级id为null时,清了node =
             if(stack!=null && stack.isEmpty()){
                 LogAgentContext.clear();
+                if(subNodes.get()!=null){
+                    subNodes.get().clear();
+                }
             }
         }
+    }
+
+    private static void doWriteSubNode() {
+        Stack<Node> subs = subNodes.get();
+        if(subs!=null){
+            while(!subs.isEmpty()){
+                Node sub = subs.pop();
+                doSendProcessLog(sub,sub.logId,sub.logPid,sub.isError);
+            }
+        }
+    }
+
+    private static void doWriteMethodParams(Node node){
+        if(node==null){
+            return;
+        }
+        LogData logData = createLogData(HLogAgentConst.MV_CODE_PARAMS,node.logId,node.logPid);
+        if(node.params==null){
+            logData.put("params","[]");
+        }else{
+            String params = RuntimeContext.toJson(node.params);
+            logData.put("params",params);
+        }
+
+        writeEvent(node.className,node.methodName,logData);
     }
 
     /**
@@ -172,7 +224,7 @@ public class HLogMonitor {
      * @return
      */
     public static long getConfigSqlSpeed(){
-        return -1;
+        return RuntimeContext.sqlTime;
     }
 
 

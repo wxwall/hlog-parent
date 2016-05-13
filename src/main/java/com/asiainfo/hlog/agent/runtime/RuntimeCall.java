@@ -3,6 +3,7 @@ package com.asiainfo.hlog.agent.runtime;
 import com.al.common.context.IPropertyListener;
 import com.al.common.context.PropertyEvent;
 import com.al.common.context.PropertyHolder;
+import com.alibaba.fastjson.JSON;
 import com.asiainfo.hlog.agent.ExcludeRuleUtils;
 import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
@@ -112,5 +113,9 @@ public class RuntimeCall{
             return false;
         }
 
+    }
+
+    public static String toJson(Object obj){
+        return JSON.toJSONString(obj);
     }
 }
