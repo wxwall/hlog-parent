@@ -128,6 +128,7 @@ public class RuntimeContext {
         if(_agent_Log_pId==null){
             LogAgentContext.clear();
             LogAgentContext.setThreadLogGroupId(_agent_Log_Id_);
+            _agent_Log_pId = "nvl";
         }
         LogAgentContext.setThreadCurrentLogId(_agent_Log_Id_);
         return _agent_Log_pId;

@@ -194,7 +194,7 @@ public class HLogMonitor {
             pid = LogAgentContext.getThreadCurrentLogId();
             clsName = className;
         }else{
-            pid = node.logPid;
+            pid = node.logId;
             clsName = node.className;
             methodName = node.methodName;
         }
