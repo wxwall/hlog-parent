@@ -52,6 +52,9 @@ public class HLogClassVisitor extends ClassVisitor {
         MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
         if (name.charAt(0) == '<' || ExcludeRuleUtils.isExcludeMethod(className,name)){
             return mv;
+        }else if(ExcludeRuleUtils.isGetOrSetMethod(name,desc)){
+            //如果是get和set方法不处理
+            return mv;
         }
         //获取方法的规则
         LogSwoopRule methodRule = processor.getSupportRule(className,name);

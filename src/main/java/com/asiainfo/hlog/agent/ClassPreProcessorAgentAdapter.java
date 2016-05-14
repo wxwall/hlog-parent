@@ -2,7 +2,9 @@ package com.asiainfo.hlog.agent;
 
 import com.asiainfo.hlog.agent.bytecode.asm.HLogPreProcessor;
 import com.asiainfo.hlog.client.config.HLogConfig;
+import com.asiainfo.hlog.client.config.jmx.HLogJMXReport;
 import com.asiainfo.hlog.client.helper.LoaderHelper;
+import com.asiainfo.hlog.client.helper.Logger;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -22,14 +24,18 @@ public class ClassPreProcessorAgentAdapter implements ClassFileTransformer {
     public ClassPreProcessorAgentAdapter(){
 
         LoaderHelper.setLoader(this.getClass().getClassLoader());
-        System.out.println("========== Asiainfo HLog Agent ["+HLogConfig.VERSION+"] ==============");
+        System.out.println("========== Asiainfo HLog Agent ["+HLogConfig.VERSION+"] ==============\n");
         //获取配置实例
         HLogConfig config = HLogConfig.getInstance();
         //初始化配置信息,后需要从properties文件或服务端来获取
         config.initConfig();
 
         //注册JMX观察
-        //HLogJMXReport.getHLogJMXReport().start();
+        try{
+            HLogJMXReport.getHLogJMXReport().start();
+        }catch (Throwable t){
+            Logger.warn("Hlog注册JMX服务失败.",t);
+        }
 
         //TODO 可根据配置来创建不同的实现
         preProcessor = new HLogPreProcessor();

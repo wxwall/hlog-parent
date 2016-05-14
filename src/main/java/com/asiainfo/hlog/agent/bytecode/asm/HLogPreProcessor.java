@@ -2,6 +2,7 @@ package com.asiainfo.hlog.agent.bytecode.asm;
 
 import com.asiainfo.hlog.agent.AbstractPreProcessor;
 import com.asiainfo.hlog.client.config.LogSwoopRule;
+import com.asiainfo.hlog.client.config.jmx.HLogJMXReport;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.org.objectweb.asm.ClassReader;
 import com.asiainfo.hlog.org.objectweb.asm.ClassVisitor;
@@ -69,9 +70,13 @@ public class HLogPreProcessor extends AbstractPreProcessor {
 
             byte[] code = classWriter.toByteArray();
             saveWaveClassFile(className,code);
+
+            HLogJMXReport.getHLogJMXReport().getRunStatusInfo().incrementWeaveClassNum();
+
             return code;
         }catch (Throwable t){
             Logger.error(t);
+            HLogJMXReport.getHLogJMXReport().getRunStatusInfo().incrementweaveErrClassNum();
         }
 
         return null;
