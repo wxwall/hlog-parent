@@ -22,6 +22,11 @@ public abstract class HLogAgentConst {
      * 表示是一个采集异常的编码
      */
     public static final String MV_CODE_ERROR = "error";
+
+    /**
+     * 表示是一个方法入参的编码
+     */
+    public static final String MV_CODE_PARAMS = "params";
     /**
      * 表示一个拦截入参的编码
      */

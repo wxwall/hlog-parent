@@ -1,7 +1,6 @@
 package com.asiainfo.hlog.agent.runtime;
 
 import com.asiainfo.hlog.client.HLogReflex;
-import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.ClassHelper;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
@@ -22,22 +21,40 @@ public class RuntimeContext {
 
     private static MethodCaller logIdMehtodClass = null;
 
+    private static MethodCaller toJson = null;
+
     private static Field messageField = null;
 
     public static long processTime = 800 ;
 
+    public static long sqlTime = 800;
+
     public static boolean enableRequest = false;
 
+    public static boolean enableSaveWithoutParams = false;
+
+    public static boolean enableSaveWithoutSubs = false;
+
     static {
-        Class clazz = ClassHelper.loadClass(HLogConfig.class.getName());
+
+        Class clazz = ClassHelper.loadClass("com.asiainfo.hlog.client.config.HLogConfig");
         try {
             Object object = ClassHelper.getMethod(clazz,"getInstance").invoke(null,null);
 
             Object val = ClassHelper.getMethod(clazz,"getProcessTime").invoke(object,null);
             processTime = Long.parseLong(val.toString());
 
+            val = ClassHelper.getMethod(clazz,"getSqlTime").invoke(object,null);
+            sqlTime = Long.parseLong(val.toString());
+
             val = ClassHelper.getMethod(clazz,"isEnableRequest").invoke(object,null);
             enableRequest = Boolean.parseBoolean(val.toString());
+
+            val = ClassHelper.getMethod(clazz,"isEnableSaveWithoutParams").invoke(object,null);
+            enableSaveWithoutParams = Boolean.parseBoolean(val.toString());
+
+            val = ClassHelper.getMethod(clazz,"isEnableSaveWithoutSubs").invoke(object,null);
+            enableSaveWithoutSubs = Boolean.parseBoolean(val.toString());
         } catch (Exception e) {
             Logger.error("读取运行时配置数据异常",e);
         }
@@ -128,11 +145,24 @@ public class RuntimeContext {
         if(_agent_Log_pId==null){
             LogAgentContext.clear();
             LogAgentContext.setThreadLogGroupId(_agent_Log_Id_);
+            _agent_Log_pId = "nvl";
         }
         LogAgentContext.setThreadCurrentLogId(_agent_Log_Id_);
         return _agent_Log_pId;
     }
 
+    public static String toJson(Object obj){
+        if(toJson==null){
+            Class runtimeCallClass = ClassHelper.loadClass(RuntimeCall.class.getName());
+            if(runtimeCallClass==null){
+                return "";
+            }
+            Method method = ClassHelper.getMethod(runtimeCallClass,"toJson",Object.class);
+            toJson = new MethodCaller(method,null);
+        }
+
+        return (String)toJson.invokeStatic(obj);
+    }
 
     public static void writeEvent(String clazz,String method,LogData logData){
         try{
