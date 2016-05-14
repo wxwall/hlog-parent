@@ -79,6 +79,64 @@ public abstract class ExcludeRuleUtils {
     }
 
 
+    public static boolean isGetOrSetMethod(String methodName,String desc){
+        if(methodName.startsWith("get") || methodName.startsWith("is")){
+            int index = methodName.startsWith("is")?2:3;
+            int length = methodName.length();
+            if(length==index){
+                return  false;
+            }
+            char four = methodName.charAt(index);
+            if(65>four || four>91){
+                return false;
+            }
+            if(!desc.startsWith("()")){
+                return false;
+            }
+            if(desc.endsWith("V")){
+                return false;
+            }
+            return true;
+            /*
+            String get= "(^get[A-Z]{1})\\D+\\(\\)([I|Z|B|C|S|D|F|J]|(L\\D+;))$";
+            String str = methodName+desc;
+            Pattern pattern = Pattern.compile(get);
+            Matcher matcher = pattern.matcher(str);
+            return matcher.find();
+            */
+        }else if(methodName.startsWith("set")){
+            /*
+            String set= "(^set[A-Z]{1})\\D+\\(([I|Z|B|C|S|D|F|J]|(L\\D+;?))\\)V$";
+            String str = methodName+desc;
+            Pattern pattern = Pattern.compile(set);
+            Matcher matcher = pattern.matcher(str);
+            boolean b = matcher.find();*/
+            int length = methodName.length();
+            if(length==3){
+                return  false;
+            }
+            char four = methodName.charAt(3);
+            if(65>four || four>91){
+                return false;
+            }
+            int descLength = desc.length();
+            int size = 0;
+            for (int i = 0; i < descLength; i++) {
+                if(desc.charAt(i)==';'){
+                    size ++;
+                }
+                if(size>1){
+                    return false;
+                }
+            }
+            if(!desc.endsWith("V")){
+                return false;
+            }
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * 判断方法是否在排除范围
@@ -92,14 +150,7 @@ public abstract class ExcludeRuleUtils {
 
         if(!b){
             String full = className+"."+methodName;
-            for(String p : excludeMethodRegulars){
-                Pattern pattern = Pattern.compile(p);
-                Matcher matcher = pattern.matcher(full);
-                b= matcher.matches();
-                if(b){
-                    break;
-                }
-            }
+            b = isExclude(full,excludeMethodRegulars);
         }
         if(b && Logger.isTrace()){
             Logger.trace("判断类{0}.{1}是否在排除范围:{2}",className,methodName,b);
@@ -113,8 +164,16 @@ public abstract class ExcludeRuleUtils {
      * @return
      */
     public static boolean isExcludePath(String name){
+        boolean b = isExclude(name,excludePathRegulars);
+        if(b && Logger.isTrace()){
+            Logger.trace("判断类{0}是否排除范围:{1}",name,b);
+        }
+        return b;
+    }
+
+    private static boolean isExclude(String name,Set<String> excludeRegulars) {
         boolean b = false;
-        for(String p : excludePathRegulars){
+        for(String p : excludeRegulars){
             Pattern pattern = Pattern.compile(p);
             Matcher matcher = pattern.matcher(name);
             b= matcher.matches();
@@ -122,19 +181,30 @@ public abstract class ExcludeRuleUtils {
                 break;
             }
         }
-        if(b && Logger.isTrace()){
-            Logger.trace("判断类{0}是否排除范围:{1}",name,b);
-        }
         return b;
     }
 
     public static void main(String[] args) {
-        String pp= ".*\\.[s|g]et[A-Z].*";
-        String str = "setAsss";
-        Pattern pattern = Pattern.compile(pp,Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        String pp= "(^get[A-Z]{1})\\D+\\(\\)([I|Z|B|C|S|D|F|J]|(L\\D+;))$";
+        String str = "getAfdfdfFs()Ljava/lang/String;";
+        Pattern pattern = Pattern.compile(pp);
         Matcher matcher = pattern.matcher(str);
         boolean b = matcher.find();
         System.out.println(b);
+
+        pp= "(^set[A-Z]{1})\\D+\\(([I|Z|B|C|S|D|F|J]|(L\\D+;?))\\)V$";
+        str = "setAfdfdfFs(Ljava/lang/String;Ljava/lang/String;)V";
+        pattern = Pattern.compile(pp);
+        matcher = pattern.matcher(str);
+        b = matcher.find();
+        System.out.println(b);
+
+        boolean isGetOrSet = isGetOrSetMethod("setAfdfdfFs","(I)V");
+        System.out.println(isGetOrSet);
+        isGetOrSet = isGetOrSetMethod("isAfdfdfFs","()Ljava/lang/String;");
+        System.out.println(isGetOrSet);
+
+        System.out.println((int)'A');
 
         String cl1 = "com.al.ec.sm.smo.impl.StaffManageSMOImpl$$EnhancerByCGLIB$$6ac3feb6";
         //"$$EnhancerByCGLIB$$"
