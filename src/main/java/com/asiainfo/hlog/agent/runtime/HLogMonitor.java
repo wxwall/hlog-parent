@@ -98,11 +98,16 @@ public class HLogMonitor {
         stack.push(node);
     }
 
-    private static void pushSubNode(Node node){
+    private static void pushSubNode(Node node,long ptime){
         Stack<Node> stack = subNodes.get();
         if(stack == null){
             stack = new Stack<Node>();
             subNodes.set(stack);
+        }
+        //避免一些死循环大量堆积子节点数据不处理
+        //这里折中处理,如果耗时设置400,估算一个子节点大概耗时4,那么到达100个子节点会被先处理
+        if(stack.size()>(ptime>>2)){
+            doWriteSubNode();
         }
         stack.push(node);
     }
@@ -126,17 +131,19 @@ public class HLogMonitor {
             String pid = node.logPid;
             node.isError = isError?1:0;
             boolean havWriteLog = false;
+            boolean enableSaveWithoutSubs = RuntimeContext.isEnableSaveWithoutSubs();
+            long ptime = RuntimeContext.getProcessTime();
             //耗时达到某值是记录
-            if(node.enableProcess && node.speed>RuntimeContext.getProcessTime()){
+            if(node.enableProcess && node.speed>ptime){
                 //记录运行耗时超过
                 doSendProcessLog(node,id,pid,node.isError);
                 //如果本节点超过预警值,追加写已经执行过的子过程节点
-                if(RuntimeContext.isEnableSaveWithoutSubs()){
+                if(enableSaveWithoutSubs){
                     doWriteSubNode();
                 }
                 havWriteLog = true;
-            }else if(node.enableProcess){
-                pushSubNode(node);
+            }else if(node.enableProcess && enableSaveWithoutSubs && ptime>0){
+                pushSubNode(node,ptime);
             }
             //发生异常时记录
             if(isError && stack.isEmpty() && node.enableError){
@@ -376,5 +383,9 @@ public class HLogMonitor {
         logData.setGId(LogAgentContext.getThreadLogGroupId());
         logData.setTime(System.currentTimeMillis());
         return logData;
+    }
+
+    public static void main(String[] args) {
+        System.out.println((56 >> 2));
     }
 }
