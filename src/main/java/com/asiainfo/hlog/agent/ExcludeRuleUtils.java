@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static javax.swing.text.html.HTML.Tag.HEAD;
+
 /**
  * 排除规则工具类</br>
  * 排除需要扫描的植入字节码的路径(package#class.method)
@@ -80,12 +82,13 @@ public abstract class ExcludeRuleUtils {
 
 
     public static boolean isGetOrSetMethod(String methodName,String desc){
-        if(methodName.startsWith("get")){
+        if(methodName.startsWith("get") || methodName.startsWith("is")){
+            int index = methodName.startsWith("is")?2:3;
             int length = methodName.length();
-            if(length==3){
+            if(length==index){
                 return  false;
             }
-            char four = methodName.charAt(3);
+            char four = methodName.charAt(index);
             if(65>four || four>91){
                 return false;
             }
@@ -200,7 +203,7 @@ public abstract class ExcludeRuleUtils {
 
         boolean isGetOrSet = isGetOrSetMethod("setAfdfdfFs","(I)V");
         System.out.println(isGetOrSet);
-        isGetOrSet = isGetOrSetMethod("getAfdfdfFs","()Ljava/lang/String;");
+        isGetOrSet = isGetOrSetMethod("isAfdfdfFs","()Ljava/lang/String;");
         System.out.println(isGetOrSet);
 
         System.out.println((int)'A');
