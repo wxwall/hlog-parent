@@ -25,36 +25,60 @@ public class RuntimeContext {
 
     private static Field messageField = null;
 
-    public static long processTime = 800 ;
+    private static MethodCaller processTime  ;
 
-    public static long sqlTime = 800;
+    private static MethodCaller sqlTime ;
 
-    public static boolean enableRequest = false;
+    private static MethodCaller enableRequest ;
 
-    public static boolean enableSaveWithoutParams = false;
+    private static MethodCaller enableSaveWithoutParams ;
 
-    public static boolean enableSaveWithoutSubs = false;
+    private static MethodCaller enableSaveWithoutSubs ;
+
+    private static Object hlogConfigInstance ;
+
+    private static Object hlogConfigInstanceInvoke(MethodCaller caller){
+        if(caller==null){
+            return null;
+        }
+        return caller.invoke();
+    }
+
+    public static long getProcessTime() {
+        return (Long)hlogConfigInstanceInvoke(processTime);
+    }
+
+    public static long getSqlTime() {
+        return (Long)hlogConfigInstanceInvoke(sqlTime);
+    }
+
+    public static boolean isEnableRequest() {
+        return (Boolean)hlogConfigInstanceInvoke(enableRequest);
+    }
+
+    public static boolean isEnableSaveWithoutParams() {
+        return (Boolean)hlogConfigInstanceInvoke(enableSaveWithoutParams);
+    }
+
+    public static boolean isEnableSaveWithoutSubs() {
+        return (Boolean)hlogConfigInstanceInvoke(enableSaveWithoutSubs);
+    }
 
     static {
 
         Class clazz = ClassHelper.loadClass("com.asiainfo.hlog.client.config.HLogConfig");
         try {
-            Object object = ClassHelper.getMethod(clazz,"getInstance").invoke(null,null);
+            hlogConfigInstance = ClassHelper.getMethod(clazz,"getInstance").invoke(null,null);
 
-            Object val = ClassHelper.getMethod(clazz,"getProcessTime").invoke(object,null);
-            processTime = Long.parseLong(val.toString());
+            processTime = new MethodCaller(ClassHelper.getMethod(clazz,"getProcessTime"),hlogConfigInstance);
 
-            val = ClassHelper.getMethod(clazz,"getSqlTime").invoke(object,null);
-            sqlTime = Long.parseLong(val.toString());
+            sqlTime = new MethodCaller(ClassHelper.getMethod(clazz,"getSqlTime"),hlogConfigInstance);
 
-            val = ClassHelper.getMethod(clazz,"isEnableRequest").invoke(object,null);
-            enableRequest = Boolean.parseBoolean(val.toString());
+            enableRequest = new MethodCaller(ClassHelper.getMethod(clazz,"isEnableRequest"),hlogConfigInstance);
 
-            val = ClassHelper.getMethod(clazz,"isEnableSaveWithoutParams").invoke(object,null);
-            enableSaveWithoutParams = Boolean.parseBoolean(val.toString());
+            enableSaveWithoutParams = new MethodCaller(ClassHelper.getMethod(clazz,"isEnableSaveWithoutParams"),hlogConfigInstance);
 
-            val = ClassHelper.getMethod(clazz,"isEnableSaveWithoutSubs").invoke(object,null);
-            enableSaveWithoutSubs = Boolean.parseBoolean(val.toString());
+            enableSaveWithoutSubs = new MethodCaller(ClassHelper.getMethod(clazz,"isEnableSaveWithoutSubs"),hlogConfigInstance);
         } catch (Exception e) {
             Logger.error("读取运行时配置数据异常",e);
         }

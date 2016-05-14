@@ -127,11 +127,11 @@ public class HLogMonitor {
             node.isError = isError?1:0;
             boolean havWriteLog = false;
             //耗时达到某值是记录
-            if(node.enableProcess && node.speed>RuntimeContext.processTime){
+            if(node.enableProcess && node.speed>RuntimeContext.getProcessTime()){
                 //记录运行耗时超过
                 doSendProcessLog(node,id,pid,node.isError);
                 //如果本节点超过预警值,追加写已经执行过的子过程节点
-                if(RuntimeContext.enableSaveWithoutSubs){
+                if(RuntimeContext.isEnableSaveWithoutSubs()){
                     doWriteSubNode();
                 }
                 havWriteLog = true;
@@ -144,7 +144,7 @@ public class HLogMonitor {
                 havWriteLog = true;
             }
             //保存入参
-            if(havWriteLog && RuntimeContext.enableSaveWithoutParams){
+            if(havWriteLog && RuntimeContext.isEnableSaveWithoutParams()){
                 doWriteMethodParams(node);
             }
 
@@ -224,7 +224,7 @@ public class HLogMonitor {
      * @return
      */
     public static long getConfigSqlSpeed(){
-        return RuntimeContext.sqlTime;
+        return RuntimeContext.getSqlTime();
     }
 
 

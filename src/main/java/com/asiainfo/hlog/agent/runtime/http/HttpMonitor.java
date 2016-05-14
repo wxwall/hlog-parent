@@ -8,8 +8,6 @@ import com.asiainfo.hlog.client.model.LogData;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.asiainfo.hlog.agent.runtime.RuntimeContext.enableRequest;
-
 /**
  * <p>用于监控各种http方式的请求处理:</p>
  * <p>1、转递上游的日志组ID和上线ID;</p>
@@ -43,7 +41,7 @@ public class HttpMonitor {
     public static void request(StringBuffer requestUrl,String addr,long start,int status){
 
         //判断是否开启收集
-        if(!enableRequest){
+        if(!RuntimeContext.isEnableRequest()){
             return;
         }
 
