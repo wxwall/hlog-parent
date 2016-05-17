@@ -660,7 +660,7 @@ public class ClassWriter extends ClassVisitor {
     // Implementation of the ClassVisitor abstract class
     // ------------------------------------------------------------------------
 
-    @Override
+
     public final void visit(final int version, final int access,
             final String name, final String signature, final String superName,
             final String[] interfaces) {
@@ -681,7 +681,7 @@ public class ClassWriter extends ClassVisitor {
         }
     }
 
-    @Override
+
     public final void visitSource(final String file, final String debug) {
         if (file != null) {
             sourceFile = newUTF8(file);
@@ -692,7 +692,7 @@ public class ClassWriter extends ClassVisitor {
         }
     }
 
-    @Override
+
     public final void visitOuterClass(final String owner, final String name,
             final String desc) {
         enclosingMethodOwner = newClass(owner);
@@ -701,7 +701,7 @@ public class ClassWriter extends ClassVisitor {
         }
     }
 
-    @Override
+
     public final AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
         if (!ClassReader.ANNOTATIONS) {
@@ -721,7 +721,7 @@ public class ClassWriter extends ClassVisitor {
         return aw;
     }
 
-    @Override
+
     public final AnnotationVisitor visitTypeAnnotation(int typeRef,
             TypePath typePath, final String desc, final boolean visible) {
         if (!ClassReader.ANNOTATIONS) {
@@ -744,13 +744,13 @@ public class ClassWriter extends ClassVisitor {
         return aw;
     }
 
-    @Override
+
     public final void visitAttribute(final Attribute attr) {
         attr.next = attrs;
         attrs = attr;
     }
 
-    @Override
+
     public final void visitInnerClass(final String name,
             final String outerName, final String innerName, final int access) {
         if (innerClasses == null) {
@@ -781,20 +781,20 @@ public class ClassWriter extends ClassVisitor {
         }
     }
 
-    @Override
+
     public final FieldVisitor visitField(final int access, final String name,
             final String desc, final String signature, final Object value) {
         return new FieldWriter(this, access, name, desc, signature, value);
     }
 
-    @Override
+
     public final MethodVisitor visitMethod(final int access, final String name,
             final String desc, final String signature, final String[] exceptions) {
         return new MethodWriter(this, access, name, desc, signature,
                 exceptions, computeMaxs, computeFrames);
     }
 
-    @Override
+
     public final void visitEnd() {
     }
 

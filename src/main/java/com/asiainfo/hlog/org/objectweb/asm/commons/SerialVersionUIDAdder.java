@@ -201,7 +201,7 @@ public class SerialVersionUIDAdder extends ClassVisitor {
      * Visit class header and get class name, access , and interfaces
      * information (step 1,2, and 3) for SVUID computation.
      */
-    @Override
+
     public void visit(final int version, final int access, final String name,
             final String signature, final String superName,
             final String[] interfaces) {
@@ -222,7 +222,7 @@ public class SerialVersionUIDAdder extends ClassVisitor {
      * Visit the methods and get constructor and method information (step 5 and
      * 7). Also determine if there is a class initializer (step 6).
      */
-    @Override
+
     public MethodVisitor visitMethod(final int access, final String name,
             final String desc, final String signature, final String[] exceptions) {
         if (computeSVUID) {
@@ -259,7 +259,7 @@ public class SerialVersionUIDAdder extends ClassVisitor {
      * Gets class field information for step 4 of the algorithm. Also determines
      * if the class already has a SVUID.
      */
-    @Override
+
     public FieldVisitor visitField(final int access, final String name,
                                    final String desc, final String signature, final Object value) {
         if (computeSVUID) {
@@ -294,7 +294,7 @@ public class SerialVersionUIDAdder extends ClassVisitor {
      * Our SVUID computation must do as the JVM does and ignore access bits in
      * the class file in favor of the access bits InnerClass attribute.
      */
-    @Override
+
     public void visitInnerClass(final String aname, final String outerName,
             final String innerName, final int attr_access) {
         if ((name != null) && name.equals(aname)) {
@@ -306,7 +306,7 @@ public class SerialVersionUIDAdder extends ClassVisitor {
     /*
      * Add the SVUID if class doesn't have one
      */
-    @Override
+
     public void visitEnd() {
         // compute SVUID and add it to the class
         if (computeSVUID && !hasSVUID) {
@@ -528,7 +528,7 @@ public class SerialVersionUIDAdder extends ClassVisitor {
             return retVal;
         }
 
-        @Override
+
         public boolean equals(final Object o) {
             if (o instanceof Item) {
                 return compareTo((Item) o) == 0;
@@ -536,7 +536,7 @@ public class SerialVersionUIDAdder extends ClassVisitor {
             return false;
         }
 
-        @Override
+
         public int hashCode() {
             return (name + desc).hashCode();
         }

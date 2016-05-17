@@ -116,7 +116,7 @@ final class AnnotationWriter extends AnnotationVisitor {
     // Implementation of the AnnotationVisitor abstract class
     // ------------------------------------------------------------------------
 
-    @Override
+
     public void visit(final String name, final Object value) {
         ++size;
         if (named) {
@@ -189,7 +189,7 @@ final class AnnotationWriter extends AnnotationVisitor {
         }
     }
 
-    @Override
+
     public void visitEnum(final String name, final String desc,
             final String value) {
         ++size;
@@ -199,7 +199,7 @@ final class AnnotationWriter extends AnnotationVisitor {
         bv.put12('e', cw.newUTF8(desc)).putShort(cw.newUTF8(value));
     }
 
-    @Override
+
     public AnnotationVisitor visitAnnotation(final String name,
             final String desc) {
         ++size;
@@ -211,7 +211,7 @@ final class AnnotationWriter extends AnnotationVisitor {
         return new AnnotationWriter(cw, true, bv, bv, bv.length - 2);
     }
 
-    @Override
+
     public AnnotationVisitor visitArray(final String name) {
         ++size;
         if (named) {
@@ -222,7 +222,7 @@ final class AnnotationWriter extends AnnotationVisitor {
         return new AnnotationWriter(cw, false, bv, bv, bv.length - 2);
     }
 
-    @Override
+
     public void visitEnd() {
         if (parent != null) {
             byte[] data = parent.data;

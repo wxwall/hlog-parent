@@ -141,7 +141,7 @@ final class FieldWriter extends FieldVisitor {
     // Implementation of the FieldVisitor abstract class
     // ------------------------------------------------------------------------
 
-    @Override
+
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
         if (!ClassReader.ANNOTATIONS) {
@@ -161,7 +161,7 @@ final class FieldWriter extends FieldVisitor {
         return aw;
     }
 
-    @Override
+
     public AnnotationVisitor visitTypeAnnotation(final int typeRef,
             final TypePath typePath, final String desc, final boolean visible) {
         if (!ClassReader.ANNOTATIONS) {
@@ -184,13 +184,13 @@ final class FieldWriter extends FieldVisitor {
         return aw;
     }
 
-    @Override
+
     public void visitAttribute(final Attribute attr) {
         attr.next = attrs;
         attrs = attr;
     }
 
-    @Override
+
     public void visitEnd() {
     }
 

@@ -215,7 +215,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         maxLocals = locals.size();
     }
 
-    @Override
+
     public void visitFrame(final int type, final int nLocal,
             final Object[] local, final int nStack, final Object[] stack) {
         if (type != Opcodes.F_NEW) { // uncompressed frame
@@ -250,7 +250,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         }
     }
 
-    @Override
+
     public void visitInsn(final int opcode) {
         if (mv != null) {
             mv.visitInsn(opcode);
@@ -263,7 +263,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         }
     }
 
-    @Override
+
     public void visitIntInsn(final int opcode, final int operand) {
         if (mv != null) {
             mv.visitIntInsn(opcode, operand);
@@ -271,7 +271,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         execute(opcode, operand, null);
     }
 
-    @Override
+
     public void visitVarInsn(final int opcode, final int var) {
         if (mv != null) {
             mv.visitVarInsn(opcode, var);
@@ -279,7 +279,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         execute(opcode, var, null);
     }
 
-    @Override
+
     public void visitTypeInsn(final int opcode, final String type) {
         if (opcode == Opcodes.NEW) {
             if (labels == null) {
@@ -300,7 +300,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         execute(opcode, 0, type);
     }
 
-    @Override
+
     public void visitFieldInsn(final int opcode, final String owner,
             final String name, final String desc) {
         if (mv != null) {
@@ -310,7 +310,7 @@ public class AnalyzerAdapter extends MethodVisitor {
     }
 
     @Deprecated
-    @Override
+
     public void visitMethodInsn(final int opcode, final String owner,
             final String name, final String desc) {
         if (api >= Opcodes.ASM5) {
@@ -321,7 +321,7 @@ public class AnalyzerAdapter extends MethodVisitor {
                 opcode == Opcodes.INVOKEINTERFACE);
     }
 
-    @Override
+
     public void visitMethodInsn(final int opcode, final String owner,
             final String name, final String desc, final boolean itf) {
         if (api < Opcodes.ASM5) {
@@ -366,7 +366,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         labels = null;
     }
 
-    @Override
+
     public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
             Object... bsmArgs) {
         if (mv != null) {
@@ -381,7 +381,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         labels = null;
     }
 
-    @Override
+
     public void visitJumpInsn(final int opcode, final Label label) {
         if (mv != null) {
             mv.visitJumpInsn(opcode, label);
@@ -393,7 +393,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         }
     }
 
-    @Override
+
     public void visitLabel(final Label label) {
         if (mv != null) {
             mv.visitLabel(label);
@@ -404,7 +404,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         labels.add(label);
     }
 
-    @Override
+
     public void visitLdcInsn(final Object cst) {
         if (mv != null) {
             mv.visitLdcInsn(cst);
@@ -442,7 +442,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         labels = null;
     }
 
-    @Override
+
     public void visitIincInsn(final int var, final int increment) {
         if (mv != null) {
             mv.visitIincInsn(var, increment);
@@ -450,7 +450,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         execute(Opcodes.IINC, var, null);
     }
 
-    @Override
+
     public void visitTableSwitchInsn(final int min, final int max,
             final Label dflt, final Label... labels) {
         if (mv != null) {
@@ -461,7 +461,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         this.stack = null;
     }
 
-    @Override
+
     public void visitLookupSwitchInsn(final Label dflt, final int[] keys,
             final Label[] labels) {
         if (mv != null) {
@@ -472,7 +472,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         this.stack = null;
     }
 
-    @Override
+
     public void visitMultiANewArrayInsn(final String desc, final int dims) {
         if (mv != null) {
             mv.visitMultiANewArrayInsn(desc, dims);
@@ -480,7 +480,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         execute(Opcodes.MULTIANEWARRAY, dims, desc);
     }
 
-    @Override
+
     public void visitMaxs(final int maxStack, final int maxLocals) {
         if (mv != null) {
             this.maxStack = Math.max(this.maxStack, maxStack);
