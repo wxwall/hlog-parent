@@ -70,7 +70,7 @@ public class MyBatisSQLMethodVisitor extends AbstractMethodVisitor {
         super.visitLabel(label);
     }
 
-    @Override
+
     public void visitInsn(int opcode) {
         boolean isReturn = opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN;
         if(isReturn && !isEndIf){

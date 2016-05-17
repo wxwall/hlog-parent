@@ -101,7 +101,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         constructor = "<init>".equals(name);
     }
 
-    @Override
+
     public void visitCode() {
         mv.visitCode();
         if (constructor) {
@@ -113,7 +113,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         }
     }
 
-    @Override
+
     public void visitLabel(final Label label) {
         mv.visitLabel(label);
         if (constructor && branches != null) {
@@ -125,7 +125,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         }
     }
 
-    @Override
+
     public void visitInsn(final int opcode) {
         if (constructor) {
             int s;
@@ -307,7 +307,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         mv.visitInsn(opcode);
     }
 
-    @Override
+
     public void visitVarInsn(final int opcode, final int var) {
         super.visitVarInsn(opcode, var);
         if (constructor) {
@@ -338,7 +338,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         }
     }
 
-    @Override
+
     public void visitFieldInsn(final int opcode, final String owner,
             final String name, final String desc) {
         mv.visitFieldInsn(opcode, owner, name, desc);
@@ -374,7 +374,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         }
     }
 
-    @Override
+
     public void visitIntInsn(final int opcode, final int operand) {
         mv.visitIntInsn(opcode, operand);
         if (constructor && opcode != NEWARRAY) {
@@ -382,7 +382,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         }
     }
 
-    @Override
+
     public void visitLdcInsn(final Object cst) {
         mv.visitLdcInsn(cst);
         if (constructor) {
@@ -393,7 +393,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         }
     }
 
-    @Override
+
     public void visitMultiANewArrayInsn(final String desc, final int dims) {
         mv.visitMultiANewArrayInsn(desc, dims);
         if (constructor) {
@@ -404,7 +404,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         }
     }
 
-    @Override
+
     public void visitTypeInsn(final int opcode, final String type) {
         mv.visitTypeInsn(opcode, type);
         // ANEWARRAY, CHECKCAST or INSTANCEOF don't change stack
@@ -414,7 +414,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
     }
 
     @Deprecated
-    @Override
+
     public void visitMethodInsn(final int opcode, final String owner,
             final String name, final String desc) {
         if (api >= Opcodes.ASM5) {
@@ -425,7 +425,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
                 opcode == Opcodes.INVOKEINTERFACE);
     }
 
-    @Override
+
     public void visitMethodInsn(final int opcode, final String owner,
             final String name, final String desc, final boolean itf) {
         if (api < Opcodes.ASM5) {
@@ -475,7 +475,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         }
     }
 
-    @Override
+
     public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
             Object... bsmArgs) {
         mv.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
@@ -498,7 +498,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         }
     }
 
-    @Override
+
     public void visitJumpInsn(final int opcode, final Label label) {
         mv.visitJumpInsn(opcode, label);
         if (constructor) {
@@ -532,7 +532,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         }
     }
 
-    @Override
+
     public void visitLookupSwitchInsn(final Label dflt, final int[] keys,
             final Label[] labels) {
         mv.visitLookupSwitchInsn(dflt, keys, labels);
@@ -542,7 +542,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         }
     }
 
-    @Override
+
     public void visitTableSwitchInsn(final int min, final int max,
             final Label dflt, final Label... labels) {
         mv.visitTableSwitchInsn(min, max, dflt, labels);
@@ -552,7 +552,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         }
     }
 
-    @Override
+
     public void visitTryCatchBlock(Label start, Label end, Label handler,
             String type) {
         super.visitTryCatchBlock(start, end, handler, type);

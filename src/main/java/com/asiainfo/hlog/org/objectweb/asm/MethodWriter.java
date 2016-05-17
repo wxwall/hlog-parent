@@ -498,7 +498,7 @@ class MethodWriter extends MethodVisitor {
     // Implementation of the MethodVisitor abstract class
     // ------------------------------------------------------------------------
 
-    @Override
+
     public void visitParameter(String name, int access) {
         if (methodParameters == null) {
             methodParameters = new ByteVector();
@@ -508,7 +508,7 @@ class MethodWriter extends MethodVisitor {
                 .putShort(access);
     }
 
-    @Override
+
     public AnnotationVisitor visitAnnotationDefault() {
         if (!ClassReader.ANNOTATIONS) {
             return null;
@@ -517,7 +517,7 @@ class MethodWriter extends MethodVisitor {
         return new AnnotationWriter(cw, false, annd, null, 0);
     }
 
-    @Override
+
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
         if (!ClassReader.ANNOTATIONS) {
@@ -537,7 +537,7 @@ class MethodWriter extends MethodVisitor {
         return aw;
     }
 
-    @Override
+
     public AnnotationVisitor visitTypeAnnotation(final int typeRef,
             final TypePath typePath, final String desc, final boolean visible) {
         if (!ClassReader.ANNOTATIONS) {
@@ -560,7 +560,7 @@ class MethodWriter extends MethodVisitor {
         return aw;
     }
 
-    @Override
+
     public AnnotationVisitor visitParameterAnnotation(final int parameter,
             final String desc, final boolean visible) {
         if (!ClassReader.ANNOTATIONS) {
@@ -592,7 +592,7 @@ class MethodWriter extends MethodVisitor {
         return aw;
     }
 
-    @Override
+
     public void visitAttribute(final Attribute attr) {
         if (attr.isCodeAttribute()) {
             attr.next = cattrs;
@@ -603,11 +603,11 @@ class MethodWriter extends MethodVisitor {
         }
     }
 
-    @Override
+
     public void visitCode() {
     }
 
-    @Override
+
     public void visitFrame(final int type, final int nLocal,
             final Object[] local, final int nStack, final Object[] stack) {
         if (!ClassReader.FRAMES || compute == FRAMES) {
@@ -710,7 +710,7 @@ class MethodWriter extends MethodVisitor {
         maxLocals = Math.max(maxLocals, currentLocals);
     }
 
-    @Override
+
     public void visitInsn(final int opcode) {
         lastCodeOffset = code.length;
         // adds the instruction to the bytecode of the method
@@ -736,7 +736,7 @@ class MethodWriter extends MethodVisitor {
         }
     }
 
-    @Override
+
     public void visitIntInsn(final int opcode, final int operand) {
         lastCodeOffset = code.length;
         // Label currentBlock = this.currentBlock;
@@ -761,7 +761,7 @@ class MethodWriter extends MethodVisitor {
         }
     }
 
-    @Override
+
     public void visitVarInsn(final int opcode, final int var) {
         lastCodeOffset = code.length;
         // Label currentBlock = this.currentBlock;
@@ -820,7 +820,7 @@ class MethodWriter extends MethodVisitor {
         }
     }
 
-    @Override
+
     public void visitTypeInsn(final int opcode, final String type) {
         lastCodeOffset = code.length;
         Item i = cw.newClassItem(type);
@@ -842,7 +842,7 @@ class MethodWriter extends MethodVisitor {
         code.put12(opcode, i.index);
     }
 
-    @Override
+
     public void visitFieldInsn(final int opcode, final String owner,
             final String name, final String desc) {
         lastCodeOffset = code.length;
@@ -881,7 +881,7 @@ class MethodWriter extends MethodVisitor {
         code.put12(opcode, i.index);
     }
 
-    @Override
+
     public void visitMethodInsn(final int opcode, final String owner,
             final String name, final String desc, final boolean itf) {
         lastCodeOffset = code.length;
@@ -933,7 +933,7 @@ class MethodWriter extends MethodVisitor {
         }
     }
 
-    @Override
+
     public void visitInvokeDynamicInsn(final String name, final String desc,
             final Handle bsm, final Object... bsmArgs) {
         lastCodeOffset = code.length;
@@ -974,7 +974,7 @@ class MethodWriter extends MethodVisitor {
         code.putShort(0);
     }
 
-    @Override
+
     public void visitJumpInsn(final int opcode, final Label label) {
         lastCodeOffset = code.length;
         Label nextInsn = null;
@@ -1065,7 +1065,7 @@ class MethodWriter extends MethodVisitor {
         }
     }
 
-    @Override
+
     public void visitLabel(final Label label) {
         // resolves previous forward references to label, if any
         resize |= label.resolve(this, code.length, code.data);
@@ -1120,7 +1120,7 @@ class MethodWriter extends MethodVisitor {
         }
     }
 
-    @Override
+
     public void visitLdcInsn(final Object cst) {
         lastCodeOffset = code.length;
         Item i = cw.newConstItem(cst);
@@ -1154,7 +1154,7 @@ class MethodWriter extends MethodVisitor {
         }
     }
 
-    @Override
+
     public void visitIincInsn(final int var, final int increment) {
         lastCodeOffset = code.length;
         if (currentBlock != null) {
@@ -1178,7 +1178,7 @@ class MethodWriter extends MethodVisitor {
         }
     }
 
-    @Override
+
     public void visitTableSwitchInsn(final int min, final int max,
             final Label dflt, final Label... labels) {
         lastCodeOffset = code.length;
@@ -1195,7 +1195,7 @@ class MethodWriter extends MethodVisitor {
         visitSwitchInsn(dflt, labels);
     }
 
-    @Override
+
     public void visitLookupSwitchInsn(final Label dflt, final int[] keys,
             final Label[] labels) {
         lastCodeOffset = code.length;
@@ -1239,7 +1239,7 @@ class MethodWriter extends MethodVisitor {
         }
     }
 
-    @Override
+
     public void visitMultiANewArrayInsn(final String desc, final int dims) {
         lastCodeOffset = code.length;
         Item i = cw.newClassItem(desc);
@@ -1257,7 +1257,7 @@ class MethodWriter extends MethodVisitor {
         code.put12(Opcodes.MULTIANEWARRAY, i.index).putByte(dims);
     }
 
-    @Override
+
     public AnnotationVisitor visitInsnAnnotation(int typeRef,
             TypePath typePath, String desc, boolean visible) {
         if (!ClassReader.ANNOTATIONS) {
@@ -1281,7 +1281,7 @@ class MethodWriter extends MethodVisitor {
         return aw;
     }
 
-    @Override
+
     public void visitTryCatchBlock(final Label start, final Label end,
             final Label handler, final String type) {
         ++handlerCount;
@@ -1299,7 +1299,7 @@ class MethodWriter extends MethodVisitor {
         lastHandler = h;
     }
 
-    @Override
+
     public AnnotationVisitor visitTryCatchAnnotation(int typeRef,
             TypePath typePath, String desc, boolean visible) {
         if (!ClassReader.ANNOTATIONS) {
@@ -1322,7 +1322,7 @@ class MethodWriter extends MethodVisitor {
         return aw;
     }
 
-    @Override
+
     public void visitLocalVariable(final String name, final String desc,
             final String signature, final Label start, final Label end,
             final int index) {
@@ -1354,7 +1354,7 @@ class MethodWriter extends MethodVisitor {
         }
     }
 
-    @Override
+
     public AnnotationVisitor visitLocalVariableAnnotation(int typeRef,
             TypePath typePath, Label[] start, Label[] end, int[] index,
             String desc, boolean visible) {
@@ -1389,7 +1389,7 @@ class MethodWriter extends MethodVisitor {
         return aw;
     }
 
-    @Override
+
     public void visitLineNumber(final int line, final Label start) {
         if (lineNumber == null) {
             lineNumber = new ByteVector();
@@ -1399,7 +1399,7 @@ class MethodWriter extends MethodVisitor {
         lineNumber.putShort(line);
     }
 
-    @Override
+
     public void visitMaxs(final int maxStack, final int maxLocals) {
         if (resize) {
             // replaces the temporary jump opcodes introduced by Label.resolve.
@@ -1647,7 +1647,7 @@ class MethodWriter extends MethodVisitor {
         }
     }
 
-    @Override
+
     public void visitEnd() {
     }
 

@@ -58,7 +58,7 @@ public class StaticInitMerger extends ClassVisitor {
         this.prefix = prefix;
     }
 
-    @Override
+
     public void visit(final int version, final int access, final String name,
             final String signature, final String superName,
             final String[] interfaces) {
@@ -66,7 +66,7 @@ public class StaticInitMerger extends ClassVisitor {
         this.name = name;
     }
 
-    @Override
+
     public MethodVisitor visitMethod(final int access, final String name,
             final String desc, final String signature, final String[] exceptions) {
         MethodVisitor mv;
@@ -86,7 +86,7 @@ public class StaticInitMerger extends ClassVisitor {
         return mv;
     }
 
-    @Override
+
     public void visitEnd() {
         if (clinit != null) {
             clinit.visitInsn(Opcodes.RETURN);

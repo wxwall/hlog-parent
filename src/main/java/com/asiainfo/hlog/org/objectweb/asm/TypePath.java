@@ -169,7 +169,7 @@ public class TypePath {
      * with '*' and {@link #TYPE_ARGUMENT TYPE_ARGUMENT} steps with their type
      * argument index in decimal form followed by ';'.
      */
-    @Override
+
     public String toString() {
         int length = getLength();
         StringBuilder result = new StringBuilder(length * 2);

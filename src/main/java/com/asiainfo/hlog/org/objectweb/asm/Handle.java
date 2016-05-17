@@ -184,7 +184,7 @@ public final class Handle {
         return itf;
     }
 
-    @Override
+
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
@@ -197,7 +197,7 @@ public final class Handle {
                 && name.equals(h.name) && desc.equals(h.desc);
     }
 
-    @Override
+
     public int hashCode() {
         return tag + (itf? 64: 0) + owner.hashCode() * name.hashCode() * desc.hashCode();
     }
@@ -215,7 +215,7 @@ public final class Handle {
      * 
      * . As this format is unambiguous, it can be parsed if necessary.
      */
-    @Override
+
     public String toString() {
         return owner + '.' + name + desc + " (" + tag + (itf? " itf": "") + ')';
     }

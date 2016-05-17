@@ -25,7 +25,7 @@ import java.security.ProtectionDomain;
  * Created by chenfeng on 2016/4/20.
  */
 public class HLogPreProcessor extends AbstractPreProcessor {
-    @Override
+
     public void initialize() {
         super.initialize();
     }

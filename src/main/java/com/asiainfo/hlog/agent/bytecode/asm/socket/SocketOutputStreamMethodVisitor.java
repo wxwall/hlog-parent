@@ -16,7 +16,7 @@ public class SocketOutputStreamMethodVisitor extends MethodVisitor {
         super(ASM5,pnv);
     }
 
-    @Override
+
     public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
         if("socketWrite0".equals(name)){
             super.visitMethodInsn(opcode, owner, "_socketWrite", desc, itf);

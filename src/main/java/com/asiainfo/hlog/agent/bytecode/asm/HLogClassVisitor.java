@@ -46,7 +46,7 @@ public class HLogClassVisitor extends ClassVisitor {
         return HLogMethodVisitorFactory.newMethodVisitor(className,mv,access,name,desc,datas,code,mcode);
     }
 
-    @Override
+
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         // 排除不关注的方法
         MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);

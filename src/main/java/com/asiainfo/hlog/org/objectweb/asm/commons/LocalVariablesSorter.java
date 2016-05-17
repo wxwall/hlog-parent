@@ -121,7 +121,7 @@ public class LocalVariablesSorter extends MethodVisitor {
         firstLocal = nextLocal;
     }
 
-    @Override
+
     public void visitVarInsn(final int opcode, final int var) {
         Type type;
         switch (opcode) {
@@ -155,17 +155,17 @@ public class LocalVariablesSorter extends MethodVisitor {
         mv.visitVarInsn(opcode, remap(var, type));
     }
 
-    @Override
+
     public void visitIincInsn(final int var, final int increment) {
         mv.visitIincInsn(remap(var, Type.INT_TYPE), increment);
     }
 
-    @Override
+
     public void visitMaxs(final int maxStack, final int maxLocals) {
         mv.visitMaxs(maxStack, nextLocal);
     }
 
-    @Override
+
     public void visitLocalVariable(final String name, final String desc,
             final String signature, final Label start, final Label end,
             final int index) {
@@ -173,7 +173,7 @@ public class LocalVariablesSorter extends MethodVisitor {
         mv.visitLocalVariable(name, desc, signature, start, end, newIndex);
     }
 
-    @Override
+
     public AnnotationVisitor visitLocalVariableAnnotation(int typeRef,
                                                           TypePath typePath, Label[] start, Label[] end, int[] index,
                                                           String desc, boolean visible) {
@@ -186,7 +186,7 @@ public class LocalVariablesSorter extends MethodVisitor {
                 newIndex, desc, visible);
     }
 
-    @Override
+
     public void visitFrame(final int type, final int nLocal,
             final Object[] local, final int nStack, final Object[] stack) {
         if (type != Opcodes.F_NEW) { // uncompressed frame
