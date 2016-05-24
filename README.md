@@ -18,6 +18,19 @@
  java HelloWorld -javaagent:hlog-agent.jar -noverify
 ```
 
+Hlog JVM参数说明
+
+```bash
+-javaagent            表示hlog-agent的jar位置
+-DhlogDomain          表示服务节点名称，如受理后端服务节点、营销资源服务节点
+-DhlogServerAlias     表示服务节点名称，如受理后端服务节点、营销资源服务节点
+-DhlogLevel           表示hlog-agent在运行过程中的日志级别，none不输出，
+                       级别：trace、debug、info、warn、error
+-DhlogSaveWeaveClass 表示是否保存到临时目录，如tomcat的temp下等
+-DhlogJmxEnable       表示是否启用jmx，默认启用
+-DhlogJmxPost         表示jmx的端口，需要注册的是同一台机器的端口不得重复
+```
+
  * 在中间件服务器上运行
  
 每个中间件服务器的设置大不相同，像tomcat需要在sh或bat的运行脚本上指定，而weblogc或websphere可以在控制台上配置。
