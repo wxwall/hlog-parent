@@ -31,6 +31,8 @@ public class HLogClassVisitor extends ClassVisitor {
      */
     private final LogSwoopRule classRule;
 
+    private boolean isInterface = false;
+
     public HLogClassVisitor(HLogPreProcessor processor, LogSwoopRule classRule, String className, byte[] datas, ClassWriter classVisitor) {
         super(Opcodes.ASM5, classVisitor);
         this.processor = processor;
@@ -46,10 +48,21 @@ public class HLogClassVisitor extends ClassVisitor {
         return HLogMethodVisitorFactory.newMethodVisitor(className,mv,access,name,desc,datas,code,mcode);
     }
 
+    @Override
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        super.visit(version, access, name, signature, superName, interfaces);
+        isInterface = ((Opcodes.ACC_INTERFACE & access) == Opcodes.ACC_INTERFACE);
+    }
 
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         // 排除不关注的方法
         MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
+
+        if(isInterface ||
+                (Opcodes.ACC_ABSTRACT & access) == Opcodes.ACC_ABSTRACT){
+            return mv;
+        }
+
         if (name.charAt(0) == '<' || ExcludeRuleUtils.isExcludeMethod(className,name)){
             return mv;
         }else if(ExcludeRuleUtils.isGetOrSetMethod(name,desc)){
