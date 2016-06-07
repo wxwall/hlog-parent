@@ -75,7 +75,7 @@ public class HLogPreProcessor extends AbstractPreProcessor {
 
             return code;
         }catch (Throwable t){
-            Logger.error(t);
+            Logger.error("操作{}类时出错",t,className);
             HLogJMXReport.getHLogJMXReport().getRunStatusInfo().incrementweaveErrClassNum();
         }
 

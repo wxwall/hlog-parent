@@ -187,7 +187,17 @@ public class HLogMonitor {
         if(node.params==null){
             logData.put("params","[]");
         }else{
-            String params = RuntimeContext.toJson(node.params);
+            String params = null;
+            try{
+                params = RuntimeContext.toJson(node.params);
+            }catch (Exception e){
+                params = "ERR:"+e.getMessage()+",param";
+                for (SoftReference<Object> obj : node.params) {
+                    if(obj!=null){
+                        params = params + ":" + obj.toString();
+                    }
+                }
+            }
             logData.put("params",params);
         }
 
