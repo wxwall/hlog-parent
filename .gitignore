@@ -1,3 +1,5 @@
+.idea/
+.svn/
 target/
 *.class
 *.iml
