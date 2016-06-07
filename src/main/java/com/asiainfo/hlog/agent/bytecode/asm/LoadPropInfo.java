@@ -28,9 +28,9 @@ public class LoadPropInfo {
             in = new BufferedInputStream(fis);
             loadMethocVisitorConfig(in,classMap);
         } catch (FileNotFoundException e) {
-            Logger.warn("无法读取本地配置文件[{0}]",extDir+extProp);
+            Logger.warn("没有读取到本地配置文件[{0}],程序继续执行.",extDir+extProp);
         } catch (IOException e) {
-            Logger.warn("读取本地配置文件错误[{0}]",extDir+extProp);
+            Logger.warn("没有读取到本地配置文件错误[{0}],程序继续执行.",extDir+extProp);
         }finally {
             try {
                 if (in!=null){
