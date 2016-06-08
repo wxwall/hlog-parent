@@ -134,7 +134,11 @@ public class RuntimeCall{
 
 
             for (String weave : captureWeaves){
-                if(weave.equals(weaveName)){
+                //如果配置none的话,那么不采集日志
+                if("none".equals(weave)){
+                    runtimeSwitch.offSwitch(switchKey);
+                    return false;
+                }else if(weave.equals(weaveName)){
                     boolean enable = false;
                     if(("logger".equals(weaveName))
                             && level!=null && rule.getLevel()!=null){
