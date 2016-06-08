@@ -9,8 +9,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static javax.swing.text.html.HTML.Tag.HEAD;
-
 /**
  * 排除规则工具类</br>
  * 排除需要扫描的植入字节码的路径(package#class.method)
@@ -187,6 +185,11 @@ public abstract class ExcludeRuleUtils {
     }
 
     public static void main(String[] args) {
+
+        addRules("com.*RedisConnStatusMgrThread",excludePathRegulars);
+
+        System.out.println(isExcludePath("com.al.crm.nosql.cache.impl.RedisCache"));
+
         String pp= "(^get[A-Z]{1})\\D+\\(\\)([I|Z|B|C|S|D|F|J]|(L\\D+;))$";
         String str = "getAfdfdfFs()Ljava/lang/String;";
         Pattern pattern = Pattern.compile(pp);
