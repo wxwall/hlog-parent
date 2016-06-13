@@ -5,6 +5,7 @@ import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
 
 import java.lang.ref.SoftReference;
+import java.util.Arrays;
 import java.util.Stack;
 
 import static com.asiainfo.hlog.agent.runtime.RuntimeContext.enable;
@@ -327,8 +328,13 @@ public class HLogMonitor {
                 if(i>0){
                     buff.append(" | ");
                 }
+                if(object==null){
+                    continue;
+                }
                 if(object instanceof Throwable){
                     buff.append(RuntimeContext.error((Throwable)object));
+                }else if(object.getClass().isArray()){
+                    buff.append(Arrays.toString((Object[])object));
                 }else{
                     buff.append(object);
                 }
