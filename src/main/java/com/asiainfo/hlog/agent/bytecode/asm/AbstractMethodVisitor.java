@@ -86,19 +86,24 @@ public abstract class AbstractMethodVisitor extends LocalVariablesSorter {
             Type[] paramTypes = Type.getArgumentTypes(desc);
             for (int i = 0; i < argumentLength; i++) {
                 int sort = paramTypes[i].getSort();
-                boolean isBaseType = ASMUtils.isBaseType(sort);
+                Class baseClass = ASMUtils.getBaseWareClass(sort);
                 visitInsn(DUP);
                 visitIntInsn(BIPUSH,i);
                 //如果入参是一个基本类型的话,统一将入参值传成String对象
-                if(isBaseType){
+                if(baseClass!=null){
                     int[] loadStoreAndDefVal = ASMUtils.getLoadStoreAndDefValue(sort);
-                    visitVarInsn(loadStoreAndDefVal[0], index++);
+                    visitVarInsn(loadStoreAndDefVal[0], index);
                     Class paramType = ASMUtils.getBaseClass(sort);
-                    ASMUtils.visitStaticMethod(mv,String.class,"valueOf",paramType);
+                    ASMUtils.visitStaticMethod(mv,baseClass,"valueOf",paramType);
                 }else{
-                    visitVarInsn(ALOAD, index++);
+                    visitVarInsn(ALOAD, index);
                 }
                 visitInsn(AASTORE);
+                if(sort == Type.LONG || sort == Type.DOUBLE){
+                    index = index + 2;
+                }else {
+                    index = index + 1;
+                }
             }
 
         }else{

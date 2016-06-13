@@ -1,6 +1,5 @@
 package com.asiainfo.hlog.agent.bytecode.asm;
 
-import com.asiainfo.hlog.agent.runtime.HLogMonitor;
 import com.asiainfo.hlog.org.objectweb.asm.*;
 
 import java.lang.reflect.Method;
@@ -48,6 +47,26 @@ public abstract class ASMUtils {
             return long.class;
         } else if (sort == Type.FLOAT) {
             return float.class;
+        }
+        return null;
+    }
+    public static Class getBaseWareClass(int sort) {
+        if (sort == Type.INT) {
+            return Integer.class;
+        } else if (sort == Type.BOOLEAN) {
+            return Boolean.class;
+        } else if (sort == Type.BYTE) {
+            return Byte.class;
+        } else if (sort == Type.CHAR) {
+            return Character.class;
+        } else if (sort == Type.SHORT) {
+            return Short.class;
+        } else if (sort == Type.DOUBLE) {
+            return Double.class;
+        } else if (sort == Type.LONG) {
+            return Long.class;
+        } else if (sort == Type.FLOAT) {
+            return Float.class;
         }
         return null;
     }
@@ -238,11 +257,5 @@ public abstract class ASMUtils {
         mv.visitLocalVariable("_id", "Ljava/lang/String;", null, l0, l12, 2);
         mv.visitMaxs(3, 5);
         mv.visitEnd();
-    }
-
-    public static void main(String[] args) throws NoSuchMethodException {
-        //System.out.println(Type.getInternalName(HttpMonitor.class));
-        Method method = HLogMonitor.class.getMethod("start",new Class[]{String.class,String.class,String.class,String[].class, Object[].class});
-        System.out.println(Type.getMethodDescriptor(method));
     }
 }
