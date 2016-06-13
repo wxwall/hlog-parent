@@ -101,6 +101,7 @@ public class ParameterNameHelper {
          * @param end
          * @param index
          */
+        private int paramIndex = 0;
         public void visitLocalVariable(String name, String desc, String signature,
                                        Label start, Label end, int index) {
             if(argumentSize==0){
@@ -110,10 +111,10 @@ public class ParameterNameHelper {
             if(index==0 && !isStatic) {
                 return;
             }
-            int idx = isStatic?index:index-1;
-            if(idx<argumentSize){
-                argumentNames[idx] = name;
+            if(paramIndex<argumentSize){
+                argumentNames[paramIndex] = name;
             }
+            paramIndex ++ ;
         }
 
         /**
