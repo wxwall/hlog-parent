@@ -106,4 +106,7 @@ public class HLogClassVisitor extends ClassVisitor {
         }
     }
 
+    public static void main(String[] args) {
+        System.out.println(-88 & 0xFF);
+    }
 }
