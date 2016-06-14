@@ -59,7 +59,12 @@ public class HLogPreProcessor extends AbstractPreProcessor {
 
         try{
             ClassReader classReader = new ClassReader(bytes);
-            ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS + ClassWriter.COMPUTE_FRAMES);
+            int flag = ClassWriter.COMPUTE_MAXS;
+            //jdk版本大于1.6
+            if(bytes[7]>Opcodes.V1_6){
+                flag = flag + ClassWriter.COMPUTE_FRAMES;
+            }
+            ClassWriter classWriter = new ClassWriter(classReader, flag);
             //修改原来方法
             ClassVisitor classVisitor = new HLogClassVisitor(this, classRule, clazz, bytes, classWriter);
             classReader.accept(classVisitor, Opcodes.ASM5);
@@ -75,8 +80,8 @@ public class HLogPreProcessor extends AbstractPreProcessor {
 
             return code;
         }catch (Throwable t){
-            Logger.error("操作["+clazz+"]类时出错",t);
             HLogJMXReport.getHLogJMXReport().getRunStatusInfo().incrementweaveErrClassNum();
+            Logger.error("操作["+clazz+"]类时出错",t);
         }
 
         return null;
