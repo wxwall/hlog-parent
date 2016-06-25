@@ -31,6 +31,7 @@ public class HttpMonitor {
         excludeExpands.add("tiff");
         excludeExpands.add("swf");
         excludeExpands.add("svg");
+        //TODO 增加可配置
     }
 
     public static void receiveHlogId(String _gid,String _pid){

@@ -137,7 +137,7 @@ public class HLogMonitor {
             //耗时达到某值是记录
             if(node.enableProcess && node.speed>ptime){
                 //记录运行耗时超过
-                doSendProcessLog(node,id,pid,node.isError);
+                doSendProcessLog(node,id,pid,node.isError,stack.isEmpty());
                 //如果本节点超过预警值,追加写已经执行过的子过程节点
                 if(enableSaveWithoutSubs){
                     doWriteSubNode();
@@ -175,7 +175,7 @@ public class HLogMonitor {
         if(subs!=null){
             while(!subs.isEmpty()){
                 Node sub = subs.pop();
-                doSendProcessLog(sub,sub.logId,sub.logPid,sub.isError);
+                doSendProcessLog(sub,sub.logId,sub.logPid,sub.isError,false);
             }
         }
     }
@@ -226,16 +226,15 @@ public class HLogMonitor {
      * @param pid
      * @param status
      */
-    private static void doSendProcessLog(Node node ,String id,String pid,int status){
+    private static void doSendProcessLog(Node node ,String id,String pid,int status,boolean isTop){
         LogData logData = createLogData(HLogAgentConst.MV_CODE_PROCESS,id,pid);
         logData.put("status",status);
         logData.put("clazz",node.className);
         logData.put("method",node.methodName);
         logData.put("spend",node.speed);
+        logData.put("isTop",isTop?1:0);
         writeEvent(node.className,node.methodName,logData);
     }
-
-
 
     /**
      * 获取配置的sql耗时数据
@@ -399,9 +398,5 @@ public class HLogMonitor {
         logData.setGId(LogAgentContext.getThreadLogGroupId());
         logData.setTime(System.currentTimeMillis());
         return logData;
-    }
-
-    public static void main(String[] args) {
-        System.out.println((56 >> 2));
     }
 }
