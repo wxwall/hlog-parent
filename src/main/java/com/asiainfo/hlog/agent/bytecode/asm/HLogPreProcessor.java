@@ -60,14 +60,19 @@ public class HLogPreProcessor extends AbstractPreProcessor {
         try{
             ClassReader classReader = new ClassReader(bytes);
             int flag = ClassWriter.COMPUTE_MAXS;
+            int jdk_v = bytes[7];
             //jdk版本大于1.6
-            if(bytes[7]>Opcodes.V1_6){
+            if(jdk_v>Opcodes.V1_6){
                 flag = flag + ClassWriter.COMPUTE_FRAMES;
             }
             ClassWriter classWriter = new ClassWriter(classReader, flag);
             //修改原来方法
             ClassVisitor classVisitor = new HLogClassVisitor(this, classRule, clazz, bytes, classWriter);
-            classReader.accept(classVisitor, Opcodes.ASM5);
+            flag = Opcodes.ASM5;
+            if(jdk_v<=Opcodes.V1_6){
+                flag = flag + ClassReader.EXPAND_FRAMES;
+            }
+            classReader.accept(classVisitor, flag);
             //增加新方法
             if(classRule!=null && classRule.getNewMethodCodes().size()>0){
                 HLogMethodCreator.create(classRule,classWriter);

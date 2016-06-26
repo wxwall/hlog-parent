@@ -58,8 +58,8 @@ public abstract class AbstractTryCatchMethodVisitor extends AbstractMethodVisito
         lCatchBlockEnd = new Label();
 
         //计算局部变量从第几个开始
-        int argumentLength = argumentNames==null ? 0 : argumentNames.length;
-        idxReturn = isStatic?argumentLength:argumentLength+1;
+        //int argumentLength = argumentNames==null ? 0 : argumentNames.length;
+        //idxReturn = paramSlot+1;
     }
 
     /**
@@ -76,7 +76,8 @@ public abstract class AbstractTryCatchMethodVisitor extends AbstractMethodVisito
             int [] loadStoreAndDefVal = ASMUtils.getLoadStoreAndDefValue(sort);
             RES_STORE_CODE = loadStoreAndDefVal[1];
             RES_LOAD_CODE = loadStoreAndDefVal[0];
-            visitLocalVariable(RETURN_OBJ,returnType.getDescriptor(),null,start,start,idxReturn);
+            //visitLocalVariable(RETURN_OBJ,returnType.getDescriptor(),null,start,start,idxReturn);
+            idxReturn = defineLocalVariable(RETURN_OBJ,returnType,start,start);
             visitInsn(loadStoreAndDefVal[2]);
             visitIntInsn(RES_STORE_CODE,idxReturn);
         }

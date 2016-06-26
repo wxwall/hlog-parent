@@ -5,7 +5,6 @@ import com.asiainfo.hlog.agent.bytecode.asm.AbstractMethodVisitor;
 import com.asiainfo.hlog.org.objectweb.asm.Label;
 import com.asiainfo.hlog.org.objectweb.asm.MethodVisitor;
 import com.asiainfo.hlog.org.objectweb.asm.Opcodes;
-import com.asiainfo.hlog.org.objectweb.asm.Type;
 
 import static com.asiainfo.hlog.agent.bytecode.asm.ASMConsts.MY_BATIS_BASE_JDBC_LOGGER;
 
@@ -26,7 +25,8 @@ public class BaseJdbcLoggerMethodVisitor extends AbstractMethodVisitor {
     public void visitCode() {
         Label start = new Label();
         visitLabel(start);
-        visitLocalVariable("_ps", Type.getDescriptor(String.class),null,start,start,1);
+        //visitLocalVariable("_ps", Type.getDescriptor(String.class),null,start,start,1);
+        defineLocalVariable("_ps",String.class,start,start);
         super.visitCode();
     }
 

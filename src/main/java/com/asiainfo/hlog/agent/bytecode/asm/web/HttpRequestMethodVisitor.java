@@ -23,7 +23,7 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
 
     private int paramIndex = -1;
 
-    private int startIndex = 1;
+    private int _startLVSlot;
 
     public HttpRequestMethodVisitor(int access, String className, String methodName, String desc, MethodVisitor pnv, byte[] datas, String mcode) {
         super(access, className, methodName, desc, pnv, datas,mcode);
@@ -49,14 +49,16 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
         //如果有返回结果的话
         //如果需要有返回则定义
         defineReturnObject();
+        /*
         if(returnType != Type.VOID_TYPE){
             startIndex = idxReturn + 1;
         }else{
             startIndex = idxReturn;
-        }
-        visitLocalVariable("_start",Type.getDescriptor(long.class),null,start,start,startIndex);
+        }*/
+        //visitLocalVariable("_start",Type.getDescriptor(long.class),null,start,start,startIndex);
+        _startLVSlot = defineLocalVariable("_start",long.class,start,start);
         mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "currentTimeMillis", "()J", false);
-        mv.visitVarInsn(LSTORE, startIndex);
+        mv.visitVarInsn(LSTORE, _startLVSlot);
 
         super.visitCode();
     }
@@ -73,7 +75,7 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
         mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getRequestURL", "()Ljava/lang/StringBuffer;", true);
         visitVarInsn(ALOAD,paramIndex);
         mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getRemoteAddr", "()Ljava/lang/String;", true);
-        visitVarInsn(LLOAD,startIndex);
+        visitVarInsn(LLOAD,_startLVSlot);
         mv.visitIntInsn(BIPUSH, status);
         visitMethodInsn(Opcodes.INVOKESTATIC,"com/asiainfo/hlog/agent/runtime/http/HttpMonitor","request",
                 "(Ljava/lang/StringBuffer;Ljava/lang/String;JI)V", false);
