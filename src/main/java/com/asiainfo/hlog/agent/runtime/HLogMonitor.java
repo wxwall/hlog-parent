@@ -135,7 +135,7 @@ public class HLogMonitor {
             boolean enableSaveWithoutSubs = RuntimeContext.isEnableSaveWithoutSubs();
             long ptime = RuntimeContext.getProcessTime();
             //耗时达到某值是记录
-            if(node.enableProcess && node.speed>ptime){
+            if(node.enableProcess && node.speed>=ptime){
                 //记录运行耗时超过
                 doSendProcessLog(node,id,pid,node.isError,stack.isEmpty());
                 //如果本节点超过预警值,追加写已经执行过的子过程节点

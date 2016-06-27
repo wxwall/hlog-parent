@@ -1,6 +1,7 @@
 package com.asiainfo.hlog.agent.bytecode.asm;
 
 import com.asiainfo.hlog.agent.runtime.HLogMonitor;
+import com.asiainfo.hlog.org.objectweb.asm.Label;
 import com.asiainfo.hlog.org.objectweb.asm.MethodVisitor;
 import com.asiainfo.hlog.org.objectweb.asm.Type;
 import com.asiainfo.hlog.org.objectweb.asm.commons.LocalVariablesSorter;
@@ -18,6 +19,7 @@ public abstract class AbstractMethodVisitor extends LocalVariablesSorter {
     protected final String className;
     protected final String methodName;
     protected final String desc;
+    protected final Type[] paramTypes;
 
     protected final Type returnType;
     protected final byte[] datas;
@@ -30,6 +32,10 @@ public abstract class AbstractMethodVisitor extends LocalVariablesSorter {
 
     protected final String[] argumentNames;
 
+    protected final int paramSlot ;
+
+    private int localVarSlot ;
+
 
     public AbstractMethodVisitor(int access, String className, String methodName, String desc, MethodVisitor pnv, byte[] datas,String mcode) {
 
@@ -40,12 +46,34 @@ public abstract class AbstractMethodVisitor extends LocalVariablesSorter {
         this.className = className;
         this.methodName = methodName;
         this.desc = desc;
+        this.paramTypes = Type.getArgumentTypes(desc);
         this.returnType = Type.getReturnType(desc);
 
         this.isStatic = ASMUtils.isStatic(access);
 
         argumentNames = ParameterNameHelper.getMethodParameterName(datas,className,methodName,desc);
 
+        paramSlot = isStatic?ASMUtils.getSlotLength(paramTypes):ASMUtils.getSlotLength(paramTypes)+1;
+
+        localVarSlot = paramSlot;
+    }
+
+
+    protected int defineLocalVariable(String lvName, Type lvType, Label start, Label end){
+        int index = localVarSlot ;
+
+        visitLocalVariable(lvName,lvType.getDescriptor(),null,start,end,index);
+
+        if(lvType==Type.LONG_TYPE || lvType==Type.DOUBLE_TYPE ){
+            localVarSlot = localVarSlot + 2;
+        }else {
+            localVarSlot = localVarSlot + 1;
+        }
+        return index;
+    }
+    protected int defineLocalVariable(String lvName, Class clazz, Label start, Label end){
+        Type lvType = Type.getType(clazz);
+        return defineLocalVariable(lvName,lvType,start,end);
     }
 
     protected void callMonitorMethod(String callMethodName,Class ... classes){
@@ -75,7 +103,14 @@ public abstract class AbstractMethodVisitor extends LocalVariablesSorter {
                 String argumentName = argumentNames[i];
                 visitInsn(DUP);
                 visitIntInsn(BIPUSH,i);
-                visitLdcInsn(argumentName);
+                if(className.endsWith("BusiOrder")){
+                    System.out.println(methodName+"-argumentName="+argumentName);
+                }
+                if(argumentName==null){
+                    visitLdcInsn("arg"+i);
+                }else{
+                    visitLdcInsn(argumentName);
+                }
                 visitInsn(AASTORE);
             }
 
@@ -83,7 +118,6 @@ public abstract class AbstractMethodVisitor extends LocalVariablesSorter {
             visitIntInsn(BIPUSH, argumentLength);
             visitTypeInsn(ANEWARRAY, ASMConsts.JAVA_LANG_OBJECT);
             int index = isStatic ? 0:1;
-            Type[] paramTypes = Type.getArgumentTypes(desc);
             for (int i = 0; i < argumentLength; i++) {
                 int sort = paramTypes[i].getSort();
                 Class baseClass = ASMUtils.getBaseWareClass(sort);

@@ -70,6 +70,20 @@ public abstract class ASMUtils {
         }
         return null;
     }
+    public static int getSlotLength(Type[] paramTypes){
+        if(paramTypes==null || paramTypes.length==0){
+            return 0;
+        }
+        int slot = 0;
+        for (Type paramType : paramTypes) {
+            if(paramType.getSort() == Type.LONG || paramType.getSort() == Type.DOUBLE){
+                slot = slot + 2;
+            }else{
+                slot ++ ;
+            }
+        }
+        return slot;
+    }
     public static char getBaseTypeSort(int sort) {
         char c = '0';
         if (sort == Type.INT) {
