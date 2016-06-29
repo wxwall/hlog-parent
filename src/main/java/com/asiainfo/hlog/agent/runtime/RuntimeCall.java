@@ -57,9 +57,13 @@ public class RuntimeCall{
         private Map<String,Object> OFF = new SwitchLRUCache<String,Object>(2000);
 
         public int getSwitch(String key){
-            if(ON.get(key)!=null){
-                return 1;
-            }else if(OFF.get(key)!=null){
+            try{
+                if(ON.get(key)!=null){
+                    return 1;
+                }else if(OFF.get(key)!=null){
+                    return 0;
+                }
+            }catch (Throwable t){
                 return 0;
             }
             return -1;
@@ -216,7 +220,7 @@ public class RuntimeCall{
             }
             */
         }catch (Throwable t){
-            Logger.error("判断{0}的{1}的{2}方法是否启用收集日志时异常",t,weaveName ,clazz,method);
+            Logger.error("判断{0}的{1}的{2}方法是否启用收集日志时异常:{3}",t,weaveName ,clazz,method,t.getMessage());
         }
         return false;
 
