@@ -16,6 +16,8 @@ public class BaseJdbcLoggerMethodVisitor extends AbstractMethodVisitor {
 
     public static final String CODE = "mybatis.BaseJdbcLogger";
 
+    private int _psIndex ;
+
     public BaseJdbcLoggerMethodVisitor(int access, String className, String methodName, String desc, MethodVisitor pnv, byte[] datas,String mcode) {
         super(access, className, methodName, desc, pnv, datas,mcode);
         //创建方法
@@ -26,18 +28,18 @@ public class BaseJdbcLoggerMethodVisitor extends AbstractMethodVisitor {
         Label start = new Label();
         visitLabel(start);
         //visitLocalVariable("_ps", Type.getDescriptor(String.class),null,start,start,1);
-        defineLocalVariable("_ps",String.class,start,start);
+        _psIndex = defineLocalVariable("_ps",String.class,start,start);
         super.visitCode();
     }
 
     public void visitInsn(int opcode) {
         boolean isReturn = opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN;
         if (isReturn) {
-            visitVarInsn(Opcodes.ASTORE, 1);
+            visitVarInsn(Opcodes.ASTORE, _psIndex);
             mv.visitVarInsn(Opcodes.ALOAD, 0);
-            mv.visitVarInsn(Opcodes.ALOAD, 1);
+            mv.visitVarInsn(Opcodes.ALOAD, _psIndex);
             mv.visitFieldInsn(Opcodes.PUTFIELD, MY_BATIS_BASE_JDBC_LOGGER, ASMConsts.PARAMS, ASMConsts.LJAVA_LANG_STRING);
-            visitVarInsn(Opcodes.ALOAD,1);
+            visitVarInsn(Opcodes.ALOAD,_psIndex);
         }
         super.visitInsn(opcode);
     }

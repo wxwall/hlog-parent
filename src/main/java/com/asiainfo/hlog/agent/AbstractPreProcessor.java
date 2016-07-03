@@ -1,5 +1,6 @@
 package com.asiainfo.hlog.agent;
 
+import com.asiainfo.hlog.client.helper.ExcludeRuleUtils;
 import com.asiainfo.hlog.client.config.*;
 import com.asiainfo.hlog.client.helper.Logger;
 
