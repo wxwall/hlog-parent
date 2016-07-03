@@ -35,6 +35,10 @@ public class RuntimeContext {
 
     private static MethodCaller enableSaveWithoutSubs ;
 
+    private static MethodCaller enableSqlTrack ;
+
+    private static MethodCaller enableLoggerTrack ;
+
     private static Object hlogConfigInstance ;
 
     private static Object hlogConfigInstanceInvoke(MethodCaller caller){
@@ -64,6 +68,13 @@ public class RuntimeContext {
         return (Boolean)hlogConfigInstanceInvoke(enableSaveWithoutSubs);
     }
 
+    public static boolean isEnableSqlTrack() {
+        return (Boolean)hlogConfigInstanceInvoke(enableSqlTrack);
+    }
+
+    public static boolean isEnableLoggerTrack() {
+        return (Boolean)hlogConfigInstanceInvoke(enableLoggerTrack);
+    }
     static {
 
         Class clazz = ClassHelper.loadClass("com.asiainfo.hlog.client.config.HLogConfig");
@@ -79,6 +90,8 @@ public class RuntimeContext {
             enableSaveWithoutParams = new MethodCaller(ClassHelper.getMethod(clazz,"isEnableSaveWithoutParams"),hlogConfigInstance);
 
             enableSaveWithoutSubs = new MethodCaller(ClassHelper.getMethod(clazz,"isEnableSaveWithoutSubs"),hlogConfigInstance);
+            enableSqlTrack = new MethodCaller(ClassHelper.getMethod(clazz,"isEnableSqlTrack"),hlogConfigInstance);
+            enableLoggerTrack = new MethodCaller(ClassHelper.getMethod(clazz,"isEnableLoggerTrack"),hlogConfigInstance);
         } catch (Exception e) {
             Logger.error("读取运行时配置数据异常",e);
         }

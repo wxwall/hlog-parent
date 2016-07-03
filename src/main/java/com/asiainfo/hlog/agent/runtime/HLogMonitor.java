@@ -32,6 +32,7 @@ public class HLogMonitor {
         private int isError = 0;
         private boolean enableProcess;
         private boolean enableError ;
+        private boolean leaf = true;
 
         public Node(){
             logId = null;
@@ -96,6 +97,9 @@ public class HLogMonitor {
             stack = new Stack<Node>();
             local.set(stack);
         }
+        if(!stack.isEmpty()){
+            stack.lastElement().leaf = false;
+        }
         stack.push(node);
     }
 
@@ -133,11 +137,18 @@ public class HLogMonitor {
             node.isError = isError?1:0;
             boolean havWriteLog = false;
             boolean enableSaveWithoutSubs = RuntimeContext.isEnableSaveWithoutSubs();
+            boolean isWriteErrLog = false;
+            //发生异常时记录
+            if(isError && stack.isEmpty() && node.enableError){
+                doSendErrorLog(node, id, pid, (Throwable) returnObj);
+                havWriteLog = true;
+                isWriteErrLog = true;
+            }
             long ptime = RuntimeContext.getProcessTime();
             //耗时达到某值是记录
             if(node.enableProcess && node.speed>=ptime){
                 //记录运行耗时超过
-                doSendProcessLog(node,id,pid,node.isError,stack.isEmpty());
+                doSendProcessLog(node,id,pid,node.isError,stack.isEmpty(),isWriteErrLog);
                 //如果本节点超过预警值,追加写已经执行过的子过程节点
                 if(enableSaveWithoutSubs){
                     doWriteSubNode();
@@ -146,23 +157,23 @@ public class HLogMonitor {
             }else if(node.enableProcess && enableSaveWithoutSubs && ptime>0){
                 pushSubNode(node,ptime);
             }
-            //发生异常时记录
-            if(isError && stack.isEmpty() && node.enableError){
-                doSendErrorLog(node, id, pid, (Throwable) returnObj);
-                havWriteLog = true;
-            }
+
             //保存入参
             if(havWriteLog && RuntimeContext.isEnableSaveWithoutParams()){
                 doWriteMethodParams(node);
             }
 
             if(pid!=null){
-                LogAgentContext.setThreadCurrentLogId(pid);
+                if("nvl".equals(pid)){
+                    LogAgentContext.clear();
+                    //LogAgentContext.setThreadCurrentLogId(null);
+                }else{
+                    LogAgentContext.setThreadCurrentLogId(pid);
+                }
             }
         }finally {
             //如果上级id为null时,清了node =
             if(stack!=null && stack.isEmpty()){
-                LogAgentContext.clear();
                 if(subNodes.get()!=null){
                     subNodes.get().clear();
                 }
@@ -175,7 +186,7 @@ public class HLogMonitor {
         if(subs!=null){
             while(!subs.isEmpty()){
                 Node sub = subs.pop();
-                doSendProcessLog(sub,sub.logId,sub.logPid,sub.isError,false);
+                doSendProcessLog(sub,sub.logId,sub.logPid,sub.isError,false,false);
             }
         }
     }
@@ -226,13 +237,15 @@ public class HLogMonitor {
      * @param pid
      * @param status
      */
-    private static void doSendProcessLog(Node node ,String id,String pid,int status,boolean isTop){
+    private static void doSendProcessLog(Node node ,String id,String pid,int status,boolean isTop,boolean isWriteErrLog){
         LogData logData = createLogData(HLogAgentConst.MV_CODE_PROCESS,id,pid);
         logData.put("status",status);
         logData.put("clazz",node.className);
         logData.put("method",node.methodName);
         logData.put("spend",node.speed);
         logData.put("isTop",isTop?1:0);
+        logData.put("havErr",isWriteErrLog?1:0);
+        logData.put("leaf",node.leaf?1:0);
         writeEvent(node.className,node.methodName,logData);
     }
 
@@ -253,6 +266,10 @@ public class HLogMonitor {
      * @param params
      */
     public static void sqlMonitor(long speed,String className,String sql,String params) {
+
+        if(!RuntimeContext.isEnableSqlTrack()){
+            return ;
+        }
 
         Node node = getCurrentNode();
         String clsName ;
@@ -297,6 +314,9 @@ public class HLogMonitor {
      * @return
      */
     public static boolean isLoggerEnabled(String className,String level){
+        if(!RuntimeContext.isEnableLoggerTrack()){
+            return false;
+        }
         Node node = getCurrentNode();
         String methodName = null;
         if(node!=null && node.className.equals(className)){
@@ -312,6 +332,9 @@ public class HLogMonitor {
      * @param objects
      */
     public static void logger(String mcode,String className,String level,Object[] objects){
+        if(!RuntimeContext.isEnableLoggerTrack()){
+            return;
+        }
         try{
             Node node = getCurrentNode();
             String methodName = null;

@@ -1,6 +1,6 @@
 package com.asiainfo.hlog.agent.bytecode.asm;
 
-import com.asiainfo.hlog.agent.ExcludeRuleUtils;
+import com.asiainfo.hlog.client.helper.ExcludeRuleUtils;
 import com.asiainfo.hlog.client.config.LogSwoopRule;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.org.objectweb.asm.ClassVisitor;
@@ -65,7 +65,7 @@ public class HLogClassVisitor extends ClassVisitor {
 
         if (name.charAt(0) == '<' || ExcludeRuleUtils.isExcludeMethod(className,name)){
             return mv;
-        }else if(ExcludeRuleUtils.isGetOrSetMethod(name,desc)){
+        }else if(ExcludeRuleUtils.isGetOrSetMethod(className,name,desc)){
             //如果是get和set方法不处理
             return mv;
         }

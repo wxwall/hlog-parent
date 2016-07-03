@@ -4,7 +4,7 @@ import com.al.common.context.IPropertyListener;
 import com.al.common.context.PropertyEvent;
 import com.al.common.context.PropertyHolder;
 import com.alibaba.fastjson.JSON;
-import com.asiainfo.hlog.agent.ExcludeRuleUtils;
+import com.asiainfo.hlog.client.helper.ExcludeRuleUtils;
 import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.config.HLogConfigRule;
@@ -106,6 +106,8 @@ public class RuntimeCall{
      */
     public boolean enable(String weaveName ,String clazz,String method,String level){
 
+        RuntimeSwitch runtimeSwitch = null;
+        String switchKey = clazz + "-" + method;
         try{
             HLogConfig config = HLogConfig.getInstance();
 
@@ -113,9 +115,8 @@ public class RuntimeCall{
                 return false;
             }
 
-            String switchKey = clazz + "-" + method;
             int flag = -1;
-            RuntimeSwitch runtimeSwitch = mcodeRuntimeSwitchMap.get(weaveName);
+            runtimeSwitch = mcodeRuntimeSwitchMap.get(weaveName);
             if (runtimeSwitch==null) {
                 runtimeSwitch = new RuntimeSwitch();
                 mcodeRuntimeSwitchMap.put(weaveName,runtimeSwitch);
@@ -222,6 +223,7 @@ public class RuntimeCall{
         }catch (Throwable t){
             Logger.error("判断{0}的{1}的{2}方法是否启用收集日志时异常:{3}",t,weaveName ,clazz,method,t.getMessage());
         }
+        runtimeSwitch.offSwitch(switchKey);
         return false;
 
     }
