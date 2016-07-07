@@ -2,7 +2,6 @@ package com.asiainfo.hlog.agent;
 
 import com.asiainfo.hlog.agent.classloader.ClassLoaderHolder;
 import com.asiainfo.hlog.client.helper.LoaderHelper;
-import com.asiainfo.hlog.client.helper.Logger;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
@@ -54,7 +53,7 @@ public class HLogAgent {
             ClassFileTransformer classFileTransformer = (ClassFileTransformer) c.newInstance();
             return classFileTransformer;
         }catch (Throwable e){
-            Logger.error("构建ClassPreProcessorAgentAdapter异常",e);
+            e.printStackTrace(System.err);
         }
         return null;
     }

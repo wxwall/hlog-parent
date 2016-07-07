@@ -35,6 +35,13 @@ public class HttpMonitor {
     }
 
     public static void receiveHlogId(String _gid,String _pid){
+        LogAgentContext.clear();
+        if(_gid==null){
+            _gid = RuntimeContext.logId();
+            _pid = RuntimeContext.buildLogPId(_gid);
+        }else if(_pid==null){
+            _pid = RuntimeContext.buildLogPId(_gid);
+        }
         LogAgentContext.setThreadLogGroupId(_gid);
         LogAgentContext.setThreadCurrentLogId(_pid);
     }

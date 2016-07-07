@@ -74,12 +74,14 @@ public class ProcessMethodVisitor extends AbstractTryCatchMethodVisitor {
         ASMUtils.visitStaticMethod(mv,HLogMonitor.class,"end",String.class,Object.class,boolean.class);
     }
 
-    protected void beforeThrow() {
+    protected void beforeThrow(int flag) {
         // 调用日志监控结束,并记录发生的异常
-        visitLdcInsn(mcode);
-        visitVarInsn(ALOAD, 2);
-        visitInsn(ICONST_1);
-        ASMUtils.visitStaticMethod(mv,HLogMonitor.class,"end",String.class,Object.class,boolean.class);
+        if(flag==1){
+            visitLdcInsn(mcode);
+            visitVarInsn(ALOAD, 2);
+            visitInsn(ICONST_1);
+            ASMUtils.visitStaticMethod(mv,HLogMonitor.class,"end",String.class,Object.class,boolean.class);
+        }
     }
 
 
