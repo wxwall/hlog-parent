@@ -116,7 +116,7 @@ public abstract class AbstractTryCatchMethodVisitor extends AbstractMethodVisito
         visitLabel(lCatchBlockStart);
         // 当异常发生时,将异常的实例先存储到我们事先声明的局部变量中
         visitVarInsn(ASTORE, 2);
-        beforeThrow();
+        beforeThrow(1);
         // 抛出异常
         visitVarInsn(ALOAD, 2);
         visitInsn(ATHROW);
@@ -128,7 +128,11 @@ public abstract class AbstractTryCatchMethodVisitor extends AbstractMethodVisito
 
     protected abstract  void beforeReturn(boolean isVoid);
 
-    protected abstract void beforeThrow() ;
+    /**
+     * 在throw之前
+     * @param flag 0应用代码throw,1hlog的throw
+     */
+    protected abstract void beforeThrow(int flag) ;
 
     public void visitEnd(){
         // 结束阶段
@@ -160,7 +164,7 @@ public abstract class AbstractTryCatchMethodVisitor extends AbstractMethodVisito
         }else if(opcode == ATHROW){
             // 当异常发生时,将异常的实例先存储到我们事先声明的局部变量中
             visitVarInsn(ASTORE, 2);
-            beforeThrow();
+            beforeThrow(0);
             // 抛出异常
             visitVarInsn(ALOAD, 2);
         }

@@ -67,8 +67,10 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
     protected void beforeReturn(boolean isVoid) {
         doEnd(0);
     }
-    protected void beforeThrow() {
-        doEnd(1);
+    protected void beforeThrow(int flag) {
+        if(flag==1){
+            doEnd(1);
+        }
     }
     private void doEnd(int status){
         visitVarInsn(ALOAD,paramIndex);
