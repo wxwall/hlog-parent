@@ -78,7 +78,7 @@ public class LoggerMethodVisitor extends MethodVisitor {
             visitFieldInsn(GETFIELD, className.replaceAll("\\.","/"), "name", Type.getDescriptor(String.class));
             visitLdcInsn(methods.get(methodName));
             //获取方法的参数名称
-            String[] argumentNames = ParameterNameHelper.getMethodParameterName(datas,className,methodName,desc);
+            String[] argumentNames = MethodInfoHelper.getMethodInfo(datas,className,methodName,desc).getParameterName();
             boolean isStatic = ASMUtils.isStatic(access);
             int index = isStatic ? 0:1;
             int argumentLength = argumentNames.length;

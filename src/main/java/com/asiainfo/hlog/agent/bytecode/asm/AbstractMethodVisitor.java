@@ -6,6 +6,9 @@ import com.asiainfo.hlog.org.objectweb.asm.MethodVisitor;
 import com.asiainfo.hlog.org.objectweb.asm.Type;
 import com.asiainfo.hlog.org.objectweb.asm.commons.LocalVariablesSorter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.*;
 
 /**
@@ -34,13 +37,16 @@ public abstract class AbstractMethodVisitor extends LocalVariablesSorter {
 
     protected final int paramSlot ;
 
+    protected List<Variable> variables ;
+
     private int localVarSlot ;
+
+    private boolean isEnd = false;
 
 
     public AbstractMethodVisitor(int access, String className, String methodName, String desc, MethodVisitor pnv, byte[] datas,String mcode) {
 
         super(ASM5,access,desc, pnv);
-
         this.datas = datas;
         this.mcode = mcode;
         this.className = className;
@@ -51,18 +57,23 @@ public abstract class AbstractMethodVisitor extends LocalVariablesSorter {
 
         this.isStatic = ASMUtils.isStatic(access);
 
-        argumentNames = ParameterNameHelper.getMethodParameterName(datas,className,methodName,desc);
+        MethodInfoHelper.MethodInfo methodInfo = MethodInfoHelper.getMethodInfo(datas,className,methodName,desc);
+
+        argumentNames = methodInfo.getParameterName();
 
         paramSlot = isStatic?ASMUtils.getSlotLength(paramTypes):ASMUtils.getSlotLength(paramTypes)+1;
 
-        localVarSlot = paramSlot;
+        localVarSlot = methodInfo.getMaxLocal();
+
+        this.variables = new ArrayList<Variable>();
     }
 
 
     protected int defineLocalVariable(String lvName, Type lvType, Label start, Label end){
         int index = localVarSlot ;
 
-        visitLocalVariable(lvName,lvType.getDescriptor(),null,start,end,index);
+        //visitLocalVariable(lvName,lvType.getDescriptor(),null,start,end,index);
+        variables.add(new Variable(index,lvName,lvType,start));
 
         if(lvType==Type.LONG_TYPE || lvType==Type.DOUBLE_TYPE ){
             localVarSlot = localVarSlot + 2;
@@ -154,4 +165,45 @@ public abstract class AbstractMethodVisitor extends LocalVariablesSorter {
         callMonitorMethod("start",String.class,String.class,String.class,String[].class, Object[].class);
     }
 
+    protected Label end ;
+
+    public void visitEnd(){
+        if(!variables.isEmpty()){
+            for (Variable variable : variables) {
+                visitLocalVariable(variable.lvName,variable.lvType.getDescriptor(),null,variable.start,end,variable.index);
+            }
+        }
+        super.visitEnd();
+    }
+
+    //Variable(String lvName, Type lvType, Label start, Label end)
+    class Variable{
+        private final int index;
+        private final String lvName;
+        private final Type lvType;
+        private final Label start;
+
+        public Variable(int index , String lvName, Type lvType, Label start){
+            this.index = index;
+            this.lvName = lvName;
+            this.lvType = lvType;
+            this.start = start;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public String getLvName() {
+            return lvName;
+        }
+
+        public Type getLvType() {
+            return lvType;
+        }
+
+        public Label getStart() {
+            return start;
+        }
+    }
 }
