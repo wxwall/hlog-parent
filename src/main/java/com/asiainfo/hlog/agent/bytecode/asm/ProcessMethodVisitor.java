@@ -42,8 +42,6 @@ public class ProcessMethodVisitor extends AbstractTryCatchMethodVisitor {
         super(access,className,methodName,desc, pmv,datas,mcode);
     }
 
-
-
     /**
      * 每个方法开始遍历字节码的入码
      */
@@ -64,7 +62,7 @@ public class ProcessMethodVisitor extends AbstractTryCatchMethodVisitor {
             visitIntInsn(RES_LOAD_CODE,idxReturn);
             //如果是一个基本类型的数据转字符串
             if(RES_LOAD_CODE != ALOAD){
-                ASMUtils.visitStaticMethod(mv,String.class,"valueOf",ASMUtils.getBaseClass(returnType.getSort()));
+                ASMUtils.visitStaticMethod(mv,String.class,"valueOf",ASMUtils.getClassByStringValueOf(returnType.getSort()));
             }
         }else {
             visitInsn(ACONST_NULL);
@@ -78,7 +76,7 @@ public class ProcessMethodVisitor extends AbstractTryCatchMethodVisitor {
         // 调用日志监控结束,并记录发生的异常
         if(flag==1){
             visitLdcInsn(mcode);
-            visitVarInsn(ALOAD, 2);
+            visitVarInsn(ALOAD, idxEx);
             visitInsn(ICONST_1);
             ASMUtils.visitStaticMethod(mv,HLogMonitor.class,"end",String.class,Object.class,boolean.class);
         }

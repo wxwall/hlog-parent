@@ -30,6 +30,22 @@ public abstract class ASMUtils {
         }
         return false;
     }
+    public static Class getClassByStringValueOf(int sort) {
+        if (sort == Type.INT || sort == Type.BYTE || sort == Type.SHORT) {
+            return int.class;
+        } else if (sort == Type.BOOLEAN) {
+            return boolean.class;
+        } else if (sort == Type.CHAR) {
+            return char.class;
+        } else if (sort == Type.FLOAT) {
+            return float.class;
+        }  else if (sort == Type.DOUBLE) {
+            return double.class;
+        } else if (sort == Type.LONG) {
+            return long.class;
+        }
+        return null;
+    }
     public static Class getBaseClass(int sort) {
         if (sort == Type.INT) {
             return int.class;

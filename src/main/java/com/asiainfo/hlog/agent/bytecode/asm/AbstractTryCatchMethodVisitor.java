@@ -38,6 +38,9 @@ public abstract class AbstractTryCatchMethodVisitor extends AbstractMethodVisito
      * 定义用于临时存储返回对象的局部变量表中的位置
      */
     protected int idxReturn;
+
+    protected int idxEx = -1;
+
     /**
      * 定义用于保存返回对象的指令,不同类型的返回指令不同
      */
@@ -60,6 +63,12 @@ public abstract class AbstractTryCatchMethodVisitor extends AbstractMethodVisito
         //计算局部变量从第几个开始
         //int argumentLength = argumentNames==null ? 0 : argumentNames.length;
         //idxReturn = paramSlot+1;
+    }
+
+    protected void defineThrowable(){
+        Label start = new Label();
+        visitLabel(start);
+        idxEx = defineLocalVariable("_ex",Throwable.class,start,start);
     }
 
     /**
@@ -87,7 +96,7 @@ public abstract class AbstractTryCatchMethodVisitor extends AbstractMethodVisito
      * 每个方法开始遍历字节码的入码
      */
     public void visitCode() {
-
+        defineThrowable();
         //加入try块开始标记
         visitLabel(lTryBlockStart);
 
@@ -115,11 +124,16 @@ public abstract class AbstractTryCatchMethodVisitor extends AbstractMethodVisito
         // 打上catch块开始标记
         visitLabel(lCatchBlockStart);
         // 当异常发生时,将异常的实例先存储到我们事先声明的局部变量中
-        visitVarInsn(ASTORE, 2);
+        visitVarInsn(ASTORE, idxEx);
         beforeThrow(1);
         // 抛出异常
-        visitVarInsn(ALOAD, 2);
+        visitVarInsn(ALOAD, idxEx);
         visitInsn(ATHROW);
+
+        if(end ==null){
+            end = new Label();
+            mv.visitLabel(end);
+        }
         // catch块结果
         visitLabel(lCatchBlockEnd);
 
@@ -137,6 +151,9 @@ public abstract class AbstractTryCatchMethodVisitor extends AbstractMethodVisito
     public void visitEnd(){
         // 结束阶段
         setGoToLastVisit();
+
+        //定义参数
+
         super.visitEnd();
     }
 
@@ -163,10 +180,10 @@ public abstract class AbstractTryCatchMethodVisitor extends AbstractMethodVisito
             }
         }else if(opcode == ATHROW){
             // 当异常发生时,将异常的实例先存储到我们事先声明的局部变量中
-            visitVarInsn(ASTORE, 2);
+            visitVarInsn(ASTORE, idxEx);
             beforeThrow(0);
             // 抛出异常
-            visitVarInsn(ALOAD, 2);
+            visitVarInsn(ALOAD, idxEx);
         }
         //
         if(isReturn || opcode == ATHROW){

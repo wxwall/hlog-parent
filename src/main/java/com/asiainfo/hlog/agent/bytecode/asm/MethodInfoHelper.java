@@ -9,14 +9,37 @@ import java.util.concurrent.ConcurrentHashMap;
  * 通过ASM来获取方法的入参名称
  * Created by chenfeng on 2016/4/20.
  */
-public class ParameterNameHelper {
+public class MethodInfoHelper {
+
+    static class MethodInfo {
+        private String[] parameterName;
+        private int maxLocal;
+        public MethodInfo(){
+
+        }
+        public String[] getParameterName() {
+            return parameterName;
+        }
+
+        public void setParameterName(String[] parameterName) {
+            this.parameterName = parameterName;
+        }
+
+        public int getMaxLocal() {
+            return maxLocal;
+        }
+
+        public void setMaxLocal(int maxLocal) {
+            this.maxLocal = maxLocal;
+        }
+    }
 
     /**
      * 缓存已经处理过的方法信息
      * key owner-name-desc
      * val 参数名称
      */
-    private final static Map<String, String[]> parameterNameMap = new ConcurrentHashMap<String, String[]>(40);
+    private final static Map<String, MethodInfo> parameterNameMap = new ConcurrentHashMap<String, MethodInfo>(40);
 
     /**
      * 标注没有入参信息
@@ -43,7 +66,7 @@ public class ParameterNameHelper {
      * @param desc
      * @return
      */
-    public static String[] getMethodParameterName(byte[] byteCodes,final String className,String methodName,String desc){
+    public static MethodInfo getMethodInfo(byte[] byteCodes,final String className,String methodName,String desc){
         final String key = getKey(className,methodName,desc);
         if(parameterNameMap.containsKey(key)){
             return parameterNameMap.get(key);
@@ -60,12 +83,12 @@ public class ParameterNameHelper {
                     int argumentSize = Type.getArgumentTypes(desc).length;
                     String tmpKey = getKey(className,name,desc);
                     // 如果没有参数直接返回
-                    if(argumentSize==0){
-                        parameterNameMap.put(tmpKey,NULL_PARAM_NAME);
-                        return null;
-                    }
+                    //if(argumentSize==0){
+                    //    parameterNameMap.put(tmpKey,NULL_PARAM_NAME);
+                    //    return null;
+                    //}
                     // 创建ParameterNameVisit来处理visit
-                    return new ParameterNameVisit(tmpKey,argumentSize,ASMUtils.isStatic(access));
+                    return new MethodInfoVisit(tmpKey,argumentSize,ASMUtils.isStatic(access));
                 }
                 return null;
             }
@@ -77,12 +100,12 @@ public class ParameterNameHelper {
     /**
      * 遍历出指定方法所有的参数名称
      */
-    static class ParameterNameVisit extends MethodVisitor{
+    static class MethodInfoVisit extends MethodVisitor{
         private int argumentSize = 0;
         private String[] argumentNames;
         private String key ;
         private boolean isStatic;
-        public ParameterNameVisit(String key,int argumentSize ,boolean isStatic) {
+        public MethodInfoVisit(String key,int argumentSize ,boolean isStatic) {
             super(Opcodes.ASM5);
             this.key = key;
             this.isStatic = isStatic;
@@ -90,6 +113,12 @@ public class ParameterNameHelper {
             if(this.argumentSize>0){
                 argumentNames = new String[argumentSize];
             }
+        }
+        private int maxLocals = 0;
+        @Override
+        public void visitMaxs(int maxStack, int maxLocals) {
+            //super.visitMaxs(maxStack, maxLocals);
+            this.maxLocals = maxLocals;
         }
 
         /**
@@ -121,11 +150,16 @@ public class ParameterNameHelper {
          * 遍历完方法体
          */
         public void visitEnd() {
+            MethodInfo methodInfo = new MethodInfo();
             if(argumentNames==null){
-                parameterNameMap.put(key,NULL_PARAM_NAME);
+                methodInfo.setParameterName(NULL_PARAM_NAME);
+                //parameterNameMap.put(key,NULL_PARAM_NAME);
             }else if(!parameterNameMap.containsKey(key)){
-                parameterNameMap.put(key,argumentNames);
+                methodInfo.setParameterName(argumentNames);
             }
+            methodInfo.setMaxLocal(maxLocals);
+
+            parameterNameMap.put(key,methodInfo);
         }
     }
 }

@@ -33,6 +33,8 @@ public class HLogClassVisitor extends ClassVisitor {
 
     private boolean isInterface = false;
 
+    private boolean isProxy = false;
+
     public HLogClassVisitor(HLogPreProcessor processor, LogSwoopRule classRule, String className, byte[] datas, ClassWriter classVisitor) {
         super(Opcodes.ASM5, classVisitor);
         this.processor = processor;
@@ -52,16 +54,18 @@ public class HLogClassVisitor extends ClassVisitor {
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         super.visit(version, access, name, signature, superName, interfaces);
         isInterface = ((Opcodes.ACC_INTERFACE & access) == Opcodes.ACC_INTERFACE);
+        isProxy = (name.indexOf("$$")!=-1);
     }
 
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         // 排除不关注的方法
         MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
 
-        if(isInterface ||
+        if(isInterface || isProxy ||
                 (Opcodes.ACC_ABSTRACT & access) == Opcodes.ACC_ABSTRACT){
             return mv;
         }
+
 
         if (name.charAt(0) == '<' || ExcludeRuleUtils.isExcludeMethod(className,name)){
             return mv;
