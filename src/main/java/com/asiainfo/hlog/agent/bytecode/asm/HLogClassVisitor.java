@@ -102,7 +102,7 @@ public class HLogClassVisitor extends ClassVisitor {
             }
             if(newMethod==null){
                 newMethod = mv;
-            }else{
+            }else if(!newMethod.equals(mv)){
                 toVisit = true;
             }
             return newMethod;
