@@ -4,7 +4,6 @@ import com.asiainfo.hlog.agent.runtime.HLogMonitor;
 import com.asiainfo.hlog.org.objectweb.asm.Label;
 import com.asiainfo.hlog.org.objectweb.asm.MethodVisitor;
 import com.asiainfo.hlog.org.objectweb.asm.Type;
-import com.asiainfo.hlog.org.objectweb.asm.commons.LocalVariablesSorter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,7 @@ import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.*;
  * 监控方法的抽象
  * Created by chenfeng on 2016/4/25.
  */
-public abstract class AbstractMethodVisitor extends LocalVariablesSorter {
+public abstract class AbstractMethodVisitor extends MethodVisitor {
 
     public static final String RETURN_OBJ = "_returnObj";
 
@@ -46,7 +45,7 @@ public abstract class AbstractMethodVisitor extends LocalVariablesSorter {
 
     public AbstractMethodVisitor(int access, String className, String methodName, String desc, MethodVisitor pnv, byte[] datas,String mcode) {
 
-        super(ASM5,access,desc, pnv);
+        super(ASM5,pnv);
         this.datas = datas;
         this.mcode = mcode;
         this.className = className;
@@ -73,7 +72,7 @@ public abstract class AbstractMethodVisitor extends LocalVariablesSorter {
         int index = localVarSlot ;
 
         //visitLocalVariable(lvName,lvType.getDescriptor(),null,start,end,index);
-        variables.add(new Variable(index,lvName,lvType,start));
+        variables.add(new Variable(index,lvName,lvType,start,end));
 
         if(lvType==Type.LONG_TYPE || lvType==Type.DOUBLE_TYPE ){
             localVarSlot = localVarSlot + 2;
@@ -165,12 +164,21 @@ public abstract class AbstractMethodVisitor extends LocalVariablesSorter {
         callMonitorMethod("start",String.class,String.class,String.class,String[].class, Object[].class);
     }
 
-    protected Label end ;
+    //protected Label end ;
 
     public void visitEnd(){
         if(!variables.isEmpty()){
+            Label end = null;
             for (Variable variable : variables) {
-                visitLocalVariable(variable.lvName,variable.lvType.getDescriptor(),null,variable.start,end,variable.index);
+                if(variable.end==null){
+                    if(end == null){
+                        end = new Label();
+                        mv.visitLabel(end);
+                    }
+                    visitLocalVariable(variable.lvName,variable.lvType.getDescriptor(),null,variable.start,end,variable.index);
+                }else{
+                    visitLocalVariable(variable.lvName,variable.lvType.getDescriptor(),null,variable.start,variable.end,variable.index);
+                }
             }
         }
         super.visitEnd();
@@ -182,12 +190,14 @@ public abstract class AbstractMethodVisitor extends LocalVariablesSorter {
         private final String lvName;
         private final Type lvType;
         private final Label start;
+        private final Label end;
 
-        public Variable(int index , String lvName, Type lvType, Label start){
+        public Variable(int index , String lvName, Type lvType, Label start,Label end){
             this.index = index;
             this.lvName = lvName;
             this.lvType = lvType;
             this.start = start;
+            this.end = end;
         }
 
         public int getIndex() {
@@ -204,6 +214,10 @@ public abstract class AbstractMethodVisitor extends LocalVariablesSorter {
 
         public Label getStart() {
             return start;
+        }
+
+        public Label getEnd() {
+            return end;
         }
     }
 }

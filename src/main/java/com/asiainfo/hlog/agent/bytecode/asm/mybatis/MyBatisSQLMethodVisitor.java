@@ -56,7 +56,7 @@ public class MyBatisSQLMethodVisitor extends AbstractMethodVisitor {
             Label start = new Label();
             visitLabel(start);
             //visitLocalVariable("start", Type.getDescriptor(long.class),null,start,start,4);
-            startLVSlot = defineLocalVariable("start",long.class,start,start);
+            startLVSlot = defineLocalVariable("start",long.class,start,null);
 
             ASMUtils.visitStaticMethod(mv,System.class, ASMConsts.CURRENT_TIME_MILLIS,null);
             visitVarInsn(Opcodes.LSTORE, startLVSlot);
@@ -64,7 +64,7 @@ public class MyBatisSQLMethodVisitor extends AbstractMethodVisitor {
             start = new Label();
             visitLabel(start);
             //visitLocalVariable("_ps", Type.getDescriptor(String.class),null,start,start,5);
-            _psLVSlot = defineLocalVariable("_ps",String.class,start,start);
+            _psLVSlot = defineLocalVariable("_ps",String.class,start,null);
             isEndIf = false;
         }
     }
