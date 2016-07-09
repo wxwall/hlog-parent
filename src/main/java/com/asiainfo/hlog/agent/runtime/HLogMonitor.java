@@ -398,8 +398,12 @@ public class HLogMonitor {
             String id = RuntimeContext.logId();
             String pid = LogAgentContext.getThreadCurrentLogId();
             LogData logData = createLogData(mcode, id, pid);
+            logData.put("amc","ipt");
             for (int i=0;i<paramNames.length;i++) {
                 String paramName = paramNames[i];
+                if(logData.containsKey(paramName)){
+                    paramName = paramName+"0";
+                }
                 logData.put(paramName,params[i]);
             }
             RuntimeContext.writeEvent(className, methodName, logData);

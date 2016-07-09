@@ -28,7 +28,7 @@ public class BaseJdbcLoggerMethodVisitor extends AbstractMethodVisitor {
         Label start = new Label();
         visitLabel(start);
         //visitLocalVariable("_ps", Type.getDescriptor(String.class),null,start,start,1);
-        _psIndex = defineLocalVariable("_ps",String.class,start,start);
+        _psIndex = defineLocalVariable("_ps",String.class,start,null);
         super.visitCode();
     }
 

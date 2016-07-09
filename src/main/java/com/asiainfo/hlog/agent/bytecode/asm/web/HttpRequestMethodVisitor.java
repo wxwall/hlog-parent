@@ -56,7 +56,7 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
             startIndex = idxReturn;
         }*/
         //visitLocalVariable("_start",Type.getDescriptor(long.class),null,start,start,startIndex);
-        _startLVSlot = defineLocalVariable("_start",long.class,start,start);
+        _startLVSlot = defineLocalVariable("_start",long.class,start,null);
         mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "currentTimeMillis", "()J", false);
         mv.visitVarInsn(LSTORE, _startLVSlot);
 

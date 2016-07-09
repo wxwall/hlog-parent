@@ -68,7 +68,7 @@ public abstract class AbstractTryCatchMethodVisitor extends AbstractMethodVisito
     protected void defineThrowable(){
         Label start = new Label();
         visitLabel(start);
-        idxEx = defineLocalVariable("_ex",Throwable.class,start,start);
+        idxEx = defineLocalVariable("_ex",Throwable.class,start,null);
     }
 
     /**
@@ -86,7 +86,7 @@ public abstract class AbstractTryCatchMethodVisitor extends AbstractMethodVisito
             RES_STORE_CODE = loadStoreAndDefVal[1];
             RES_LOAD_CODE = loadStoreAndDefVal[0];
             //visitLocalVariable(RETURN_OBJ,returnType.getDescriptor(),null,start,start,idxReturn);
-            idxReturn = defineLocalVariable(RETURN_OBJ,returnType,start,start);
+            idxReturn = defineLocalVariable(RETURN_OBJ,returnType,start,null);
             visitInsn(loadStoreAndDefVal[2]);
             visitIntInsn(RES_STORE_CODE,idxReturn);
         }
@@ -130,10 +130,6 @@ public abstract class AbstractTryCatchMethodVisitor extends AbstractMethodVisito
         visitVarInsn(ALOAD, idxEx);
         visitInsn(ATHROW);
 
-        if(end ==null){
-            end = new Label();
-            mv.visitLabel(end);
-        }
         // catch块结果
         visitLabel(lCatchBlockEnd);
 
