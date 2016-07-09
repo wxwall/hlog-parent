@@ -5,7 +5,6 @@ import com.asiainfo.hlog.client.config.LogSwoopRule;
 import com.asiainfo.hlog.client.config.jmx.HLogJMXReport;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.org.objectweb.asm.ClassReader;
-import com.asiainfo.hlog.org.objectweb.asm.ClassVisitor;
 import com.asiainfo.hlog.org.objectweb.asm.ClassWriter;
 import com.asiainfo.hlog.org.objectweb.asm.Opcodes;
 
@@ -67,7 +66,11 @@ public class HLogPreProcessor extends AbstractPreProcessor {
             }
             ClassWriter classWriter = new ClassWriter(classReader, flag);
             //修改原来方法
-            ClassVisitor classVisitor = new HLogClassVisitor(this, classRule, clazz, bytes, classWriter);
+            HLogClassVisitor classVisitor = new HLogClassVisitor(this, classRule, clazz, bytes, classWriter);
+            //未发生改变
+            if(!classVisitor.isToVisit()){
+                return null;
+            }
             flag = Opcodes.ASM5;
             if(jdk_v<=Opcodes.V1_6){
                 flag = flag + ClassReader.EXPAND_FRAMES;

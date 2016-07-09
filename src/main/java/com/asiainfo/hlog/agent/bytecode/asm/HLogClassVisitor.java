@@ -35,6 +35,8 @@ public class HLogClassVisitor extends ClassVisitor {
 
     private boolean isProxy = false;
 
+    private boolean toVisit = false;
+
     public HLogClassVisitor(HLogPreProcessor processor, LogSwoopRule classRule, String className, byte[] datas, ClassWriter classVisitor) {
         super(Opcodes.ASM5, classVisitor);
         this.processor = processor;
@@ -100,6 +102,8 @@ public class HLogClassVisitor extends ClassVisitor {
             }
             if(newMethod==null){
                 newMethod = mv;
+            }else{
+                toVisit = true;
             }
             return newMethod;
         }catch (HLogASMException e){
@@ -108,5 +112,9 @@ public class HLogClassVisitor extends ClassVisitor {
             // 返回原始的方法,保存应用正常
             return  mv;
         }
+    }
+
+    public boolean isToVisit() {
+        return toVisit;
     }
 }
