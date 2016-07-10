@@ -7,17 +7,14 @@ import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.org.objectweb.asm.ClassReader;
 import com.asiainfo.hlog.org.objectweb.asm.ClassWriter;
 import com.asiainfo.hlog.org.objectweb.asm.Opcodes;
-import com.asiainfo.hlog.org.objectweb.asm.Type;
 import com.asiainfo.hlog.org.objectweb.asm.tree.ClassNode;
 import com.asiainfo.hlog.org.objectweb.asm.tree.MethodNode;
 import com.asiainfo.hlog.org.objectweb.asm.tree.analysis.Analyzer;
 import com.asiainfo.hlog.org.objectweb.asm.tree.analysis.BasicValue;
-import com.asiainfo.hlog.org.objectweb.asm.tree.analysis.SimpleVerifier;
+import com.asiainfo.hlog.org.objectweb.asm.tree.analysis.BasicVerifier;
 import com.asiainfo.hlog.org.objectweb.asm.util.CheckClassAdapter;
 
 import java.security.ProtectionDomain;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -115,33 +112,46 @@ public class HLogPreProcessor extends AbstractPreProcessor {
         return null;
     }
 
-    private void verify(final ClassReader cr, final ClassLoader loader,final  int flag) throws Exception {
+    private void verify(final ClassReader cr, final ClassLoader loader,final  int flag) throws Throwable {
+
         ClassNode cn = new ClassNode();
         cr.accept(new CheckClassAdapter(cn, false), ClassReader.SKIP_DEBUG+flag);
 
-        Type syperType = cn.superName == null ? null : Type
-                .getObjectType(cn.superName);
         List<MethodNode> methods = cn.methods;
 
+        BasicVerifier verifier = new BasicVerifier();
+
+        for (int i = 0; i < methods.size(); ++i) {
+            MethodNode method = methods.get(i);
+            Analyzer<BasicValue> a = new Analyzer<BasicValue>(verifier);
+            a.analyze(cn.name, method);
+        }
+
+        /*
         List<Type> interfaces = new ArrayList<Type>();
         for (Iterator<String> i = cn.interfaces.iterator(); i.hasNext();) {
             interfaces.add(Type.getObjectType(i.next()));
         }
-
+        Type syperType = cn.superName == null ? null : Type
+                .getObjectType(cn.superName);
         for (int i = 0; i < methods.size(); ++i) {
             MethodNode method = methods.get(i);
+
             SimpleVerifier verifier = new SimpleVerifier(
                     Type.getObjectType(cn.name), syperType, interfaces,
                     (cn.access & Opcodes.ACC_INTERFACE) != 0);
+
             Analyzer<BasicValue> a = new Analyzer<BasicValue>(verifier);
+
             if (loader != null) {
                 verifier.setClassLoader(loader);
             }
             try {
                 a.analyze(cn.name, method);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 throw e;
             }
         }
+        */
     }
 }

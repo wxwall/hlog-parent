@@ -107,7 +107,13 @@ public class RuntimeCall{
     public boolean enable(String weaveName ,String clazz,String method,String level){
 
         RuntimeSwitch runtimeSwitch = null;
-        String switchKey = clazz + "-" + method;
+        String switchKey = clazz ;
+        if(method!=null){
+            switchKey = switchKey + "-" + method;
+        }
+        if(level!=null){
+            switchKey = switchKey + "-" + level;
+        }
         try{
             HLogConfig config = HLogConfig.getInstance();
 

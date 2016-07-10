@@ -209,7 +209,7 @@ public class RuntimeContext {
             event.setData(logData);
             HLogReflex.reveice(event);
         }catch (Throwable t){
-            Logger.error("将日志写入队列时出错,参数：{},{},{}",t,clazz,method,logData);
+            Logger.error("将日志写入队列时出错,参数：{0},{1},{2}",t,clazz,method,logData);
         }
     }
 
