@@ -82,12 +82,14 @@ public class HLogPreProcessor extends AbstractPreProcessor {
 
             classReader.accept(classVisitor, flag);
             //增加新方法
+            boolean addNewMethod = false;
             if(classRule!=null && classRule.getNewMethodCodes().size()>0){
                 HLogMethodCreator.create(classRule,classWriter);
+                addNewMethod = true;
             }
 
             //未发生改变
-            if(!classVisitor.isToVisit()){
+            if(!classVisitor.isToVisit() && !addNewMethod){
                 return null;
             }
             //得到新的字节码

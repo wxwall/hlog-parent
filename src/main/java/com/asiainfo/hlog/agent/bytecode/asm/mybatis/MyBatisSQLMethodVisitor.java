@@ -102,7 +102,7 @@ public class MyBatisSQLMethodVisitor extends AbstractMethodVisitor {
             //visitMethodInsn(Opcodes.INVOKESTATIC, ASMConsts.HLOG_MONITOR, ASMConsts.HLOG_MONITOR_GET_CONFIG_SQL_SPEED, "()J", false);
             ASMUtils.visitStaticMethod(mv,HLogMonitor.class, ASMConsts.HLOG_MONITOR_GET_CONFIG_SQL_SPEED,null);
             visitInsn(Opcodes.LCMP);
-            visitJumpInsn(Opcodes.IFLE, ifLab);
+            visitJumpInsn(Opcodes.IFLT, ifLab);
 
             visitVarInsn(Opcodes.LLOAD, startLVSlot);
             mv.visitLdcInsn(ASMConsts.MY_BATIS_JDBC_PREPARED_STATEMENT_LOGGER_CLS);
