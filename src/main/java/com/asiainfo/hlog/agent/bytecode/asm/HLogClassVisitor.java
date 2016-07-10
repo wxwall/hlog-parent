@@ -32,6 +32,7 @@ public class HLogClassVisitor extends ClassVisitor {
     private final LogSwoopRule classRule;
 
     private boolean isInterface = false;
+    private boolean isEnum = false;
 
     private boolean isProxy = false;
 
@@ -56,6 +57,7 @@ public class HLogClassVisitor extends ClassVisitor {
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         super.visit(version, access, name, signature, superName, interfaces);
         isInterface = ((Opcodes.ACC_INTERFACE & access) == Opcodes.ACC_INTERFACE);
+        isEnum = ((Opcodes.ACC_ENUM & access) == Opcodes.ACC_ENUM);
         isProxy = (name.indexOf("$$")!=-1);
     }
 
@@ -63,11 +65,10 @@ public class HLogClassVisitor extends ClassVisitor {
         // 排除不关注的方法
         MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
 
-        if(isInterface || isProxy ||
+        if(isInterface || isEnum || isProxy ||
                 (Opcodes.ACC_ABSTRACT & access) == Opcodes.ACC_ABSTRACT){
             return mv;
         }
-
 
         if (name.charAt(0) == '<' || ExcludeRuleUtils.isExcludeMethod(className,name)){
             return mv;
