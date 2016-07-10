@@ -65,7 +65,7 @@ public class HLogPreProcessor extends AbstractPreProcessor {
         if(classRule==null && !isSupportMethodRule(clazz)){
             return null;
         }
-
+        byte[] code = null;
         try{
             ClassReader classReader = new ClassReader(bytes);
             int flag = ClassWriter.COMPUTE_MAXS;
@@ -94,7 +94,7 @@ public class HLogPreProcessor extends AbstractPreProcessor {
                 return null;
             }
             //得到新的字节码
-            byte[] code = classWriter.toByteArray();
+            code = classWriter.toByteArray();
             //对新的字节码进行检验
             //字节码检验不通过,抛出异常并原字节码
             verify(new ClassReader(code),classLoader,flag);
@@ -106,7 +106,10 @@ public class HLogPreProcessor extends AbstractPreProcessor {
             return code;
         }catch (Throwable t){
             HLogJMXReport.getHLogJMXReport().getRunStatusInfo().incrementweaveErrClassNum();
-            Logger.error("解析["+clazz+"]类时遇到问题,放弃解析返回原类内容.(不影响程序运行)",t);
+            Logger.error("解析["+clazz+"]类时遇到问题,放弃解析返回原类内容.(不影响程序运行):{0}",null,t.getMessage());
+            if(code!=null){
+                saveErrorWaveClassFile(className,code);
+            }
         }
 
         return null;

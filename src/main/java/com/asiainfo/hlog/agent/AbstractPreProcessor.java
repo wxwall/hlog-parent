@@ -31,6 +31,8 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
 
     protected String saveWeaveClassPath = null;
 
+    protected String saveErrorWeaveClassPath = null;
+
     public void initialize() {
         HLogConfig config = HLogConfig.getInstance();
         logSwoopRuleList = new ArrayList<LogSwoopRule>();
@@ -140,6 +142,14 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
     protected boolean isExcludePath(String name){
         return ExcludeRuleUtils.isExcludePath(name);
     }
+    /**
+     * 保存被植入代码发生错误的类到指定目录
+     * @param name
+     * @param code
+     */
+    protected void saveErrorWaveClassFile(String name,byte[] code){
+        saveClassFile(name, code,saveErrorWeaveClassPath+name+".class");
+    }
 
     /**
      * 保存被植入代码的类到指定目录
@@ -151,9 +161,13 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
         if(!isSaveWeaveClass){
             return;
         }
+        saveClassFile(name, code,saveWeaveClassPath+name+".class");
+    }
+
+    private void saveClassFile(String name, byte[] code,String classFile) {
         FileOutputStream fos = null;
         try {
-            File file = new File(saveWeaveClassPath+name+".class");
+            File file = new File(classFile);
             if(!file.getParentFile().exists()){
                 file.getParentFile().mkdirs();
             }
@@ -162,7 +176,7 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
             fos.write(code);
 
         }catch (IOException ioe){
-            Logger.error("保存[{0}]异常",ioe,saveWeaveClassPath+name+".class");
+            Logger.error("保存[{0}]异常",ioe,classFile);
         }finally {
             try {
                 if(fos!=null){
@@ -176,9 +190,13 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
 
         isSaveWeaveClass = "yes".equals(System.getProperty(Constants.SYS_KEY_HLOG_SAVE_WEAVE_CLASS));
 
+        String base = HLogConfig.tmpdir + File.separator + "log-agent" + File.separator;
         if(isSaveWeaveClass){
-            saveWeaveClassPath = HLogConfig.tmpdir + File.separator + "log-agent" + File.separator+"weave-class"+ File.separator;
+            saveWeaveClassPath = base+"weave-class"+ File.separator;
         }
+
+        saveErrorWeaveClassPath = base+"err-weave-class"+ File.separator;
+
         if(Logger.isDebug()){
             Logger.debug("是否开启[{0}]保存被植class文件到指定目录：{1}",isSaveWeaveClass,saveWeaveClassPath);
         }
