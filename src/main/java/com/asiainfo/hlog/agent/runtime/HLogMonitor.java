@@ -120,6 +120,7 @@ public class HLogMonitor {
     public static void end(String mcode,Object returnObj,boolean isError){
 
         Stack<Node> stack = null;
+        String pid = null;
         try{
             stack = local.get();
             if(stack.isEmpty()){
@@ -133,7 +134,7 @@ public class HLogMonitor {
             node.speed = System.currentTimeMillis() - node.beginTime;
             //如果产生多个日志,这里的logId保持一致
             String id = node.logId ;
-            String pid = node.logPid;
+            pid = node.logPid;
             node.isError = isError?1:0;
             boolean havWriteLog = false;
             boolean enableSaveWithoutSubs = RuntimeContext.isEnableSaveWithoutSubs();
@@ -163,15 +164,16 @@ public class HLogMonitor {
                 doWriteMethodParams(node);
             }
 
-            if(pid!=null){
-                if("nvl".equals(pid)){
-                    LogAgentContext.clear();
-                    //LogAgentContext.setThreadCurrentLogId(null);
-                }else{
-                    LogAgentContext.setThreadCurrentLogId(pid);
-                }
-            }
         }finally {
+            if("nvl".equals(pid)){
+                if(!LogAgentContext.isKeepContext()){
+                    LogAgentContext.clear();
+                }
+                stack.clear();
+                //LogAgentContext.setThreadCurrentLogId(null);
+            }else{
+                LogAgentContext.setThreadCurrentLogId(pid);
+            }
             //如果上级id为null时,清了node =
             if(stack!=null && stack.isEmpty()){
                 if(subNodes.get()!=null){
