@@ -44,6 +44,7 @@ public class HttpMonitor {
         }
         LogAgentContext.setThreadLogGroupId(_gid);
         LogAgentContext.setThreadCurrentLogId(_pid);
+        LogAgentContext.setKeepContext(true);
     }
 
     public static void request(StringBuffer requestUrl,String addr,long start,int status){

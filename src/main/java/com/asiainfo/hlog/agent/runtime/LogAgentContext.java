@@ -20,6 +20,20 @@ public class LogAgentContext {
      */
     private static final ThreadLocal<Integer> threadCurrentIndex = new ThreadLocal<Integer>();
 
+    private static final ThreadLocal<Boolean> keepContext = new ThreadLocal<Boolean>();
+
+    public static void setKeepContext(boolean keep){
+        keepContext.set(keep);
+    }
+
+    public static boolean isKeepContext(){
+        if(keepContext.get()==null){
+            return false;
+        }else{
+            return keepContext.get();
+        }
+    }
+
     public static void setThreadLogGroupId(String logGroupId){
         threadLogGroupId.set(logGroupId);
     }
@@ -42,6 +56,7 @@ public class LogAgentContext {
         threadLogGroupId.remove();
         threadCurrentLogId.remove();
         threadCurrentIndex.set(new Integer(0));
+        keepContext.set(false);
     }
 
     public static int getIndex(){

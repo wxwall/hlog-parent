@@ -40,7 +40,7 @@ public abstract class AbstractMethodVisitor extends MethodVisitor {
 
     private int localVarSlot ;
 
-    private boolean isEnd = false;
+    //private boolean isEnd = false;
 
 
     public AbstractMethodVisitor(int access, String className, String methodName, String desc, MethodVisitor pnv, byte[] datas,String mcode) {
@@ -62,23 +62,41 @@ public abstract class AbstractMethodVisitor extends MethodVisitor {
 
         paramSlot = isStatic?ASMUtils.getSlotLength(paramTypes):ASMUtils.getSlotLength(paramTypes)+1;
 
-        localVarSlot = methodInfo.getMaxLocal();
+        if(!(mv instanceof  AbstractMethodVisitor)){
+            localVarSlot = methodInfo.getMaxLocal();
+        }
 
         this.variables = new ArrayList<Variable>();
     }
 
+    public int getLocalVarSlot() {
+        if(mv instanceof  AbstractMethodVisitor){
+            return ((AbstractMethodVisitor)mv).getLocalVarSlot();
+        }
+        return localVarSlot;
+    }
+    public void addLocalVarSlot(int step) {
+        if(mv instanceof  AbstractMethodVisitor){
+            ((AbstractMethodVisitor)mv).addLocalVarSlot(step);
+        }else{
+            this.localVarSlot = localVarSlot+step;
+        }
+    }
 
     protected int defineLocalVariable(String lvName, Type lvType, Label start, Label end){
-        int index = localVarSlot ;
+        int index = getLocalVarSlot() ;
 
         //visitLocalVariable(lvName,lvType.getDescriptor(),null,start,end,index);
         variables.add(new Variable(index,lvName,lvType,start,end));
 
         if(lvType==Type.LONG_TYPE || lvType==Type.DOUBLE_TYPE ){
-            localVarSlot = localVarSlot + 2;
+            //localVarSlot = localVarSlot + 2;
+            addLocalVarSlot(2);
         }else {
-            localVarSlot = localVarSlot + 1;
+            //localVarSlot = localVarSlot + 1;
+            addLocalVarSlot(1);
         }
+
         return index;
     }
     protected int defineLocalVariable(String lvName, Class clazz, Label start, Label end){
