@@ -6,6 +6,8 @@ import com.asiainfo.hlog.client.model.LogData;
 
 import java.lang.ref.SoftReference;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 import static com.asiainfo.hlog.agent.runtime.RuntimeContext.enable;
@@ -25,6 +27,7 @@ public class HLogMonitor {
         private final String logPid;
         private final String className;
         private final String methodName;
+        private final String[] paramNames;
         private final SoftReference<Object>[]  params;
         //private final Object[] params;
         private final long beginTime;
@@ -40,7 +43,7 @@ public class HLogMonitor {
             className = null;
             methodName = null;
             //description = null;
-            //paramNames = null;
+            paramNames = null;
             params = null;
             beginTime = 0;
         }
@@ -51,7 +54,7 @@ public class HLogMonitor {
             this.className = className;
             this.methodName = methodName;
             //this.description = description;
-            //this.paramNames = paramNames;
+            this.paramNames = paramNames;
             this.params = params;
             beginTime = System.currentTimeMillis();
         }
@@ -154,7 +157,9 @@ public class HLogMonitor {
                 if(enableSaveWithoutSubs){
                     doWriteSubNode();
                 }
-                havWriteLog = true;
+                if(node.speed>=RuntimeContext.getProcessTimeWithout()){
+                    havWriteLog = true;
+                }
             }else if(node.enableProcess && enableSaveWithoutSubs && ptime>0){
                 pushSubNode(node,ptime);
             }
@@ -198,19 +203,30 @@ public class HLogMonitor {
             return;
         }
         LogData logData = createLogData(HLogAgentConst.MV_CODE_PARAMS,node.logId,node.logPid);
-        if(node.params==null){
-            logData.put("params","[]");
+        if(node.paramNames==null || node.paramNames.length==0 ){
+            logData.put("params","{}");
         }else{
             String params = null;
             try{
-                params = RuntimeContext.toJson(node.params);
+                String[] pns = node.paramNames;
+                int ilen = pns.length;
+                Map<String,Object> jsonMap = new HashMap<String, Object>();
+                for (int i = 0; i < ilen; i++) {
+                    try{
+                        jsonMap.put(pns[i],node.params[i]);
+                    }catch (Exception e){
+                        jsonMap.put(pns[i],"ERR:"+e.getMessage());
+                    }
+                }
+                params = RuntimeContext.toJson(jsonMap);
             }catch (Exception e){
-                params = "ERR:"+e.getMessage()+",param";
+                params = "{\"ERR\":\""+e.getMessage()+",param";
                 for (SoftReference<Object> obj : node.params) {
                     if(obj!=null){
                         params = params + ":" + obj.toString();
                     }
                 }
+                params = params + "\"}";
             }
             logData.put("params",params);
         }

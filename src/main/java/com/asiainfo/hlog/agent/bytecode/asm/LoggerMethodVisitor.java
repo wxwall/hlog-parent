@@ -1,6 +1,7 @@
 package com.asiainfo.hlog.agent.bytecode.asm;
 
 import com.asiainfo.hlog.agent.runtime.HLogMonitor;
+import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.org.objectweb.asm.Label;
 import com.asiainfo.hlog.org.objectweb.asm.MethodVisitor;
 import com.asiainfo.hlog.org.objectweb.asm.Type;
@@ -53,14 +54,21 @@ public class LoggerMethodVisitor extends MethodVisitor {
 
 
     public void visitCode() {
-        if(!methods.keySet().contains(methodName)){
+        if(!methods.containsKey(methodName)){
             super.visitCode();
             return ;
         }
+        String level = methods.get(methodName);
+
+        if(!isEnableWeaveLevel(level)){
+            super.visitCode();
+            return ;
+        }
+
         //增加判断代码
         visitVarInsn(ALOAD, 0);
         visitFieldInsn(GETFIELD, className.replaceAll("\\.","/"), "name", Type.getDescriptor(String.class));
-        visitLdcInsn(methods.get(methodName));
+        visitLdcInsn(level);
         ASMUtils.visitStaticMethod(mv, HLogMonitor.class,"isLoggerEnabled",String.class,String.class);
 
         Label endIfLable = new Label();
@@ -76,7 +84,7 @@ public class LoggerMethodVisitor extends MethodVisitor {
             visitLdcInsn(mcode);
             visitVarInsn(ALOAD, 0);
             visitFieldInsn(GETFIELD, className.replaceAll("\\.","/"), "name", Type.getDescriptor(String.class));
-            visitLdcInsn(methods.get(methodName));
+            visitLdcInsn(level);
             //获取方法的参数名称
             String[] argumentNames = MethodInfoHelper.getMethodInfo(datas,className,methodName,desc).getParameterName();
             boolean isStatic = ASMUtils.isStatic(access);
@@ -95,6 +103,17 @@ public class LoggerMethodVisitor extends MethodVisitor {
         visitLabel(endIfLable);
 
         super.visitCode();
+    }
+
+    private boolean isEnableWeaveLevel(String level) {
+        //判断是否在植入的范围
+        String[] levels = HLogConfig.getInstance().getEnableLoggerLevel();
+        for (String l : levels) {
+            if(l.equals(level)){
+                return true;
+            }
+        }
+        return false;
     }
 
 }
