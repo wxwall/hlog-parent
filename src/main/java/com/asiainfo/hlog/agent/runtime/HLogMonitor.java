@@ -157,7 +157,9 @@ public class HLogMonitor {
                 if(enableSaveWithoutSubs){
                     doWriteSubNode();
                 }
-                havWriteLog = true;
+                if(node.speed>=RuntimeContext.getProcessTimeWithout()){
+                    havWriteLog = true;
+                }
             }else if(node.enableProcess && enableSaveWithoutSubs && ptime>0){
                 pushSubNode(node,ptime);
             }

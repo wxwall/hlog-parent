@@ -70,9 +70,15 @@ public class RuntimeCall{
         }
 
         public void onSwitch(String key){
+            if(key==null){
+                return ;
+            }
             ON.put(key,nullObject);
         }
         public void offSwitch(String key){
+            if(key==null){
+                return ;
+            }
             OFF.put(key,nullObject);
         }
         public void clear(){

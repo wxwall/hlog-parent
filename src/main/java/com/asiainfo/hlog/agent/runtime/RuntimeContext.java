@@ -27,6 +27,8 @@ public class RuntimeContext {
 
     private static MethodCaller processTime  ;
 
+    private static MethodCaller processTimeWithout  ;
+
     private static MethodCaller sqlTime ;
 
     private static MethodCaller enableRequest ;
@@ -50,6 +52,9 @@ public class RuntimeContext {
 
     public static long getProcessTime() {
         return (Long)hlogConfigInstanceInvoke(processTime);
+    }
+    public static long getProcessTimeWithout() {
+        return (Long)hlogConfigInstanceInvoke(processTimeWithout);
     }
 
     public static long getSqlTime() {
@@ -82,6 +87,8 @@ public class RuntimeContext {
             hlogConfigInstance = ClassHelper.getMethod(clazz,"getInstance").invoke(null,null);
 
             processTime = new MethodCaller(ClassHelper.getMethod(clazz,"getProcessTime"),hlogConfigInstance);
+
+            processTimeWithout = new MethodCaller(ClassHelper.getMethod(clazz,"getProcessTimeWithout"),hlogConfigInstance);
 
             sqlTime = new MethodCaller(ClassHelper.getMethod(clazz,"getSqlTime"),hlogConfigInstance);
 
