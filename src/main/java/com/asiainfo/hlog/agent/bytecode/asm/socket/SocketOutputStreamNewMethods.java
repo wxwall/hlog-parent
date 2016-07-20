@@ -31,6 +31,8 @@ public class SocketOutputStreamNewMethods implements IHLogNewMethods,Opcodes {
 
         ASMUtils.createGetLogIdMethod(classWriter);
 
+        showLog(classWriter);
+
         createSocketWrite(classWriter);
 
         isHttpProtocol(classWriter);
@@ -45,6 +47,32 @@ public class SocketOutputStreamNewMethods implements IHLogNewMethods,Opcodes {
     private void createSocketWrite(ClassWriter classWriter){
         MethodVisitor mv = classWriter.visitMethod(ACC_PRIVATE, "_socketWrite", "(Ljava/io/FileDescriptor;[BII)V", null, new String[]{"java/io/IOException"});
         mv.visitCode();
+        /*
+        mv.visitLdcInsn("true");
+        mv.visitLdcInsn("socketLog");
+        mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "getProperty", "(Ljava/lang/String;)Ljava/lang/String;", false);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", false);
+        Label ll1 = new Label();
+        mv.visitJumpInsn(IFEQ, ll1);
+        mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+        mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
+        mv.visitInsn(DUP);
+        mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
+        mv.visitLdcInsn("_socketWrite : ");
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+        mv.visitTypeInsn(NEW, "java/lang/String");
+        mv.visitInsn(DUP);
+        mv.visitVarInsn(ALOAD, 2);
+        mv.visitVarInsn(ILOAD, 3);
+        mv.visitVarInsn(ILOAD, 4);
+        mv.visitLdcInsn("UTF-8");
+        mv.visitMethodInsn(INVOKESPECIAL, "java/lang/String", "<init>", "([BIILjava/lang/String;)V", false);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+        mv.visitLabel(ll1);
+        */
+
         Label l0 = new Label();
         mv.visitLabel(l0);
         mv.visitVarInsn(ALOAD, 0);
@@ -139,6 +167,15 @@ public class SocketOutputStreamNewMethods implements IHLogNewMethods,Opcodes {
         mv.visitInsn(ICONST_1);
         mv.visitInsn(IADD);
         mv.visitVarInsn(ISTORE, 8);
+
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitVarInsn(ALOAD, 2);
+        mv.visitInsn(ICONST_0);
+        mv.visitVarInsn(ILOAD, 8);
+        mv.visitInsn(ICONST_1);
+        mv.visitMethodInsn(INVOKESPECIAL, JAVA_NET_SOCKET_OUTPUT_STREAM, "showLog", "([BIII)V", false);
+
+
         Label l17 = new Label();
         mv.visitLabel(l17);
         mv.visitVarInsn(ALOAD, 0);
@@ -189,6 +226,15 @@ public class SocketOutputStreamNewMethods implements IHLogNewMethods,Opcodes {
         mv.visitMethodInsn(INVOKEVIRTUAL, ASMConsts.JAVA_LANG_STRING_BUILDER, "toString", "()Ljava/lang/String;", false);
         mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "getBytes", "()[B", false);
         mv.visitVarInsn(ASTORE, 11);
+
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitVarInsn(ALOAD, 11);
+        mv.visitInsn(ICONST_0);
+        mv.visitVarInsn(ALOAD, 11);
+        mv.visitInsn(ARRAYLENGTH);
+        mv.visitInsn(ICONST_2);
+        mv.visitMethodInsn(INVOKESPECIAL, JAVA_NET_SOCKET_OUTPUT_STREAM, "showLog", "([BIII)V", false);
+
         Label l24 = new Label();
         mv.visitLabel(l24);
         mv.visitVarInsn(ALOAD, 0);
@@ -198,14 +244,23 @@ public class SocketOutputStreamNewMethods implements IHLogNewMethods,Opcodes {
         mv.visitVarInsn(ALOAD, 11);
         mv.visitInsn(ARRAYLENGTH);
         mv.visitMethodInsn(INVOKESPECIAL, JAVA_NET_SOCKET_OUTPUT_STREAM, "socketWrite0", "(Ljava/io/FileDescriptor;[BII)V", false);
+
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitVarInsn(ALOAD, 2);
+        mv.visitVarInsn(ILOAD, 8);
+        mv.visitVarInsn(ILOAD, 4);
+        mv.visitVarInsn(ILOAD, 8);
+        mv.visitInsn(ISUB);
+        mv.visitInsn(ICONST_3);
+        mv.visitMethodInsn(INVOKESPECIAL, JAVA_NET_SOCKET_OUTPUT_STREAM, "showLog", "([BIII)V", false);
+
         Label l25 = new Label();
         mv.visitLabel(l25);
         mv.visitVarInsn(ALOAD, 0);
         mv.visitVarInsn(ALOAD, 1);
         mv.visitVarInsn(ALOAD, 2);
         mv.visitVarInsn(ILOAD, 8);
-        mv.visitVarInsn(ALOAD, 2);
-        mv.visitInsn(ARRAYLENGTH);
+        mv.visitVarInsn(ILOAD, 4);
         mv.visitVarInsn(ILOAD, 8);
         mv.visitInsn(ISUB);
         mv.visitMethodInsn(INVOKESPECIAL, JAVA_NET_SOCKET_OUTPUT_STREAM, "socketWrite0", "(Ljava/io/FileDescriptor;[BII)V", false);
@@ -216,6 +271,14 @@ public class SocketOutputStreamNewMethods implements IHLogNewMethods,Opcodes {
         mv.visitIincInsn(7, 1);
         mv.visitJumpInsn(GOTO, l9);
         mv.visitLabel(l1);
+
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitVarInsn(ALOAD, 2);
+        mv.visitVarInsn(ILOAD, 3);
+        mv.visitVarInsn(ILOAD, 4);
+        mv.visitInsn(ICONST_0);
+        mv.visitMethodInsn(INVOKESPECIAL, JAVA_NET_SOCKET_OUTPUT_STREAM, "showLog", "([BIII)V", false);
+
         mv.visitVarInsn(ALOAD, 0);
         mv.visitVarInsn(ALOAD, 1);
         mv.visitVarInsn(ALOAD, 2);
@@ -234,12 +297,59 @@ public class SocketOutputStreamNewMethods implements IHLogNewMethods,Opcodes {
         mv.visitLocalVariable("index", "I", null, l9, l1, 7);
         mv.visitLocalVariable("isHttp", "Z", null, l3, l1, 5);
         mv.visitLocalVariable("gid", "Ljava/lang/String;", null, l5, l1, 6);
-        mv.visitLocalVariable("this", "Lcom/asiainfo/hlog/agent/bytecode/asm/TestASM;", null, l0, l28, 0);
+        mv.visitLocalVariable("this", "Ljava/net/SocketOutputStream;", null, l0, l28, 0);
         mv.visitLocalVariable("fd", "Ljava/io/FileDescriptor;", null, l0, l28, 1);
         mv.visitLocalVariable("b", "[B", null, l0, l28, 2);
         mv.visitLocalVariable("off", "I", null, l0, l28, 3);
         mv.visitLocalVariable("len", "I", null, l0, l28, 4);
         mv.visitMaxs(6, 12);
+        mv.visitEnd();
+    }
+
+    private void showLog(ClassWriter classWriter){
+        MethodVisitor mv = classWriter.visitMethod(ACC_PRIVATE, "showLog", "([BIII)V", null, null);
+        mv.visitCode();
+        Label l0 = new Label();
+        mv.visitLabel(l0);
+        mv.visitLdcInsn("true");
+        mv.visitLdcInsn("socketLog");
+        mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "getProperty", "(Ljava/lang/String;)Ljava/lang/String;", false);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", false);
+        Label l1 = new Label();
+        mv.visitJumpInsn(IFEQ, l1);
+        Label l2 = new Label();
+        mv.visitLabel(l2);
+        mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+        mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
+        mv.visitInsn(DUP);
+        mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
+        mv.visitLdcInsn("-hlog:flag=");
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+        mv.visitVarInsn(ILOAD, 4);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(I)Ljava/lang/StringBuilder;", false);
+        mv.visitLdcInsn(",_socketWrite :\n[");
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+        mv.visitTypeInsn(NEW, "java/lang/String");
+        mv.visitInsn(DUP);
+        mv.visitVarInsn(ALOAD, 1);
+        mv.visitVarInsn(ILOAD, 2);
+        mv.visitVarInsn(ILOAD, 3);
+        mv.visitMethodInsn(INVOKESPECIAL, "java/lang/String", "<init>", "([BII)V", false);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+        mv.visitLdcInsn("]");
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+        mv.visitLabel(l1);
+        mv.visitInsn(RETURN);
+        Label l3 = new Label();
+        mv.visitLabel(l3);
+        mv.visitLocalVariable("this", "Ljava/net/SocketOutputStream;", null, l0, l3, 0);
+        mv.visitLocalVariable("b", "[B", null, l0, l3, 1);
+        mv.visitLocalVariable("off", "I", null, l0, l3, 2);
+        mv.visitLocalVariable("len", "I", null, l0, l3, 3);
+        mv.visitLocalVariable("flag", "I", null, l0, l3, 4);
+        mv.visitMaxs(7, 5);
         mv.visitEnd();
     }
 
