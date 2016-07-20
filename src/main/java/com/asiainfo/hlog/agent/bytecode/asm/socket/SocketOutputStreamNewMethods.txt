@@ -12,7 +12,7 @@ public class TestASM {
 
     boolean isWrited = false;
     private void socketWrite0(FileDescriptor fd, byte[] b, int off,
-                                     int len) throws IOException{
+                              int len) throws IOException{
         System.out.print(new String(b, off, len));
     }
     public String _getLogId(String method){
@@ -57,6 +57,7 @@ public class TestASM {
                 }else if(isHttp && b[index]==10 && b[index-1]==13){
                     int newIndex = index+1;
                     //1、发关前部分
+                    showLog(b,0,newIndex,1);
                     socketWrite0(fd,b,0,newIndex);
                     String pid = _getLogId("getThreadCurrentLogId");
                     //2、追加Hlog头
@@ -66,9 +67,11 @@ public class TestASM {
                         head.append("\r\n").append("Hlog-Agent-Pid:").append(pid);
                     }
                     byte[] headBytes = head.toString().getBytes();
+                    showLog(headBytes,0,headBytes.length,2);
                     socketWrite0(fd,headBytes,0,headBytes.length);
                     //再追加剩余内容
-                    socketWrite0(fd,b,newIndex,b.length-newIndex);
+                    showLog(b,newIndex,len-newIndex,3);
+                    socketWrite0(fd,b,newIndex,len-newIndex);
                     //返回
                     return ;
                 }
@@ -76,7 +79,14 @@ public class TestASM {
             }
         }
         //发送原内容
+        showLog(b,off,len,0);
         socketWrite0(fd,b,off,len);
+    }
+
+    private void showLog(byte[] b,int off,int len,int flag){
+        if("true".equals(System.getProperty("socketLog"))){
+            System.out.println("-hlog:flag="+flag + ",_socketWrite :\n[" + new String(b,off,len)+"]");
+        }
     }
     private boolean isHttpProtocol(byte b[],int len){
         switch (len){
@@ -106,7 +116,8 @@ public class TestASM {
 
     public static void main(String[] args) throws IOException {
         TestASM testASM = new TestASM();
-        byte[] b = "GET sssssssssssss\r\nTest:test\r\nName:flll\r\n\nttttttttttttttttttt11".getBytes();
+        //byte[] b = "GET sssssssssssss\r\nTest:test\r\nName:flll\r\n\r\nttttttttttttttttttt11".getBytes();
+        byte[] b = "GET sssssssssssss\r\nTest:test\r\nName:flll\r\n\r\nttttttttttttttttttt11".getBytes();
         testASM._socketWrite(null,b,0,b.length);
     }
 }
