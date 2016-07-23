@@ -73,11 +73,12 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
         }
     }
     private void doEnd(int status){
-        visitVarInsn(ALOAD,paramIndex);
+        mv.visitVarInsn(ALOAD,paramIndex);
         mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getRequestURL", "()Ljava/lang/StringBuffer;", true);
-        visitVarInsn(ALOAD,paramIndex);
+        mv.visitVarInsn(ALOAD,paramIndex);
         mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getRemoteAddr", "()Ljava/lang/String;", true);
-        visitVarInsn(LLOAD,_startLVSlot);
+        mv.visitVarInsn(LLOAD,_startLVSlot);
+        //mv.visitInsn(LCONST_1);
         mv.visitIntInsn(BIPUSH, status);
         visitMethodInsn(Opcodes.INVOKESTATIC,"com/asiainfo/hlog/agent/runtime/http/HttpMonitor","request",
                 "(Ljava/lang/StringBuffer;Ljava/lang/String;JI)V", false);

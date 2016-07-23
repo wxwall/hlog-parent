@@ -1,6 +1,7 @@
 package com.asiainfo.hlog.agent.bytecode.asm;
 
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
+import com.asiainfo.hlog.agent.runtime.http.HttpMonitor;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -119,5 +120,7 @@ public class TestASM {
         //byte[] b = "GET sssssssssssss\r\nTest:test\r\nName:flll\r\n\r\nttttttttttttttttttt11".getBytes();
         byte[] b = "GET sssssssssssss\r\nTest:test\r\nName:flll\r\n\r\nttttttttttttttttttt11".getBytes();
         testASM._socketWrite(null,b,0,b.length);
+
+        HttpMonitor.clearReceiveHlogId();
     }
 }

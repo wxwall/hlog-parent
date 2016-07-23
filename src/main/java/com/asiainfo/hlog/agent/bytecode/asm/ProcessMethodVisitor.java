@@ -76,7 +76,7 @@ public class ProcessMethodVisitor extends AbstractTryCatchMethodVisitor {
         // 调用日志监控结束,并记录发生的异常
         if(flag==1){
             visitLdcInsn(mcode);
-            visitVarInsn(ALOAD, idxEx);
+            visitVarInsn(ALOAD, getIdxExce());
             visitInsn(ICONST_1);
             ASMUtils.visitStaticMethod(mv,HLogMonitor.class,"end",String.class,Object.class,boolean.class);
         }

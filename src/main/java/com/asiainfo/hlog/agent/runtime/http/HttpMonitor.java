@@ -47,6 +47,10 @@ public class HttpMonitor {
         LogAgentContext.setKeepContext(true);
     }
 
+    public static void clearReceiveHlogId(){
+        LogAgentContext.clear();
+    }
+
     public static void request(StringBuffer requestUrl,String addr,long start,int status){
 
         //判断是否开启收集
