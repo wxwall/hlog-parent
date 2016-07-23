@@ -1,12 +1,13 @@
 package com.asiainfo.hlog.agent.bytecode.asm.web;
 
+import com.asiainfo.hlog.agent.bytecode.asm.ASMUtils;
+import com.asiainfo.hlog.agent.bytecode.asm.AbstractEndTodoMethodVisitor;
+import com.asiainfo.hlog.agent.runtime.http.HttpMonitor;
 import com.asiainfo.hlog.org.objectweb.asm.MethodVisitor;
 import com.asiainfo.hlog.org.objectweb.asm.Opcodes;
 import com.asiainfo.hlog.org.objectweb.asm.Type;
 
-import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.ALOAD;
-import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.ASM5;
-import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.INVOKEINTERFACE;
+import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.*;
 
 /**
  * <p>接收上流传递过来的方法</p>
@@ -14,7 +15,7 @@ import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.INVOKEINTERFACE;
  * <p>所以要求被处理的方法入参必须要有{@link javax.servlet.http.HttpServletRequest}类型</p>
  * Created by chenfeng on 2016/5/8.
  */
-public class ReceiveIdMethodVisitor extends MethodVisitor {
+public class ReceiveIdMethodVisitor extends AbstractEndTodoMethodVisitor {
 
     public static final String CODE  = "receive.id";
 
@@ -24,8 +25,8 @@ public class ReceiveIdMethodVisitor extends MethodVisitor {
 
     private int startIndex = 1;
 
-    public ReceiveIdMethodVisitor(int access, String className, String methodName, String desc, MethodVisitor pnv, byte[] datas, String mcode) {
-        super(ASM5,pnv);
+    public ReceiveIdMethodVisitor(int access, String className, String methodName, String desc, MethodVisitor pmv, byte[] datas, String mcode) {
+        super(access,className,methodName,desc, pmv,datas,mcode);
 
         Type[] types = Type.getArgumentTypes(desc);
         startIndex = types.length+1;
@@ -39,6 +40,9 @@ public class ReceiveIdMethodVisitor extends MethodVisitor {
     }
 
     public void visitCode() {
+
+        defineThrowable();
+
         if(paramIndex==-1){
             super.visitCode();
             return ;
@@ -55,6 +59,19 @@ public class ReceiveIdMethodVisitor extends MethodVisitor {
         visitMethodInsn(Opcodes.INVOKESTATIC,"com/asiainfo/hlog/agent/runtime/http/HttpMonitor","receiveHlogId",
                 "(Ljava/lang/String;Ljava/lang/String;)V", false);
         super.visitCode();
+    }
+
+    protected void beforeReturn(boolean isVoid) {
+        doClean();
+    }
+
+    protected void beforeThrow(int flag) {
+        doClean();
+    }
+
+    private void doClean(){
+        //mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/http/HttpMonitor", "clearReceiveHlogId", "()V", false);
+        ASMUtils.visitStaticMethod(mv, HttpMonitor.class,"clearReceiveHlogId",null);
     }
 
 }
