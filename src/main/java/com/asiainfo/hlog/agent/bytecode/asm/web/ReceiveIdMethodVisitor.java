@@ -48,11 +48,11 @@ public class ReceiveIdMethodVisitor extends AbstractEndTodoMethodVisitor {
             return ;
         }
         mv.visitIntInsn(ALOAD,paramIndex);
-        mv.visitLdcInsn("Hlog-Agent-Gid");
+        mv.visitLdcInsn("HlogGid");
         mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getHeader", "(Ljava/lang/String;)Ljava/lang/String;", true);
 
         mv.visitIntInsn(ALOAD,paramIndex);
-        mv.visitLdcInsn("Hlog-Agent-Pid");
+        mv.visitLdcInsn("HlogPid");
         mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getHeader", "(Ljava/lang/String;)Ljava/lang/String;", true);
 
         //ASMUtils.visitStaticMethod(mv, HttpMonitor.class,"receiveHlogId", ServletRequest.class);

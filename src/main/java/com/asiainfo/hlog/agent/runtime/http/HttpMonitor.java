@@ -31,6 +31,10 @@ public class HttpMonitor {
         excludeExpands.add("tiff");
         excludeExpands.add("swf");
         excludeExpands.add("svg");
+        excludeExpands.add("zip");
+        excludeExpands.add("rar");
+        excludeExpands.add("doc");
+        excludeExpands.add("xsl");
         //TODO 增加可配置
     }
 

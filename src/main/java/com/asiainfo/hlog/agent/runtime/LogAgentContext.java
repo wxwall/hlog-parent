@@ -22,6 +22,8 @@ public class LogAgentContext {
 
     private static final ThreadLocal<Boolean> keepContext = new ThreadLocal<Boolean>();
 
+    private static final ThreadLocal<Boolean> writeHeaderLocked = new ThreadLocal<Boolean>();
+
     public static void setKeepContext(boolean keep){
         keepContext.set(keep);
     }
@@ -32,6 +34,20 @@ public class LogAgentContext {
         }else{
             return keepContext.get();
         }
+    }
+
+    public static void writeHeaderLocked(){
+        writeHeaderLocked.set(true);
+    }
+    public static boolean isWriteHeaderLocked(){
+        if(writeHeaderLocked.get()==null){
+            return false;
+        }else{
+            return writeHeaderLocked.get();
+        }
+    }
+    public static void cleanWriteHeaderLock(){
+        writeHeaderLocked.set(false);
     }
 
     public static void setThreadLogGroupId(String logGroupId){

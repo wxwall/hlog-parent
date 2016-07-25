@@ -1,0 +1,24 @@
+
+
+    public void executeMethod(final HttpMethod method) throws IOException, HttpException {
+
+        boolean lock = false;
+        if(!LogAgentContext.isWriteHeaderLocked()){
+            LogAgentContext.writeHeaderLocked();
+            lock = true;
+            String gId = LogAgentContext.getThreadLogGroupId();
+            if(gId!=null){
+                method.addRequestHeader("Hlog-Agent-Gid1",gId);
+            }
+            String pId = LogAgentContext.getThreadCurrentLogId();
+            if(pId!=null){
+                method.addRequestHeader("Hlog-Agent-Pid1",pId);
+            }
+        }
+
+        if(lock){
+            LogAgentContext.cleanWriteHeaderLock();
+        }
+
+
+    }

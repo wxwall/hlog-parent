@@ -49,6 +49,11 @@ public abstract class AbstractEndTodoMethodVisitor extends AbstractMethodVisitor
         return idxExce;
     }
 
+    @Override
+    public void visitIntInsn(int opcode, int operand) {
+        super.visitIntInsn(opcode, operand);
+    }
+
     protected void defineThrowable(){
 
         if(mv instanceof  AbstractEndTodoMethodVisitor){

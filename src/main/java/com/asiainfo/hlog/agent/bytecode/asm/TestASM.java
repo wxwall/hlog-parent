@@ -1,7 +1,7 @@
 package com.asiainfo.hlog.agent.bytecode.asm;
 
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
-import com.asiainfo.hlog.agent.runtime.http.HttpMonitor;
+import com.asiainfo.hlog.client.helper.LogUtil;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -15,6 +15,20 @@ public class TestASM {
     private void socketWrite0(FileDescriptor fd, byte[] b, int off,
                               int len) throws IOException{
         System.out.print(new String(b, off, len));
+    }
+    private boolean _isLockWriteHeader(){
+        boolean _lock = false;
+        try{
+            _lock =  LogAgentContext.isWriteHeaderLocked();
+        }catch (Throwable t){
+            try{
+                _lock = (Boolean) Thread.currentThread().getContextClassLoader()
+                        .loadClass("com.asiainfo.hlog.agent.runtime.LogAgentContext")
+                        .getMethod("isWriteHeaderLocked").invoke(null,new Object[0]);
+            }catch (Throwable t1){
+            }
+        }
+        return _lock;
     }
     public String _getLogId(String method){
         String _id = null;
@@ -41,7 +55,7 @@ public class TestASM {
     }
 
     private void _socketWrite(FileDescriptor fd,byte b[], int off, int len) throws IOException {
-        if(!isWrited && len>6){
+        if(!_isLockWriteHeader() && !isWrited && len>6){
             boolean isHttp = false;
             isWrited = true;
             String gid = _getLogId("getThreadLogGroupId");
@@ -58,22 +72,32 @@ public class TestASM {
                 }else if(isHttp && b[index]==10 && b[index-1]==13){
                     int newIndex = index+1;
                     //1、发关前部分
-                    showLog(b,0,newIndex,1);
-                    socketWrite0(fd,b,0,newIndex);
                     String pid = _getLogId("getThreadCurrentLogId");
                     //2、追加Hlog头
                     StringBuilder head = new StringBuilder();
-                    head.append("Hlog-Agent-Gid:").append(gid);
+                    head.append("Hlog-Agent-Gid:").append(gid).append("\r\n");
                     if(pid!=null){
-                        head.append("\r\n").append("Hlog-Agent-Pid:").append(pid);
+                        head.append("Hlog-Agent-Pid:").append(pid).append("\r\n");
                     }
                     byte[] headBytes = head.toString().getBytes();
-                    showLog(headBytes,0,headBytes.length,2);
-                    socketWrite0(fd,headBytes,0,headBytes.length);
-                    //再追加剩余内容
-                    showLog(b,newIndex,len-newIndex,3);
-                    socketWrite0(fd,b,newIndex,len-newIndex);
-                    //返回
+
+
+                    byte[] newdatas = new byte[len+headBytes.length];
+
+                    System.arraycopy(b,off,newdatas,0,newIndex);
+                    System.arraycopy(headBytes,0,newdatas,newIndex,headBytes.length);
+                    System.arraycopy(b,newIndex,newdatas,newIndex+headBytes.length,len-newIndex);
+
+                    /*
+                    byte[] newdatas = new byte[len];
+                    System.arraycopy(b,off,newdatas,0,newIndex);
+                    //System.arraycopy(headBytes,0,newdatas,newIndex,headBytes.length);
+                    System.arraycopy(b,newIndex,newdatas,newIndex,len-newIndex);
+                    */
+                    showLog(newdatas,0,newdatas.length,1);
+
+                    socketWrite0(fd,newdatas,0,newdatas.length);
+
                     return ;
                 }
 
@@ -116,11 +140,13 @@ public class TestASM {
     }
 
     public static void main(String[] args) throws IOException {
+        LogAgentContext.setThreadLogGroupId(LogUtil.logId());
         TestASM testASM = new TestASM();
         //byte[] b = "GET sssssssssssss\r\nTest:test\r\nName:flll\r\n\r\nttttttttttttttttttt11".getBytes();
         byte[] b = "GET sssssssssssss\r\nTest:test\r\nName:flll\r\n\r\nttttttttttttttttttt11".getBytes();
+        System.out.println("length:"+b.length);
         testASM._socketWrite(null,b,0,b.length);
 
-        HttpMonitor.clearReceiveHlogId();
+        //HttpMonitor.clearReceiveHlogId();
     }
 }
