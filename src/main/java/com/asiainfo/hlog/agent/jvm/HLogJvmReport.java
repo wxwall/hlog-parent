@@ -10,6 +10,7 @@ import com.asiainfo.hlog.client.model.LogData;
 import com.sun.management.OperatingSystemMXBean;
 
 import java.lang.management.*;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -60,7 +61,6 @@ public class HLogJvmReport {
         logData.put("freePhyMem",osmxb.getFreePhysicalMemorySize());
         logData.put("totalPhyMem",osmxb.getTotalPhysicalMemorySize());
         //logData.put("cpuLoad",osmxb.getSystemCpuLoad());//jdk7+
-
         //线程
         ThreadMXBean thread = ManagementFactory.getThreadMXBean();
         logData.put("peakThread",thread.getPeakThreadCount());
@@ -94,10 +94,12 @@ public class HLogJvmReport {
     public void start(){
         try {
             String interval = HLogConfig.getInstance().getProperty(Constants.KEY_MONITOR_JVM_INTERVAL_TIME, "2");
-            //延迟interval秒后以每隔interval秒执行异常task任务
+            int second = Calendar.getInstance().get(Calendar.SECOND);
+            int delay = 60 - second;
+            //延迟delay秒后以每隔interval秒执行异常task任务
             scheduledExecutorService.scheduleAtFixedRate(
                     task,
-                    Integer.parseInt(interval),
+                    delay,
                     Integer.parseInt(interval),
                     TimeUnit.SECONDS);
 
