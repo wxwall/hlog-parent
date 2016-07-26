@@ -1,6 +1,8 @@
 package com.asiainfo.hlog.agent.runtime;
 
 import com.asiainfo.hlog.client.HLogReflex;
+import com.asiainfo.hlog.client.config.Constants;
+import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.ClassHelper;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
@@ -43,6 +45,8 @@ public class RuntimeContext {
 
     private static Object hlogConfigInstance ;
 
+    private static MethodCaller propertyMethodCaller;
+
     private static Object hlogConfigInstanceInvoke(MethodCaller caller){
         if(caller==null){
             return null;
@@ -67,6 +71,14 @@ public class RuntimeContext {
 
     public static boolean isEnableSaveWithoutParams() {
         return (Boolean)hlogConfigInstanceInvoke(enableSaveWithoutParams);
+    }
+
+    public static String[] getErrorCodeTypes(){
+        if(propertyMethodCaller !=null){
+            String values = (String)propertyMethodCaller.invoke(Constants.KEY_ERROR_CODE_TYPES,"code");
+            return values.split(",");
+        }
+        return new String[]{"code"};
     }
 
     public static boolean isEnableSaveWithoutSubs() {
@@ -99,6 +111,8 @@ public class RuntimeContext {
             enableSaveWithoutSubs = new MethodCaller(ClassHelper.getMethod(clazz,"isEnableSaveWithoutSubs"),hlogConfigInstance);
             enableSqlTrack = new MethodCaller(ClassHelper.getMethod(clazz,"isEnableSqlTrack"),hlogConfigInstance);
             enableLoggerTrack = new MethodCaller(ClassHelper.getMethod(clazz,"isEnableLoggerTrack"),hlogConfigInstance);
+
+            propertyMethodCaller = new MethodCaller(ClassHelper.getMethod(clazz,"getProperty",String.class,String.class),hlogConfigInstance);
         } catch (Exception e) {
             Logger.error("读取运行时配置数据异常",e);
         }
@@ -218,6 +232,29 @@ public class RuntimeContext {
         }catch (Throwable t){
             Logger.error("将日志写入队列时出错,参数：{0},{1},{2}",t,clazz,method,logData);
         }
+    }
+
+    /**
+     * 获取异常编码，如果属性不存在返回字符串“undefined”
+     * @param t
+     * @return
+     */
+    public static String errorCode(Throwable t){
+        String[] codeTypeArray = getErrorCodeTypes();
+        for(String codeType : codeTypeArray){
+            try {
+                Field field = t.getClass().getDeclaredField(codeType);
+                field.setAccessible(true);
+                Object value = field.get(t);
+                if(value!=null){
+                    return value.toString();
+                }
+                return null;
+            } catch (Exception e) {
+                Logger.debug("ERROR_CODE={0}不存在",codeType);
+            }
+        }
+        return "undefined";
     }
 
 }
