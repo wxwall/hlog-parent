@@ -251,10 +251,10 @@ public class RuntimeContext {
                 }
                 return null;
             } catch (Exception e) {
-                Logger.debug("ERROR_CODE={0}不存在",codeType);
+                Logger.debug("ERROR_CODE_TYPE={0}不存在",codeType);
             }
         }
-        return "undefined";
+        return t.getClass().getSimpleName();
     }
 
 }
