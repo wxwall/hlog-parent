@@ -347,6 +347,8 @@ public class SocketOutputStreamNewMethods implements IHLogNewMethods,Opcodes {
         mv.visitIincInsn(7, 1);
         mv.visitJumpInsn(GOTO, l9);
         mv.visitLabel(l1);
+        /*
+
         mv.visitLineNumber(107, l1);
         mv.visitVarInsn(ALOAD, 0);
         mv.visitVarInsn(ALOAD, 2);
@@ -354,6 +356,7 @@ public class SocketOutputStreamNewMethods implements IHLogNewMethods,Opcodes {
         mv.visitVarInsn(ILOAD, 4);
         mv.visitInsn(ICONST_0);
         mv.visitMethodInsn(INVOKESPECIAL, JAVA_NET_SOCKET_OUTPUT_STREAM, "showLog", "([BIII)V", false);
+        */
         Label l30 = new Label();
         mv.visitLabel(l30);
         mv.visitLineNumber(108, l30);
