@@ -3,12 +3,10 @@ package com.asiainfo.hlog.agent.runtime;
 import com.asiainfo.hlog.agent.HLogAgentConst;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
+import com.asiainfo.hlog.org.objectweb.asm.Type;
 
 import java.lang.ref.SoftReference;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 import static com.asiainfo.hlog.agent.runtime.RuntimeContext.enable;
 import static com.asiainfo.hlog.agent.runtime.RuntimeContext.writeEvent;
@@ -22,11 +20,28 @@ import static com.asiainfo.hlog.agent.runtime.RuntimeContext.writeEvent;
  * Created by chenfeng on 2016/4/20.
  */
 public class HLogMonitor {
+
+    private static Set<String> excludeParamTypes = new HashSet<String>();
+    private static Set<String> excludeParamTypePaths = new HashSet<String>();
+    static {
+        excludeParamTypes.add("javax.servlet.http.HttpServletResponse");
+        excludeParamTypes.add("javax.servlet.http.HttpServletRequest");
+        excludeParamTypes.add("javax.servlet.http.HttpSession");
+        excludeParamTypePaths.add("javax.");
+        excludeParamTypePaths.add("org.springframework");
+        excludeParamTypePaths.add("org.apache");
+        excludeParamTypePaths.add("org.jdom");
+        excludeParamTypePaths.add("com.fasterxml");
+        excludeParamTypePaths.add("org.mybatis");
+        excludeParamTypePaths.add("com.fasterxml");
+    }
+
     static final class Node{
         private final String logId;
         private final String logPid;
         private final String className;
         private final String methodName;
+        private final String description;
         private final String[] paramNames;
         private final SoftReference<Object>[]  params;
         //private final Object[] params;
@@ -42,7 +57,7 @@ public class HLogMonitor {
             logPid = null;
             className = null;
             methodName = null;
-            //description = null;
+            description = null;
             paramNames = null;
             params = null;
             beginTime = 0;
@@ -53,7 +68,7 @@ public class HLogMonitor {
             this.logPid = logPid;
             this.className = className;
             this.methodName = methodName;
-            //this.description = description;
+            this.description = description;
             this.paramNames = paramNames;
             this.params = params;
             beginTime = System.currentTimeMillis();
@@ -121,7 +136,6 @@ public class HLogMonitor {
     }
 
     public static void end(String mcode,Object returnObj,boolean isError){
-
         Stack<Node> stack = null;
         String pid = null;
         try{
@@ -148,6 +162,7 @@ public class HLogMonitor {
                 havWriteLog = true;
                 isWriteErrLog = true;
             }
+
             long ptime = RuntimeContext.getProcessTime();
             //耗时达到某值是记录
             if(node.enableProcess && node.speed>=ptime){
@@ -168,14 +183,14 @@ public class HLogMonitor {
             if(havWriteLog && RuntimeContext.isEnableSaveWithoutParams()){
                 doWriteMethodParams(node);
             }
-
+        }catch (Throwable t){
+            Logger.error("HLogMonitor end异常",t);
         }finally {
             if("nvl".equals(pid)){
                 if(!LogAgentContext.isKeepContext()){
                     LogAgentContext.clear();
                 }
                 stack.clear();
-                //LogAgentContext.setThreadCurrentLogId(null);
             }else{
                 LogAgentContext.setThreadCurrentLogId(pid);
             }
@@ -198,6 +213,7 @@ public class HLogMonitor {
         }
     }
 
+
     private static void doWriteMethodParams(Node node){
         if(node==null){
             return;
@@ -206,14 +222,22 @@ public class HLogMonitor {
         if(node.paramNames==null || node.paramNames.length==0 ){
             logData.put("params","{}");
         }else{
+            Type[] paramsDesc = Type.getArgumentTypes(node.description);
             String params = null;
             try{
                 String[] pns = node.paramNames;
                 int ilen = pns.length;
                 Map<String,Object> jsonMap = new HashMap<String, Object>();
                 for (int i = 0; i < ilen; i++) {
+                    SoftReference<Object> p = node.params[i];
                     try{
-                        jsonMap.put(pns[i],node.params[i]);
+                        //是否是排除的参数类型
+                        boolean isExclude = isExcludeParamType(paramsDesc[i].getClassName());
+                        if(!isExclude){
+                            jsonMap.put(pns[i],p);
+                        }else{
+                            jsonMap.put(pns[i],"--");
+                        }
                     }catch (Exception e){
                         jsonMap.put(pns[i],"ERR:"+e.getMessage());
                     }
@@ -232,6 +256,22 @@ public class HLogMonitor {
         }
 
         writeEvent(node.className,node.methodName,logData);
+    }
+
+    private static boolean isExcludeParamType(String clazz) {
+        for (String excludeParamType : excludeParamTypes) {
+            if (excludeParamType.equals(clazz)) {
+                return true;
+            }
+        }
+
+        for (String excludeParamTypePath : excludeParamTypePaths) {
+            if (clazz.startsWith(excludeParamTypePath)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
