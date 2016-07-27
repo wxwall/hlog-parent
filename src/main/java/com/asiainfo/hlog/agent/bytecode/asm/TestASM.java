@@ -147,6 +147,10 @@ public class TestASM {
         System.out.println("length:"+b.length);
         testASM._socketWrite(null,b,0,b.length);
 
+        Throwable t = null;
+
+        t.printStackTrace();
+
         //HttpMonitor.clearReceiveHlogId();
     }
 }

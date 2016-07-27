@@ -57,24 +57,28 @@ public class ProcessMethodVisitor extends AbstractTryCatchMethodVisitor {
     }
 
     protected void beforeReturn(boolean isVoid){
+
+        visitLdcInsn(mcode);
         if(!isVoid){
-            visitLdcInsn(mcode);
             visitIntInsn(RES_LOAD_CODE,idxReturn);
             //如果是一个基本类型的数据转字符串
             if(RES_LOAD_CODE != ALOAD){
                 ASMUtils.visitStaticMethod(mv,String.class,"valueOf",ASMUtils.getClassByStringValueOf(returnType.getSort()));
             }
         }else {
-            visitInsn(ACONST_NULL);
+            //visitInsn(ACONST_NULL);
             visitInsn(ACONST_NULL);
         }
         visitInsn(ICONST_0);
         ASMUtils.visitStaticMethod(mv,HLogMonitor.class,"end",String.class,Object.class,boolean.class);
+        //ASMUtils.visitStaticMethod(mv,HLogMonitor.class,"test");
     }
 
     protected void beforeThrow(int flag) {
         // 调用日志监控结束,并记录发生的异常
         if(flag==1){
+            //visitVarInsn(ALOAD, getIdxExce());
+            //mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Throwable", "printStackTrace", "()V", false);
             visitLdcInsn(mcode);
             visitVarInsn(ALOAD, getIdxExce());
             visitInsn(ICONST_1);
