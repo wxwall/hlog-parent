@@ -45,6 +45,8 @@ public class HLogJvmReport {
         logData.put("heapInit",heap.getInit());
         logData.put("heapMax",heap.getMax());
         logData.put("heapUsed",heap.getUsed());
+        logData.put("heapCommitted",heap.getCommitted());
+        logData.put("heapRate",(heap.getUsed()*100)/heap.getMax());
 
         List<MemoryPoolMXBean> list = ManagementFactory.getMemoryPoolMXBeans();
         for (MemoryPoolMXBean bean:list){
@@ -54,17 +56,19 @@ public class HLogJvmReport {
                 logData.put("permGenInit",usage.getInit());
                 logData.put("permGenMax",usage.getMax());
                 logData.put("permGenUsed",usage.getUsed());
+                logData.put("permGenRate",(usage.getUsed()*100)/usage.getMax());
             }
         }
         //操作系统物理内存
         OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-        logData.put("freePhyMem",osmxb.getFreePhysicalMemorySize());
-        logData.put("totalPhyMem",osmxb.getTotalPhysicalMemorySize());
+        logData.put("phyMemFree",osmxb.getFreePhysicalMemorySize());
+        logData.put("phyMemTotal",osmxb.getTotalPhysicalMemorySize());
+        logData.put("phyMemRate",(osmxb.getFreePhysicalMemorySize()*100)/osmxb.getTotalPhysicalMemorySize());
         //logData.put("cpuLoad",osmxb.getSystemCpuLoad());//jdk7+
         //线程
         ThreadMXBean thread = ManagementFactory.getThreadMXBean();
-        logData.put("peakThread",thread.getPeakThreadCount());
-        logData.put("liveThread",thread.getThreadCount());
+        logData.put("threadPeak",thread.getPeakThreadCount());
+        logData.put("threadLive",thread.getThreadCount());
         RuntimeContext.writeEvent("jvm.log",null,logData);
     }
 
