@@ -2,7 +2,6 @@ package com.asiainfo.hlog.agent.runtime;
 
 import com.asiainfo.hlog.client.HLogReflex;
 import com.asiainfo.hlog.client.config.Constants;
-import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.ClassHelper;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
@@ -249,9 +248,9 @@ public class RuntimeContext {
                 if(value!=null){
                     return value.toString();
                 }
-                return null;
-            } catch (Exception e) {
-                Logger.debug("ERROR_CODE_TYPE={0}不存在",codeType);
+                return t.getClass().getSimpleName();
+            } catch (Throwable e) {
+                Logger.debug("{1}类ERROR_CODE_TYPE={0}不存在",codeType,t.getClass());
             }
         }
         return t.getClass().getSimpleName();

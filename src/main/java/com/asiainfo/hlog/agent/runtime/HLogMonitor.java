@@ -52,6 +52,8 @@ public class HLogMonitor {
         private boolean enableError ;
         private boolean leaf = true;
 
+        private SoftReference<Throwable> rootThrowable ;
+
         public Node(){
             logId = null;
             logPid = null;
@@ -156,8 +158,12 @@ public class HLogMonitor {
             boolean havWriteLog = false;
             boolean enableSaveWithoutSubs = RuntimeContext.isEnableSaveWithoutSubs();
             boolean isWriteErrLog = false;
-            //发生异常时记录
-            if(isError && stack.isEmpty() && node.enableError){
+            //发生异常时记录,在异常源头保存异常数据,同时将上级node设为非源头
+            if(isError && (node.rootThrowable==null  || !returnObj.equals(node.rootThrowable.get()))){
+                Node pnode = stack.peek();
+                if(pnode!=null){
+                    pnode.rootThrowable=new SoftReference(returnObj);
+                }
                 doSendErrorLog(node, id, pid, (Throwable) returnObj);
                 havWriteLog = true;
                 isWriteErrLog = true;

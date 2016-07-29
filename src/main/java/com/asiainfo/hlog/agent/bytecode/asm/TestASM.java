@@ -16,20 +16,6 @@ public class TestASM {
                               int len) throws IOException{
         System.out.print(new String(b, off, len));
     }
-    private boolean _isLockWriteHeader(){
-        boolean _lock = false;
-        try{
-            _lock =  LogAgentContext.isWriteHeaderLocked();
-        }catch (Throwable t){
-            try{
-                _lock = (Boolean) Thread.currentThread().getContextClassLoader()
-                        .loadClass("com.asiainfo.hlog.agent.runtime.LogAgentContext")
-                        .getMethod("isWriteHeaderLocked").invoke(null,new Object[0]);
-            }catch (Throwable t1){
-            }
-        }
-        return _lock;
-    }
     public String _getLogId(String method){
         String _id = null;
         try{
@@ -55,9 +41,9 @@ public class TestASM {
     }
 
     private void _socketWrite(FileDescriptor fd,byte b[], int off, int len) throws IOException {
-        if(!_isLockWriteHeader() && !isWrited && len>6){
+        if(len>6){
             boolean isHttp = false;
-            isWrited = true;
+            //isWrited = true;
             String gid = _getLogId("getThreadLogGroupId");
             if(gid==null){
                 socketWrite0(fd,b,off,len);
@@ -146,10 +132,6 @@ public class TestASM {
         byte[] b = "GET sssssssssssss\r\nTest:test\r\nName:flll\r\n\r\nttttttttttttttttttt11".getBytes();
         System.out.println("length:"+b.length);
         testASM._socketWrite(null,b,0,b.length);
-
-        Throwable t = null;
-
-        t.printStackTrace();
 
         //HttpMonitor.clearReceiveHlogId();
     }
