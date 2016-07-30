@@ -51,6 +51,7 @@ public class HLogMonitor {
         private boolean enableProcess;
         private boolean enableError ;
         private boolean leaf = true;
+        private boolean sql = false;
 
         private SoftReference<Throwable> rootThrowable ;
 
@@ -311,6 +312,9 @@ public class HLogMonitor {
         logData.put("isTop",isTop?1:0);
         logData.put("havErr",isWriteErrLog?1:0);
         logData.put("leaf",node.leaf?1:0);
+        if(node.sql){
+            logData.put("sql",1);
+        }
         writeEvent(node.className,node.methodName,logData);
     }
 
@@ -348,6 +352,7 @@ public class HLogMonitor {
             pid = node.logId;
             clsName = node.className;
             methodName = node.methodName;
+            node.sql=true;
         }
         LogData logData = createLogData(HLogAgentConst.MV_CODE_SQL,id,pid);
         logData.put("spend",speed);
