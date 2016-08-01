@@ -196,6 +196,9 @@ public class RuntimeContext {
 
         return (String)logIdMehtodClass.invoke();
     }
+    public static String getLogId(){
+        return LogAgentContext.getThreadCurrentLogId();
+    }
     public static String buildLogPId(String _agent_Log_Id_){
         //获取上级日志id
         String _agent_Log_pId = LogAgentContext.getThreadCurrentLogId();

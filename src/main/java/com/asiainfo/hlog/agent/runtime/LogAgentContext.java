@@ -54,7 +54,11 @@ public class LogAgentContext {
         threadLogGroupId.set(logGroupId);
     }
     public static String getThreadLogGroupId(){
-        return threadLogGroupId.get();
+        String gId = threadLogGroupId.get();
+        if(gId==null){
+            gId = threadCurrentLogId.get();
+        }
+        return gId;
     }
     public static void clearLogGroupId(){
         threadLogGroupId.remove();

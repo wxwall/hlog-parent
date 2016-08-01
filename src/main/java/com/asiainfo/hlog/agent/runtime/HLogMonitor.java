@@ -38,7 +38,7 @@ public class HLogMonitor {
 
     static final class Node{
         private final String logId;
-        private final String logPid;
+        private String logPid;
         private final String className;
         private final String methodName;
         private final String description;
@@ -104,7 +104,12 @@ public class HLogMonitor {
             }
         }
         String id = RuntimeContext.logId();
-        String pid = RuntimeContext.buildLogPId(id);
+        String pid = null;
+        if(enableProcess){
+            pid = RuntimeContext.buildLogPId(id);
+        }else{
+            pid = id;
+        }
         Node node = new Node(id,pid,className,methodName,desc,paramNames,softReferences);
         node.enableProcess = enableProcess;
         node.enableError = enableError;
@@ -141,6 +146,7 @@ public class HLogMonitor {
     public static void end(String mcode,Object returnObj,boolean isError){
         Stack<Node> stack = null;
         String pid = null;
+        boolean enableProcess = false;
         try{
             stack = local.get();
             if(stack.isEmpty()){
@@ -159,20 +165,31 @@ public class HLogMonitor {
             boolean havWriteLog = false;
             boolean enableSaveWithoutSubs = RuntimeContext.isEnableSaveWithoutSubs();
             boolean isWriteErrLog = false;
+
+            enableProcess = node.enableProcess;
+
             //发生异常时记录,在异常源头保存异常数据,同时将上级node设为非源头
             if(isError && (node.rootThrowable==null  || !returnObj.equals(node.rootThrowable.get()))){
                 Node pnode = stack.peek();
                 if(pnode!=null){
                     pnode.rootThrowable=new SoftReference(returnObj);
                 }
+                //如果没有开启记录该方法时,又发生异常了,就记录该方法
+                if(!enableProcess){
+                    pid = RuntimeContext.buildLogPId(id);
+                    node.logPid = pid;
+                    enableProcess = true;
+                }
                 doSendErrorLog(node, id, pid, (Throwable) returnObj);
                 havWriteLog = true;
                 isWriteErrLog = true;
+
             }
 
             long ptime = RuntimeContext.getProcessTime();
+
             //耗时达到某值是记录
-            if(node.enableProcess && node.speed>=ptime){
+            if(enableProcess && node.speed>=ptime){
                 //记录运行耗时超过
                 doSendProcessLog(node,id,pid,node.isError,stack.isEmpty(),isWriteErrLog);
                 //如果本节点超过预警值,追加写已经执行过的子过程节点
@@ -182,7 +199,7 @@ public class HLogMonitor {
                 if(node.speed>=RuntimeContext.getProcessTimeWithout()){
                     havWriteLog = true;
                 }
-            }else if(node.enableProcess && enableSaveWithoutSubs && ptime>0){
+            }else if(enableProcess && enableSaveWithoutSubs && ptime>0){
                 pushSubNode(node,ptime);
             }
 
@@ -199,7 +216,9 @@ public class HLogMonitor {
                 }
                 stack.clear();
             }else{
-                LogAgentContext.setThreadCurrentLogId(pid);
+                if(enableProcess){
+                    LogAgentContext.setThreadCurrentLogId(pid);
+                }
             }
             //如果上级id为null时,清了node =
             if(stack!=null && stack.isEmpty()){
