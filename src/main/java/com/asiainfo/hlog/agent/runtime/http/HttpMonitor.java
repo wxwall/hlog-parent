@@ -68,8 +68,8 @@ public class HttpMonitor {
         if(excludeExpands.contains(expand)){
             return ;
         }
+        String pid = RuntimeContext.getLogId();
         String id = RuntimeContext.logId();
-        String pid = RuntimeContext.buildLogPId(id);
         LogData logData = HLogMonitor.createLogData("request",id,pid);
         logData.put("url",requestUrl.toString());
         logData.put("remoteAddr",addr);
