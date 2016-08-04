@@ -19,6 +19,8 @@ public class SocketOutputStreamNewMethods implements IHLogNewMethods,Opcodes {
 
     private static final String FIELD_IS_WRITED = "isWrited";
 
+    public SocketOutputStreamNewMethods(String className){
+    }
 
     public void createNewMethods(ClassWriter classWriter) {
         //创建isWrited成员属性

@@ -7,7 +7,6 @@ import com.asiainfo.hlog.org.objectweb.asm.ClassWriter;
  * Created by chenfeng on 2016/4/25.
  */
 public interface IHLogNewMethods {
-
     /**
      * 创建新的方法,可以创建多个新方法
      * @param classWriter

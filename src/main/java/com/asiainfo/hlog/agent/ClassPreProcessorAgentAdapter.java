@@ -25,7 +25,6 @@ public class ClassPreProcessorAgentAdapter implements ClassFileTransformer {
     public ClassPreProcessorAgentAdapter(){
 
         LoaderHelper.setLoader(this.getClass().getClassLoader());
-        System.out.println("========== Asiainfo HLog Agent ["+HLogConfig.VERSION+"] ==============\n");
         //获取配置实例
         HLogConfig config = HLogConfig.getInstance();
         //初始化配置信息,后需要从properties文件或服务端来获取

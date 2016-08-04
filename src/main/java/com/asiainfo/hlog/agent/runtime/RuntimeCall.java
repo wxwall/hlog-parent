@@ -4,14 +4,14 @@ import com.al.common.context.IPropertyListener;
 import com.al.common.context.PropertyEvent;
 import com.al.common.context.PropertyHolder;
 import com.alibaba.fastjson.JSON;
-import com.asiainfo.hlog.client.helper.ExcludeRuleUtils;
 import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.config.HLogConfigRule;
 import com.asiainfo.hlog.client.helper.LogUtil;
-import com.asiainfo.hlog.client.helper.Logger;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Created by chenfeng on 2015/4/17.
@@ -52,11 +52,40 @@ public class RuntimeCall{
         }
     }
 
-    class RuntimeSwitch{
-        private Map<String,Object> ON = new SwitchLRUCache<String,Object>(2000);
-        private Map<String,Object> OFF = new SwitchLRUCache<String,Object>(2000);
+    class SwitchKey {
 
-        public int getSwitch(String key){
+        private String clazz;
+
+        private int flag ;
+
+        public SwitchKey(String clazz,int flag){
+            this.clazz = clazz;
+            this.flag = flag;
+        }
+
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            SwitchKey switchKey = (SwitchKey) o;
+
+            return clazz.equals(switchKey.clazz);
+
+        }
+
+        @Override
+        public int hashCode() {
+            return clazz.hashCode();
+        }
+    }
+
+    class RuntimeSwitch{
+        private Map<SwitchKey,Object> ON = new SwitchLRUCache<SwitchKey,Object>(10000);
+        private Map<SwitchKey,Object> OFF = new SwitchLRUCache<SwitchKey,Object>(10000);
+        //private Map<String,Object> ON = new LinkedHashMap<String,Object>(1000, 0.8f,false);
+        //private Map<String,Object> OFF = new LinkedHashMap<String,Object>(1000, 0.8f,false);
+
+        public int getSwitch(SwitchKey key){
             try{
                 if(ON.get(key)!=null){
                     return 1;
@@ -69,13 +98,13 @@ public class RuntimeCall{
             return -1;
         }
 
-        public void onSwitch(String key){
+        public void onSwitch(SwitchKey key){
             if(key==null){
                 return ;
             }
             ON.put(key,nullObject);
         }
-        public void offSwitch(String key){
+        public void offSwitch(SwitchKey key){
             if(key==null){
                 return ;
             }
@@ -110,137 +139,91 @@ public class RuntimeCall{
      * @param level
      * @return
      */
+
+    private static Map<String,Integer> CAPTURE_ENABLE_CACHE = new HashMap<String,Integer>(2000);
+
     public boolean enable(String weaveName ,String clazz,String method,String level){
 
-        RuntimeSwitch runtimeSwitch = null;
-        String switchKey = clazz ;
-        if(method!=null){
-            switchKey = switchKey + "-" + method;
+        HLogConfig config = HLogConfig.getInstance();
+        if(!config.isEnable()){
+            return false;
         }
-        if(level!=null){
-            switchKey = switchKey + "-" + level;
+
+        Integer temp = config.CAPTURE_ENABLE_FLAG.get(weaveName);
+        if(temp==null){
+            if("logger".equals(weaveName)){
+                String tmp = weaveName + "-" + level;
+                temp = config.CAPTURE_ENABLE_FLAG.get(tmp);
+            }
+            return false;
         }
-        try{
-            HLogConfig config = HLogConfig.getInstance();
-
-            if(!config.isEnable()){
-                return false;
-            }
-
-            int flag = -1;
-            runtimeSwitch = mcodeRuntimeSwitchMap.get(weaveName);
-            if (runtimeSwitch==null) {
-                runtimeSwitch = new RuntimeSwitch();
-                mcodeRuntimeSwitchMap.put(weaveName,runtimeSwitch);
-            }else if((flag=runtimeSwitch.getSwitch(switchKey))!=-1){
-                return flag==1?true:false;
-            }
-
-            //寻找最合适的配置
-            HLogConfigRule rule = LogUtil.suitableConfig(clazz, method, config.getRuntimeCaptureCofnigRule());
-            if(rule==null){
-                runtimeSwitch.offSwitch(switchKey);
-                return false;
-            }
-
-            List<String> captureWeaves = rule.getCaptureWeaves();
-            if(captureWeaves==null || captureWeaves.size()==0){
-                runtimeSwitch.offSwitch(switchKey);
-                return false;
-            }
-
-
-            for (String weave : captureWeaves){
-                //如果配置none的话,那么不采集日志
-                if("none".equals(weave)){
-                    runtimeSwitch.offSwitch(switchKey);
-                    return false;
-                }else if(weave.equals(weaveName)){
-                    boolean enable = false;
-                    if(("logger".equals(weaveName))
-                            && level!=null && rule.getLevel()!=null){
-                        //看是否是被排除的类
-                        if(ExcludeRuleUtils.isExcludePath(clazz)){
-                            enable = false;
-                        }else if(Logger.canOutprint(level,rule.getLevel())){
-                            enable = true;
-                        }
-                    }else{
-                        enable = true;
-                    }
-                    if(enable){
-                        runtimeSwitch.onSwitch(switchKey);
-                    }else{
-                        runtimeSwitch.offSwitch(switchKey);
-                    }
-
-                    if(Logger.isTrace()){
-                        Logger.trace("判断[{0}]是否在收集日志数据范围:{1}",switchKey,enable);
-                    }
-                    return enable;
-                }
-            }
-
-            /*
-
-            //查收到是有直接是方法级的
-            String classKey = clazz + "-" + weaveName;
-            if("logger".equals(weaveName) && level!=null){
-                classKey = classKey + "-" + level;
-            }
-            if(runtimeSwitchMap.containsKey(classKey)){
-                boolean b = runtimeSwitchMap.get(classKey);
-                if(Logger.isTrace()){
-                    Logger.trace("判断[{0}]是否在收集日志数据范围:{1}",classKey,b);
-                }
-                return b;
-            }else{
-                //寻找最合适的配置
-                HLogConfigRule rule = LogUtil.suitableConfig(clazz, method, config.getRuntimeCaptureCofnigRule());
-
-                if(rule!=null){
-                    List<String> captureWeaves = rule.getCaptureWeaves();
-                    if(captureWeaves!=null){
-                        for (String weave : captureWeaves){
-                            if(weave.equals(weaveName)){
-                                boolean enable = false;
-                                if(("logger".equals(weaveName))
-                                        && level!=null && rule.getLevel()!=null){
-                                    //看是否是被排除的类
-                                    if(ExcludeRuleUtils.isExcludePath(clazz)){
-                                        enable = false;
-                                    }else if(Logger.canOutprint(level,rule.getLevel())){
-                                        enable = true;
-                                    }
-                                }else{
-                                    enable = true;
-                                }
-
-                                runtimeSwitchMap.put(classKey, enable);
-                                if(Logger.isTrace()){
-                                    Logger.trace("判断[{0}]是否在收集日志数据范围:{1}",classKey,enable);
-                                }
-                                return enable;
-                            }
-                        }
-                    }
-                }
-            }
-
-            runtimeSwitchMap.put(classKey,false);
-            if(Logger.isTrace()){
-                Logger.trace("判断[{0}]是否在收集日志数据范围:{1}",classKey,false);
-            }
-            */
-        }catch (Throwable t){
-            Logger.error("判断{0}的{1}的{2}方法是否启用收集日志时异常:{3}",t,weaveName ,clazz,method,t.getMessage());
+        if(temp==null){
+            return false;
         }
-        runtimeSwitch.offSwitch(switchKey);
-        return false;
+
+        int captureFlag = temp.intValue();
+
+        Integer cacheFlag = CAPTURE_ENABLE_CACHE.get(clazz);
+
+        int flag = 0;
+        if(cacheFlag!=null){
+            flag = cacheFlag.intValue();
+            return ckeckFlag(captureFlag, flag);
+        }
+
+        HLogConfigRule rule = LogUtil.suitableConfig(clazz, null, config.getRuntimeCaptureCofnigRule());
+
+        if(rule==null){
+            rule = config.getDefRuntimeCaptureCofnigRule();
+        }
+
+        if(rule!=null){
+            flag = rule.getFlag();
+        }
+        CAPTURE_ENABLE_CACHE.put(clazz,flag);
+
+        return ckeckFlag(captureFlag, flag);
+
 
     }
 
+    private boolean ckeckFlag(int captureFlag, int flag) {
+        if(flag==-1){
+            return true;
+        }
+        return (flag & captureFlag) == captureFlag;
+    }
+
+
     public static String toJson(Object obj){
         return JSON.toJSONString(obj);
+    }
+
+
+    public static void main(String[] args) {
+
+
+        System.out.println(0x0100);
+
+        System.out.println(Integer.valueOf(0x0100));
+
+        int H_PROCESS = 0x0001;
+        int H_ERROR = 0x0002;
+        int H_INTECEPT = 0x0004;
+        int H_INTECEPTRET = 0x0008;
+        int H_SQL = 0x0010;
+        int H_LOG_DEBUG = 0x0020;
+        int H_LOG_INFO = 0x0040;
+        int H_LOG_WARN = 0x0080;
+        int H_LOG_ERROR = 0x0100;
+
+        int flag = H_ERROR+H_INTECEPTRET;
+
+        if((flag & H_SQL) == H_SQL){
+            System.out.println("true");
+        }else{
+            System.out.println("false");
+        }
+
     }
 }
