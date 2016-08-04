@@ -1,13 +1,13 @@
 package com.asiainfo.hlog.agent.runtime;
 
-import com.al.common.context.IPropertyListener;
-import com.al.common.context.PropertyEvent;
-import com.al.common.context.PropertyHolder;
 import com.alibaba.fastjson.JSON;
 import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.config.HLogConfigRule;
 import com.asiainfo.hlog.client.helper.LogUtil;
+import com.asiainfo.hlog.comm.context.IPropertyListener;
+import com.asiainfo.hlog.comm.context.PropertyEvent;
+import com.asiainfo.hlog.comm.context.PropertyHolder;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
