@@ -12,6 +12,7 @@ import com.sun.management.OperatingSystemMXBean;
 import java.lang.management.*;
 import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,6 +25,7 @@ public class HLogJvmReport {
     private static Object pLock = new Object();
     private static HLogJvmReport p_instance = null;
     ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+    private static String uuid = UUID.randomUUID().toString().replaceAll("-","");
     public static HLogJvmReport getInstance(){
         synchronized(pLock){
             if(null == p_instance){
@@ -38,6 +40,7 @@ public class HLogJvmReport {
 
     public void acquireJvmInfo(){
         Logger.debug("采集jvm信息");
+
         //堆内存
         MemoryMXBean mbean = ManagementFactory.getMemoryMXBean();
         LogData logData = createLogData();
@@ -69,6 +72,7 @@ public class HLogJvmReport {
         ThreadMXBean thread = ManagementFactory.getThreadMXBean();
         logData.put("threadPeak",thread.getPeakThreadCount());
         logData.put("threadLive",thread.getThreadCount());
+
         RuntimeContext.writeEvent("jvm.log",null,logData);
     }
 
@@ -80,6 +84,7 @@ public class HLogJvmReport {
         logData.setPId(null);
         logData.setGId(null);
         logData.setTime(System.currentTimeMillis());
+        logData.put("uuid",uuid);
         return logData;
     }
 
@@ -97,10 +102,10 @@ public class HLogJvmReport {
     };
     public void start(){
         try {
-            String interval = HLogConfig.getInstance().getProperty(Constants.KEY_MONITOR_JVM_INTERVAL_TIME, "2");
+            String interval = HLogConfig.getInstance().getProperty(Constants.KEY_MONITOR_JVM_INTERVAL_TIME, "1");
             int second = Calendar.getInstance().get(Calendar.SECOND);
             int delay = 60 - second;
-            //延迟delay秒后以每隔interval秒执行异常task任务
+            //延迟delay秒后以每隔interval秒执行task任务
             scheduledExecutorService.scheduleAtFixedRate(
                     task,
                     delay,
