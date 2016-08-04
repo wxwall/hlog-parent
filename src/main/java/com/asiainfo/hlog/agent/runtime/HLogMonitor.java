@@ -108,7 +108,7 @@ public class HLogMonitor {
         if(enableProcess){
             pid = RuntimeContext.buildLogPId(id);
         }else{
-            pid = id;
+            pid = RuntimeContext.getLogId();
         }
         Node node = new Node(id,pid,className,methodName,desc,paramNames,softReferences);
         node.enableProcess = enableProcess;
@@ -169,21 +169,24 @@ public class HLogMonitor {
             enableProcess = node.enableProcess;
 
             //发生异常时记录,在异常源头保存异常数据,同时将上级node设为非源头
-            if(isError && (node.rootThrowable==null  || !returnObj.equals(node.rootThrowable.get()))){
-                Node pnode = stack.peek();
+            if(isError && node.enableError){
+                Node pnode = null;
+                if(!stack.isEmpty()){
+                    pnode = stack.peek();
+                }
                 if(pnode!=null){
                     pnode.rootThrowable=new SoftReference(returnObj);
                 }
-                //如果没有开启记录该方法时,又发生异常了,就记录该方法
-                if(!enableProcess){
-                    pid = RuntimeContext.buildLogPId(id);
-                    node.logPid = pid;
-                    enableProcess = true;
+                if(node.rootThrowable==null ||
+                    !returnObj.equals(node.rootThrowable.get())){
+                    doSendErrorLog(node, id, pid, (Throwable) returnObj);
+                    //如果没有开启记录该方法时,又发生异常了,就记录该方法
+                    if(!enableProcess){
+                        enableProcess = true;
+                    }
+                    havWriteLog = true;
+                    isWriteErrLog = true;
                 }
-                doSendErrorLog(node, id, pid, (Throwable) returnObj);
-                havWriteLog = true;
-                isWriteErrLog = true;
-
             }
 
             long ptime = RuntimeContext.getProcessTime();
