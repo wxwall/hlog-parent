@@ -14,6 +14,9 @@ public class ErrorContextNewMethods implements IHLogNewMethods, Opcodes{
 
     public static final String CODE = "+mybatis.ErrorContext.newMethods";
 
+    public ErrorContextNewMethods(String className){
+    }
+
     public void createNewMethods(ClassWriter classWriter) {
         MethodVisitor mv = classWriter.visitMethod(ACC_PUBLIC, "getSql", ASMConsts.NONPARAM_LJAVA_LANG_STRING, null, null);
         mv.visitCode();

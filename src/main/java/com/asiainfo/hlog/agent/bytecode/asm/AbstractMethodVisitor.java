@@ -1,6 +1,8 @@
 package com.asiainfo.hlog.agent.bytecode.asm;
 
+import com.asiainfo.hlog.agent.HLogAgentConst;
 import com.asiainfo.hlog.agent.runtime.HLogMonitor;
+import com.asiainfo.hlog.agent.runtime.RuntimeContext;
 import com.asiainfo.hlog.org.objectweb.asm.Label;
 import com.asiainfo.hlog.org.objectweb.asm.MethodVisitor;
 import com.asiainfo.hlog.org.objectweb.asm.Type;
@@ -8,6 +10,7 @@ import com.asiainfo.hlog.org.objectweb.asm.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.asiainfo.hlog.agent.runtime.RuntimeContext.enable;
 import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.*;
 
 /**
@@ -173,13 +176,30 @@ public abstract class AbstractMethodVisitor extends MethodVisitor {
             visitInsn(ACONST_NULL);
             visitInsn(ACONST_NULL);
         }
+        //mv.visitFieldInsn(GETSTATIC, className, "_hlog_process", "Z");
+        //mv.visitFieldInsn(GETSTATIC, className, "_hlog_error", "Z");
+
+        boolean f = RuntimeContext.enable(HLogAgentConst.MV_CODE_PROCESS,className,null);
+        if(f){
+            mv.visitInsn(ICONST_1);
+        }else{
+            mv.visitInsn(ICONST_0);
+        }
+
+        f = enable(HLogAgentConst.MV_CODE_ERROR,className,null);
+        if(f){
+            mv.visitInsn(ICONST_1);
+        }else{
+            mv.visitInsn(ICONST_0);
+        }
+
     }
 
     /**
      * 编写调用HlogMonitor.start方法的字节码指令
      */
     protected void callMonitorStart(){
-        callMonitorMethod("start",String.class,String.class,String.class,String[].class, Object[].class);
+        callMonitorMethod("start",String.class,String.class,String.class,String[].class, Object[].class,boolean.class,boolean.class);
     }
 
     //protected Label end ;

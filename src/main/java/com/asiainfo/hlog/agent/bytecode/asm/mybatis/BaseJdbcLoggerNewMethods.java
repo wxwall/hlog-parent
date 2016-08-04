@@ -17,6 +17,9 @@ public class BaseJdbcLoggerNewMethods implements IHLogNewMethods, Opcodes {
 
     public static final String CODE = "+mybatis.BaseJdbcLogger.newMethods";
 
+    public BaseJdbcLoggerNewMethods(String className){
+    }
+
     public void createNewMethods(ClassWriter cw) {
 
         FieldVisitor fv = cw.visitField(ACC_PRIVATE, ASMConsts.PARAMS, ASMConsts.LJAVA_LANG_STRING, null, null);

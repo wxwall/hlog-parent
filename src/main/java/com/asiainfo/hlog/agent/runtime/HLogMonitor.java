@@ -1,6 +1,7 @@
 package com.asiainfo.hlog.agent.runtime;
 
 import com.asiainfo.hlog.agent.HLogAgentConst;
+import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
 import com.asiainfo.hlog.org.objectweb.asm.Type;
@@ -37,7 +38,7 @@ public class HLogMonitor {
     }
 
     static final class Node{
-        private final String logId;
+        private String logId;
         private String logPid;
         private final String className;
         private final String methodName;
@@ -83,10 +84,10 @@ public class HLogMonitor {
     private static ThreadLocal<Stack<Node>> local = new ThreadLocal<Stack<Node>>();
     private static ThreadLocal<Stack<Node>> subNodes = new ThreadLocal<Stack<Node>>();
 
-    public static void start(String className,String methodName,String desc,String[] paramNames,Object[] params){
+    public static void start(String className,String methodName,String desc,String[] paramNames,Object[] params,boolean enableProcess,boolean enableError){
 
-        boolean enableProcess = enable(HLogAgentConst.MV_CODE_PROCESS, className,methodName);
-        boolean enableError = enable(HLogAgentConst.MV_CODE_ERROR, className,methodName);
+        //enable(HLogAgentConst.MV_CODE_PROCESS, className,methodName);
+        //enable(HLogAgentConst.MV_CODE_ERROR, className,methodName);
 
         if(!enableProcess && !enableError){
             Node node = new Node();
@@ -103,9 +104,10 @@ public class HLogMonitor {
                 softReferences[i] =  new SoftReference(params[i]);
             }
         }
-        String id = RuntimeContext.logId();
-        String pid = null;
+        String id = null;
+        String pid;
         if(enableProcess){
+            id = LogUtil.logId();
             pid = RuntimeContext.buildLogPId(id);
         }else{
             pid = RuntimeContext.getLogId();
@@ -128,7 +130,15 @@ public class HLogMonitor {
         }
         stack.push(node);
     }
-
+    private static void checkNodeId(Node node){
+        if(node!=null && node.logId==null){
+            synchronized (node){
+                if(node.logId==null){
+                    node.logId = LogUtil.logId();
+                }
+            }
+        }
+    }
     private static void pushSubNode(Node node,long ptime){
         Stack<Node> stack = subNodes.get();
         if(stack == null){
@@ -144,6 +154,8 @@ public class HLogMonitor {
     }
 
     public static void end(String mcode,Object returnObj,boolean isError){
+        //local.get().pop();
+
         Stack<Node> stack = null;
         String pid = null;
         boolean enableProcess = false;
@@ -159,7 +171,7 @@ public class HLogMonitor {
             }
             node.speed = System.currentTimeMillis() - node.beginTime;
             //如果产生多个日志,这里的logId保持一致
-            String id = node.logId ;
+            //String id = node.logId ;
             pid = node.logPid;
             node.isError = isError?1:0;
             boolean havWriteLog = false;
@@ -179,7 +191,10 @@ public class HLogMonitor {
                 }
                 if(node.rootThrowable==null ||
                     !returnObj.equals(node.rootThrowable.get())){
-                    doSendErrorLog(node, id, pid, (Throwable) returnObj);
+
+                    checkNodeId(node);
+
+                    doSendErrorLog(node, node.logId, pid, (Throwable) returnObj);
                     //如果没有开启记录该方法时,又发生异常了,就记录该方法
                     if(!enableProcess){
                         enableProcess = true;
@@ -190,19 +205,18 @@ public class HLogMonitor {
             }
 
             long ptime = RuntimeContext.getProcessTime();
-
             //耗时达到某值是记录
-            if(enableProcess && node.speed>=ptime){
+            if(enableProcess && node.speed>ptime){
                 //记录运行耗时超过
-                doSendProcessLog(node,id,pid,node.isError,stack.isEmpty(),isWriteErrLog);
+                doSendProcessLog(node,node.logId,pid,node.isError,stack.isEmpty(),isWriteErrLog);
                 //如果本节点超过预警值,追加写已经执行过的子过程节点
                 if(enableSaveWithoutSubs){
                     doWriteSubNode();
                 }
-                if(node.speed>=RuntimeContext.getProcessTimeWithout()){
+                if(node.speed>RuntimeContext.getProcessTimeWithout()){
                     havWriteLog = true;
                 }
-            }else if(enableProcess && enableSaveWithoutSubs && ptime>0){
+            }else if(enableSaveWithoutSubs && enableProcess && ptime>0){
                 pushSubNode(node,ptime);
             }
 
@@ -230,6 +244,7 @@ public class HLogMonitor {
                 }
             }
         }
+
     }
 
     private static void doWriteSubNode() {
@@ -331,9 +346,14 @@ public class HLogMonitor {
         logData.put("clazz",node.className);
         logData.put("method",node.methodName);
         logData.put("spend",node.speed);
-        logData.put("isTop",isTop?1:0);
-        logData.put("havErr",isWriteErrLog?1:0);
-        logData.put("leaf",node.leaf?1:0);
+        if(isTop){
+            logData.put("isTop",1);
+        }
+        if(isWriteErrLog){
+            logData.put("havErr",1);
+        }
+        //logData.put("havErr",isWriteErrLog?1:0);
+        //logData.put("leaf",node.leaf?1:0);
         if(node.sql){
             logData.put("sql",1);
         }
@@ -394,6 +414,7 @@ public class HLogMonitor {
             if(node.isEmpty()){
                 return null;
             }
+            checkNodeId(node);
             return node;
         }
         return null;

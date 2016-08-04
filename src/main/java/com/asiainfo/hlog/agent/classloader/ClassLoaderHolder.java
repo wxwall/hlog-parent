@@ -19,6 +19,33 @@ import java.util.zip.ZipEntry;
  */
 public class ClassLoaderHolder  {
 
+    private static class HlogClassLoader extends URLClassLoader{
+
+        public HlogClassLoader(URL[] urls, ClassLoader parent) {
+            super(urls, parent);
+        }
+
+        public Class<?> loadClass(String name) throws ClassNotFoundException {
+            Class<?> clazz ;
+            try{
+                if(!name.startsWith("org.slf4j.") && (name.startsWith("com.asiainfo.hlog.client.model.") ||
+                        name.endsWith("ITransmitter") ||
+                        name.endsWith("TransmitterFactory"))){
+                    clazz = super.loadClass(name);
+                }else{
+                    clazz = findClass(name);
+                }
+            }catch (ClassNotFoundException cfe){
+                try{
+                    clazz = super.loadClass(name);
+                }catch (ClassNotFoundException cfe2){
+                    clazz = getInstance().getParent().loadClass(name);
+                }
+            }
+            return clazz;
+        }
+    }
+
     public static final String tmpdir = System.getProperty("java.io.tmpdir");
 
     private static  ClassLoader loader = null;
@@ -114,29 +141,11 @@ public class ClassLoaderHolder  {
                 if(extClassesFile.exists()){
                     jarList.add(extClassesFile.toURI().toURL());
                 }
-
                 //jarLis
                 URL[] urls = jarList.toArray(new URL[jarList.size()]);
-                loader = new URLClassLoader(urls, null){
 
-                    public Class<?> loadClass(String name) throws ClassNotFoundException {
-                        if(name.startsWith("com.asiainfo.hlog.client.model.")){
-                            return getInstance().getParent().loadClass(name);
-                        }
-                        Class<?> clazz = null;
-                        try{
-                            clazz = super.loadClass(name);
-                        }catch (ClassNotFoundException cfe){
-                            if(!name.startsWith("org.slf4j")){
-                                clazz = getInstance().getParent().loadClass(name);
-                            }else{
-                                throw  cfe;
-                            }
-                        }
+                loader = new HlogClassLoader(urls, getParent());
 
-                        return clazz;
-                    }
-                };
             } catch (Exception e) {
                 Logger.error("从hlog-agent中获取依赖资源失败", e);
             } finally {

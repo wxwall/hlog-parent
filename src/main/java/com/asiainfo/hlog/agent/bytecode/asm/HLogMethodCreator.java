@@ -7,6 +7,7 @@ import com.asiainfo.hlog.client.config.LogSwoopRule;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.org.objectweb.asm.ClassWriter;
 
+import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,7 +37,7 @@ public abstract class HLogMethodCreator {
         }
     }
 
-    private static IHLogNewMethods getIHlogNewMethodsByCode(String code){
+    private static IHLogNewMethods getIHlogNewMethodsByCode(String code,String className){
         IHLogNewMethods hlogNewMethods = null;
 
         if(codeIntesMap.containsKey(code)){
@@ -44,7 +45,9 @@ public abstract class HLogMethodCreator {
         }
         synchronized (codeClassMap){
             try{
-                hlogNewMethods = ((IHLogNewMethods) codeClassMap.get(code).newInstance());
+                Class cls = codeClassMap.get(code);
+                Constructor c = cls.getConstructor(String.class);
+                hlogNewMethods = ((IHLogNewMethods) c.newInstance(className));
                 codeIntesMap.put(code,hlogNewMethods);
             }catch (Throwable t){
                 Logger.error(t);
@@ -55,10 +58,10 @@ public abstract class HLogMethodCreator {
         return hlogNewMethods;
     }
 
-    public static void create(LogSwoopRule classRule, ClassWriter classWriter){
+    public static void create(LogSwoopRule classRule, ClassWriter classWriter,String className){
         List<String> codes = classRule.getNewMethodCodes();
         for (String code : codes){
-            IHLogNewMethods newMethods = getIHlogNewMethodsByCode(code);
+            IHLogNewMethods newMethods = getIHlogNewMethodsByCode(code,className);
             if(newMethods!=null){
                 newMethods.createNewMethods(classWriter);
             }

@@ -84,7 +84,7 @@ public class HLogPreProcessor extends AbstractPreProcessor {
             //增加新方法
             boolean addNewMethod = false;
             if(classRule!=null && classRule.getNewMethodCodes().size()>0){
-                HLogMethodCreator.create(classRule,classWriter);
+                HLogMethodCreator.create(classRule,classWriter,className);
                 addNewMethod = true;
             }
 

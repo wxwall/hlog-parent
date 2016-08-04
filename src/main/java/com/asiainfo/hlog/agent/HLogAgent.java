@@ -1,6 +1,7 @@
 package com.asiainfo.hlog.agent;
 
 import com.asiainfo.hlog.agent.classloader.ClassLoaderHolder;
+import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.LoaderHelper;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -23,13 +24,21 @@ public class HLogAgent {
     static Instrumentation inst;
 
     private static void domain(Instrumentation inst){
+
+        System.out.println("========== Asiainfo HLog Agent ["+HLogConfig.VERSION+"] ==============\n");
+
         if (HLogAgent.inst == null) {
             HLogAgent.inst = inst;
         }
 
         if (classPreProcessorAgentAdapter == null) {
+            //获取配置实例
+            HLogConfig config = HLogConfig.getInstance();
+            //初始化配置信息,后需要从properties文件或服务端来获取
+            config.initConfig(true);
             classPreProcessorAgentAdapter = createClassFileTransformer();
         }
+
         inst.addTransformer(classPreProcessorAgentAdapter);
 
         LoaderHelper.setLoader(ClassLoaderHolder.getInstance().getClassLoader());
