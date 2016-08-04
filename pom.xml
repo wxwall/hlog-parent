@@ -10,7 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>hlog-agent</artifactId>
-    <version>0.4</version>
+    <version>0.4.1</version>
     <repositories>
         <repository>
             <id>io.spring</id>
@@ -21,18 +21,24 @@
         <dependency>
             <groupId>com.asiainfo.hlog</groupId>
             <artifactId>hlog-comm</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>com.asiainfo.hlog</groupId>
             <artifactId>hlog-client</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.10</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.1</version>
+        </dependency>
+
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
