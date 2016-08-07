@@ -1,13 +1,14 @@
 package com.asiainfo.hlog.agent.bytecode.asm.web;
 
 import com.asiainfo.hlog.agent.bytecode.asm.ASMUtils;
-import com.asiainfo.hlog.agent.bytecode.asm.AbstractEndTodoMethodVisitor;
+import com.asiainfo.hlog.agent.bytecode.asm.AbstractTryCatchMethodVisitor;
 import com.asiainfo.hlog.agent.runtime.http.HttpMonitor;
 import com.asiainfo.hlog.org.objectweb.asm.MethodVisitor;
 import com.asiainfo.hlog.org.objectweb.asm.Opcodes;
 import com.asiainfo.hlog.org.objectweb.asm.Type;
 
-import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.*;
+import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.ALOAD;
+import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 
 /**
  * <p>接收上流传递过来的方法</p>
@@ -15,7 +16,7 @@ import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.*;
  * <p>所以要求被处理的方法入参必须要有{@link javax.servlet.http.HttpServletRequest}类型</p>
  * Created by chenfeng on 2016/5/8.
  */
-public class ReceiveIdMethodVisitor extends AbstractEndTodoMethodVisitor {
+public class ReceiveIdMethodVisitor extends AbstractTryCatchMethodVisitor {
 
     public static final String CODE  = "receive.id";
 
@@ -66,7 +67,9 @@ public class ReceiveIdMethodVisitor extends AbstractEndTodoMethodVisitor {
     }
 
     protected void beforeThrow(int flag) {
-        doClean();
+        if(flag==1){
+            doClean();
+        }
     }
 
     private void doClean(){

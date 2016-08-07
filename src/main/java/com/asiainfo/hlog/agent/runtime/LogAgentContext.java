@@ -73,6 +73,13 @@ public class LogAgentContext {
     }
 
     public static void clear(){
+        /*
+        System.out.println("-------------------public static void clear()");
+        StackTraceElement[] tt = Thread.currentThread().getStackTrace();
+        for (StackTraceElement stackTraceElement : tt) {
+            System.out.println(stackTraceElement);
+        }
+        */
         threadLogGroupId.remove();
         threadCurrentLogId.remove();
         threadCurrentIndex.set(new Integer(0));

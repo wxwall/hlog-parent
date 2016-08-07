@@ -1,9 +1,12 @@
 package com.asiainfo.hlog.agent.bytecode.asm;
 
+import com.asiainfo.hlog.agent.HLogAgentConst;
 import com.asiainfo.hlog.agent.runtime.HLogMonitor;
+import com.asiainfo.hlog.agent.runtime.RuntimeContext;
 import com.asiainfo.hlog.org.objectweb.asm.MethodVisitor;
 import com.asiainfo.hlog.org.objectweb.asm.commons.LocalVariablesSorter;
 
+import static com.asiainfo.hlog.agent.runtime.RuntimeContext.enable;
 import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.*;
 
 /**
@@ -42,6 +45,28 @@ public class ProcessMethodVisitor extends AbstractTryCatchMethodVisitor {
         super(access,className,methodName,desc, pmv,datas,mcode);
     }
 
+
+    /**
+     * 编写调用HlogMonitor.start方法的字节码指令
+     */
+    protected void callMonitorStart(){
+        //判断是否开启这个类的监控耗时开关
+        boolean f = RuntimeContext.enable(HLogAgentConst.MV_CODE_PROCESS,className,null);
+        if(f){
+            mv.visitInsn(ICONST_1);
+        }else{
+            mv.visitInsn(ICONST_0);
+        }
+        //判断是否开启这个类的监控异常开关
+        f = enable(HLogAgentConst.MV_CODE_ERROR,className,null);
+        if(f){
+            mv.visitInsn(ICONST_1);
+        }else{
+            mv.visitInsn(ICONST_0);
+        }
+        callMonitorMethod("start",boolean.class,boolean.class,String.class,String.class,String.class,String[].class, Object[].class);
+    }
+
     /**
      * 每个方法开始遍历字节码的入码
      */
@@ -49,7 +74,6 @@ public class ProcessMethodVisitor extends AbstractTryCatchMethodVisitor {
         //如果有返回结果的话
         //如果需要有返回则定义
         defineReturnObject();
-
         //调用监控开始方法
         callMonitorStart();
 

@@ -16,28 +16,12 @@ import java.lang.reflect.Field;
  */
 public class RuntimeContext {
 
-    private static RuntimeCall runtimeCall = null;
+    private static RuntimeEnable runtimeCall = null;
 
     private static Field messageField = null;
 
-    public static long getProcessTime() {
-        return HLogConfig.getInstance().getProcessTime();
-    }
-    public static long getProcessTimeWithout() {
-        return HLogConfig.getInstance().getProcessTimeWithout();
-    }
+    private static IRutimeCall rutimeCall = RutimeCallFactory.getRutimeCall();
 
-    public static long getSqlTime() {
-        return HLogConfig.getInstance().getSqlTime();
-    }
-
-    public static boolean isEnableRequest() {
-        return HLogConfig.getInstance().isEnableRequest();
-    }
-
-    public static boolean isEnableSaveWithoutParams() {
-        return HLogConfig.getInstance().isEnableSaveWithoutParams();
-    }
 
     public static String[] getErrorCodeTypes(){
         String values = HLogConfig.getInstance().getProperty(Constants.KEY_ERROR_CODE_TYPES,"code");
@@ -45,18 +29,6 @@ public class RuntimeContext {
             return values.split(",");
         }
         return new String[]{"code"};
-    }
-
-    public static boolean isEnableSaveWithoutSubs() {
-        return HLogConfig.getInstance().isEnableSaveWithoutSubs();
-    }
-
-    public static boolean isEnableSqlTrack() {
-        return HLogConfig.getInstance().isEnableSqlTrack();
-    }
-
-    public static boolean isEnableLoggerTrack() {
-        return HLogConfig.getInstance().isEnableLoggerTrack();
     }
 
 
@@ -114,7 +86,7 @@ public class RuntimeContext {
     public static boolean enable(String weaveName ,String clazz,String method,String level) {
         if (runtimeCall == null) {
             synchronized (RuntimeContext.class) {
-                runtimeCall = new RuntimeCall();
+                runtimeCall = new RuntimeEnable();
             }
         }
         return runtimeCall.enable(weaveName,clazz,method,level);
@@ -127,13 +99,14 @@ public class RuntimeContext {
         return LogAgentContext.getThreadCurrentLogId();
     }
 
-
     public static String buildLogPId(String _agent_Log_Id_){
         //获取上级日志id
         String _agent_Log_pId = LogAgentContext.getThreadCurrentLogId();
         if(_agent_Log_pId==null){
-            LogAgentContext.clear();
-            LogAgentContext.setThreadLogGroupId(_agent_Log_Id_);
+            //LogAgentContext.clear();
+            if(LogAgentContext.getThreadLogGroupId()==null){
+                LogAgentContext.setThreadLogGroupId(_agent_Log_Id_);
+            }
             _agent_Log_pId = "nvl";
         }
         LogAgentContext.setThreadCurrentLogId(_agent_Log_Id_);
@@ -141,7 +114,7 @@ public class RuntimeContext {
     }
 
     public static String toJson(Object obj){
-        return RuntimeCall.toJson(obj);
+        return rutimeCall.toJson(obj);
     }
 
     public static void writeEvent(String clazz,String method,LogData logData){
