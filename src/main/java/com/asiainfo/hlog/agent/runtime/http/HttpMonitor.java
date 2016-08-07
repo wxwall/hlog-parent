@@ -3,6 +3,7 @@ package com.asiainfo.hlog.agent.runtime.http;
 import com.asiainfo.hlog.agent.runtime.HLogMonitor;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 import com.asiainfo.hlog.agent.runtime.RuntimeContext;
+import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.model.LogData;
 
 import java.util.HashSet;
@@ -38,6 +39,8 @@ public class HttpMonitor {
         //TODO 增加可配置
     }
 
+    private static HLogConfig config = HLogConfig.getInstance();
+
     public static void receiveHlogId(String _gid,String _pid){
         LogAgentContext.clear();
         if(_gid==null){
@@ -56,9 +59,8 @@ public class HttpMonitor {
     }
 
     public static void request(StringBuffer requestUrl,String addr,long start,int status){
-
         //判断是否开启收集
-        if(!RuntimeContext.isEnableRequest()){
+        if(!config.isEnableRequest()){
             return;
         }
 
@@ -76,6 +78,8 @@ public class HttpMonitor {
         logData.put("spend",System.currentTimeMillis()-start);
         logData.put("status",status);
         RuntimeContext.writeEvent("request.log",null,logData);
+
+        LogAgentContext.clear();
     }
 
     private static String getExpand(StringBuffer requestUrl){

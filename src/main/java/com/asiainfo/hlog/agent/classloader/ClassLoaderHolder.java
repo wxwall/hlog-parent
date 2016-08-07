@@ -29,6 +29,8 @@ public class ClassLoaderHolder  {
             Class<?> clazz ;
             try{
                 if(!name.startsWith("org.slf4j.") && (name.startsWith("com.asiainfo.hlog.client.model.") ||
+                        name.endsWith("IRutimeCall") ||
+                        name.endsWith("ITransmitter") ||
                         name.endsWith("ITransmitter") ||
                         name.endsWith("TransmitterFactory"))){
                     clazz = super.loadClass(name);

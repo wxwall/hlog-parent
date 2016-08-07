@@ -9,10 +9,6 @@ import com.asiainfo.hlog.org.objectweb.asm.Opcodes;
 
 import static com.asiainfo.hlog.agent.runtime.RuntimeContext.enable;
 
-/**
- * 给ErrorContext类增加getSql方法
- * Created by chenfeng on 2016/4/25.
- */
 public class ProcessNewMethods implements IHLogNewMethods, Opcodes{
 
     public static final String CODE = "+process";
@@ -60,9 +56,5 @@ public class ProcessNewMethods implements IHLogNewMethods, Opcodes{
             mv.visitMaxs(1, 0);
             mv.visitEnd();
         }
-    }
-
-    public static void main(String[] args) {
-        System.out.println("abc.def.ddd".replaceAll("\\.", "/"));
     }
 }

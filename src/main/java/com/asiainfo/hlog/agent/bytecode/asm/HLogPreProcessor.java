@@ -106,6 +106,9 @@ public class HLogPreProcessor extends AbstractPreProcessor {
         }catch (Throwable t){
             HLogJMXReport.getHLogJMXReport().getRunStatusInfo().incrementweaveErrClassNum();
             Logger.error("解析["+clazz+"]类时遇到问题,放弃解析返回原类内容.(不影响程序运行):{0}",null,t.getMessage());
+            if(Logger.isDebug()){
+                Logger.error("解析遇到问题的详细信息:",t);
+            }
             if(code!=null){
                 saveErrorWaveClassFile(className,code);
             }

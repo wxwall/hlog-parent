@@ -1,6 +1,7 @@
 package com.asiainfo.hlog.agent.runtime;
 
 import com.asiainfo.hlog.agent.HLogAgentConst;
+import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
@@ -84,7 +85,9 @@ public class HLogMonitor {
     private static ThreadLocal<Stack<Node>> local = new ThreadLocal<Stack<Node>>();
     private static ThreadLocal<Stack<Node>> subNodes = new ThreadLocal<Stack<Node>>();
 
-    public static void start(String className,String methodName,String desc,String[] paramNames,Object[] params,boolean enableProcess,boolean enableError){
+    private static HLogConfig config = HLogConfig.getInstance();
+
+    public static void start(boolean enableProcess,boolean enableError,String className,String methodName,String desc,String[] paramNames,Object[] params){
 
         //enable(HLogAgentConst.MV_CODE_PROCESS, className,methodName);
         //enable(HLogAgentConst.MV_CODE_ERROR, className,methodName);
@@ -162,7 +165,7 @@ public class HLogMonitor {
         try{
             stack = local.get();
             if(stack.isEmpty()){
-                LogAgentContext.clear();
+                clear();
                 return ;
             }
             Node node = stack.pop();
@@ -175,7 +178,7 @@ public class HLogMonitor {
             pid = node.logPid;
             node.isError = isError?1:0;
             boolean havWriteLog = false;
-            boolean enableSaveWithoutSubs = RuntimeContext.isEnableSaveWithoutSubs();
+            boolean enableSaveWithoutSubs = config.isEnableSaveWithoutSubs();
             boolean isWriteErrLog = false;
 
             enableProcess = node.enableProcess;
@@ -204,7 +207,7 @@ public class HLogMonitor {
                 }
             }
 
-            long ptime = RuntimeContext.getProcessTime();
+            long ptime = config.getProcessTime();
             //耗时达到某值是记录
             if(enableProcess && node.speed>ptime){
                 //记录运行耗时超过
@@ -213,7 +216,7 @@ public class HLogMonitor {
                 if(enableSaveWithoutSubs){
                     doWriteSubNode();
                 }
-                if(node.speed>RuntimeContext.getProcessTimeWithout()){
+                if(node.speed>config.getProcessTimeWithout()){
                     havWriteLog = true;
                 }
             }else if(enableSaveWithoutSubs && enableProcess && ptime>0){
@@ -221,16 +224,14 @@ public class HLogMonitor {
             }
 
             //保存入参
-            if(havWriteLog && RuntimeContext.isEnableSaveWithoutParams()){
+            if(havWriteLog && config.isEnableSaveWithoutParams()){
                 doWriteMethodParams(node);
             }
         }catch (Throwable t){
             Logger.error("HLogMonitor end异常",t);
         }finally {
             if("nvl".equals(pid)){
-                if(!LogAgentContext.isKeepContext()){
-                    LogAgentContext.clear();
-                }
+                clear();
                 stack.clear();
             }else{
                 if(enableProcess){
@@ -245,6 +246,12 @@ public class HLogMonitor {
             }
         }
 
+    }
+
+    private static void clear(){
+        if(!LogAgentContext.isKeepContext()){
+            LogAgentContext.clear();
+        }
     }
 
     private static void doWriteSubNode() {
@@ -365,7 +372,8 @@ public class HLogMonitor {
      * @return
      */
     public static long getConfigSqlSpeed(){
-        return RuntimeContext.getSqlTime();
+        long time = config.getSqlTime();
+        return time;
     }
 
 
@@ -377,11 +385,9 @@ public class HLogMonitor {
      * @param params
      */
     public static void sqlMonitor(long speed,String className,String sql,String params) {
-
-        if(!RuntimeContext.isEnableSqlTrack()){
+        if(!config.isEnableSqlTrack()){
             return ;
         }
-
         Node node = getCurrentNode();
         String clsName ;
         String methodName = null;
@@ -427,7 +433,7 @@ public class HLogMonitor {
      * @return
      */
     public static boolean isLoggerEnabled(String className,String level){
-        if(!RuntimeContext.isEnableLoggerTrack()){
+        if(!config.isEnableLoggerTrack()){
             return false;
         }
         Node node = getCurrentNode();
@@ -445,7 +451,7 @@ public class HLogMonitor {
      * @param objects
      */
     public static void logger(String mcode,String className,String level,Object[] objects){
-        if(!RuntimeContext.isEnableLoggerTrack()){
+        if(!config.isEnableLoggerTrack()){
             return;
         }
         try{

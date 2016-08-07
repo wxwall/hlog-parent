@@ -1,6 +1,5 @@
 package com.asiainfo.hlog.agent.runtime;
 
-import com.alibaba.fastjson.JSON;
 import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.config.HLogConfigRule;
@@ -103,11 +102,6 @@ public class RuntimeEnable {
             return true;
         }
         return (flag & captureFlag) == captureFlag;
-    }
-
-
-    public static String toJson(Object obj){
-        return JSON.toJSONString(obj);
     }
 
 }
