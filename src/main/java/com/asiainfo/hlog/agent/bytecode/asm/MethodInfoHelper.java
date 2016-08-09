@@ -80,7 +80,19 @@ public class MethodInfoHelper {
                 if (name.charAt(0)!='<') {
                     // 除了构造函数外,其他的所有方法被遍历
                     // 通过desc来获取到参数个数
-                    int argumentSize = Type.getArgumentTypes(desc).length;
+                    Type[] argTypes = Type.getArgumentTypes(desc);
+                    int argumentSize = argTypes.length;
+                    int solt = 0;
+                    for (Type argType : argTypes) {
+
+                        if(argType.getSort() == Type.LONG || argType.getSort() == Type.DOUBLE){
+                            solt = solt+2;
+                        }else{
+                            solt = solt +1;
+                        }
+                    }
+
+
                     String tmpKey = getKey(className,name,desc);
                     // 如果没有参数直接返回
                     //if(argumentSize==0){
@@ -88,7 +100,7 @@ public class MethodInfoHelper {
                     //    return null;
                     //}
                     // 创建ParameterNameVisit来处理visit
-                    return new MethodInfoVisit(tmpKey,argumentSize,ASMUtils.isStatic(access));
+                    return new MethodInfoVisit(tmpKey,argumentSize,solt,ASMUtils.isStatic(access));
                 }
                 return null;
             }
@@ -105,11 +117,13 @@ public class MethodInfoHelper {
         private String[] argumentNames;
         private String key ;
         private boolean isStatic;
-        public MethodInfoVisit(String key,int argumentSize ,boolean isStatic) {
+        private int solt = 0;
+        public MethodInfoVisit(String key,int argumentSize ,int solt,boolean isStatic) {
             super(Opcodes.ASM5);
             this.key = key;
             this.isStatic = isStatic;
             this.argumentSize = argumentSize;
+            this.solt = solt;
             if(this.argumentSize>0){
                 argumentNames = new String[argumentSize];
             }
@@ -131,6 +145,7 @@ public class MethodInfoHelper {
          * @param index
          */
         private int paramIndex = 0;
+        private int soltIndex = 0;
         public void visitLocalVariable(String name, String desc, String signature,
                                        Label start, Label end, int index) {
             if(argumentSize==0){
@@ -140,10 +155,11 @@ public class MethodInfoHelper {
             if(index==0 && !isStatic) {
                 return;
             }
-            if(paramIndex<argumentSize){
+            if(paramIndex<argumentSize && index<=solt){
                 argumentNames[paramIndex] = name;
+                paramIndex ++ ;
             }
-            paramIndex ++ ;
+
         }
 
         /**
