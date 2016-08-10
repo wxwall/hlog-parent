@@ -5,11 +5,13 @@ import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 import com.asiainfo.hlog.agent.runtime.RuntimeContext;
 import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
+import com.asiainfo.hlog.client.helper.ClassHelper;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
-import com.sun.management.OperatingSystemMXBean;
 
 import java.lang.management.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
@@ -63,10 +65,27 @@ public class HLogJvmReport {
             }
         }
         //操作系统物理内存
-        OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-        logData.put("phyMemFree",osmxb.getFreePhysicalMemorySize());
-        logData.put("phyMemTotal",osmxb.getTotalPhysicalMemorySize());
-        logData.put("phyMemRate",(osmxb.getFreePhysicalMemorySize()*100)/osmxb.getTotalPhysicalMemorySize());
+        OperatingSystemMXBean osmxb = ManagementFactory.getOperatingSystemMXBean();
+        boolean ibmVendor = System.getProperty("java.vendor").contains("IBM");
+        try{
+            Class osBeanClass = null;
+            if(ibmVendor) {
+                osBeanClass = Class.forName("com.ibm.lang.management.OperatingSystemMXBean");
+            }else {
+                osBeanClass = Class.forName("com.sun.management.OperatingSystemMXBean");
+            }
+            long phyMemFree = (Long)osBeanClass.getDeclaredMethod("getFreePhysicalMemorySize").invoke(osmxb);
+            long phyMemTotal = (Long)osBeanClass.getDeclaredMethod("getTotalPhysicalMemorySize").invoke(osmxb);
+            logData.put("phyMemFree",phyMemFree);
+            logData.put("phyMemTotal",phyMemTotal);
+            logData.put("phyMemRate",(phyMemFree*100)/phyMemTotal);
+        } catch (Exception e) {
+            logData.put("phyMemFree",0);
+            logData.put("phyMemTotal",0);
+            logData.put("phyMemRate",0);
+            Logger.error("获取系统物理内存出错",e);
+        }
+
         //logData.put("cpuLoad",osmxb.getSystemCpuLoad());//jdk7+
         //线程
         ThreadMXBean thread = ManagementFactory.getThreadMXBean();
