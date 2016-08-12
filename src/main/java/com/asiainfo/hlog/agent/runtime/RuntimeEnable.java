@@ -30,11 +30,7 @@ public class RuntimeEnable {
             public void changed(PropertyEvent event) {
                 String key = event.getKey();
                 if(key.startsWith(Constants.KEY_HLOG_CAPTURE_ENABLE)
-                        || key.startsWith(Constants.KEY_HLOG_LEVLE)){
-                    //for (RuntimeSwitch runtimeSwitch : mcodeRuntimeSwitchMap.values()) {
-                    //    runtimeSwitch.clear();
-                    //}
-                    //mcodeRuntimeSwitchMap.clear();
+                        || key.startsWith(Constants.KEY_HLOG_CAPTURE_LOGGER_ENABLE_PATHS)){
                     CAPTURE_ENABLE_CACHE.clear();
                 }
             }
@@ -52,21 +48,28 @@ public class RuntimeEnable {
 
     private static Map<String,Integer> CAPTURE_ENABLE_CACHE = new HashMap<String,Integer>(2000);
 
+    private static final Map<String,String> loggerWeaveMap  = new HashMap();
+
+    static {
+        loggerWeaveMap.put("debug","logger.debug");
+        loggerWeaveMap.put("info","logger.info");
+        loggerWeaveMap.put("warn","logger.warn");
+        loggerWeaveMap.put("error","logger.error");
+    }
+
     public boolean enable(String weaveName ,String clazz,String method,String level){
 
         HLogConfig config = HLogConfig.getInstance();
         if(!config.isEnable()){
             return false;
         }
-
-        Integer temp = config.CAPTURE_ENABLE_FLAG.get(weaveName);
-        if(temp==null){
-            if("logger".equals(weaveName)){
-                String tmp = weaveName + "-" + level;
-                temp = config.CAPTURE_ENABLE_FLAG.get(tmp);
-            }
-            return false;
+        Integer temp ;
+        if(level!=null){
+            temp = config.CAPTURE_ENABLE_FLAG.get(loggerWeaveMap.get(level));
+        }else{
+            temp = config.CAPTURE_ENABLE_FLAG.get(weaveName);
         }
+
         if(temp==null){
             return false;
         }
@@ -82,9 +85,27 @@ public class RuntimeEnable {
         }
 
         HLogConfigRule rule = LogUtil.suitableConfig(clazz, null, config.getRuntimeCaptureCofnigRule());
-
         if(rule==null){
             rule = config.getDefRuntimeCaptureCofnigRule();
+            if(rule!=null && level!=null){
+                boolean havCfgLogger = false;
+                String[] loggerPaths = rule.getLoggerPaths();
+                if(loggerPaths!=null){
+                    for (String loggerPath : loggerPaths) {
+                        if(clazz.startsWith(loggerPath)){
+                            havCfgLogger = true;
+                            //返回正常配置
+                            break;
+                        }
+                    }
+                }
+                if(!havCfgLogger){
+                    flag = rule.getNoLoggerFlag();
+                    CAPTURE_ENABLE_CACHE.put(clazz,flag);
+                    return ckeckFlag(captureFlag, flag);
+                }
+
+            }
         }
 
         if(rule!=null){

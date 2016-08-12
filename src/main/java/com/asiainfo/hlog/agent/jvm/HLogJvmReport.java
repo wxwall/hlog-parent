@@ -1,21 +1,15 @@
 package com.asiainfo.hlog.agent.jvm;
 
 
-import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 import com.asiainfo.hlog.agent.runtime.RuntimeContext;
 import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
-import com.asiainfo.hlog.client.helper.ClassHelper;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
 
 import java.lang.management.*;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Calendar;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +22,11 @@ public class HLogJvmReport {
     private static HLogJvmReport p_instance = null;
     ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
     private static String uuid = UUID.randomUUID().toString().replaceAll("-","");
+
+    private Method getFreePhysicalMemorySizeMethod = null;
+    private Method getTotalPhysicalMemorySizeMethod = null;
+
+
     public static HLogJvmReport getInstance(){
         synchronized(pLock){
             if(null == p_instance){
@@ -38,6 +37,15 @@ public class HLogJvmReport {
     }
     private HLogJvmReport() {
 
+    }
+
+    private void initMethods(Class mbeanClass) throws NoSuchMethodException {
+        synchronized (this){
+            getFreePhysicalMemorySizeMethod = mbeanClass.getMethod("getFreePhysicalMemorySize");
+            getFreePhysicalMemorySizeMethod.setAccessible(true);
+            getTotalPhysicalMemorySizeMethod = mbeanClass.getMethod("getTotalPhysicalMemorySize");
+            getTotalPhysicalMemorySizeMethod.setAccessible(true);
+        }
     }
 
     public void acquireJvmInfo(){
@@ -66,16 +74,24 @@ public class HLogJvmReport {
         }
         //操作系统物理内存
         OperatingSystemMXBean osmxb = ManagementFactory.getOperatingSystemMXBean();
-        boolean ibmVendor = System.getProperty("java.vendor").contains("IBM");
+
+        //boolean ibmVendor = System.getProperty("java.vendor").contains("IBM");
         try{
+            if(getFreePhysicalMemorySizeMethod==null ||
+                    getTotalPhysicalMemorySizeMethod == null){
+                initMethods(osmxb.getClass());
+            }
+            /*
             Class osBeanClass = null;
             if(ibmVendor) {
                 osBeanClass = Class.forName("com.ibm.lang.management.OperatingSystemMXBean");
             }else {
                 osBeanClass = Class.forName("com.sun.management.OperatingSystemMXBean");
             }
-            long phyMemFree = (Long)osBeanClass.getDeclaredMethod("getFreePhysicalMemorySize").invoke(osmxb);
-            long phyMemTotal = (Long)osBeanClass.getDeclaredMethod("getTotalPhysicalMemorySize").invoke(osmxb);
+            */
+            long phyMemFree = (Long)getFreePhysicalMemorySizeMethod.invoke(osmxb);
+            long phyMemTotal = (Long)getTotalPhysicalMemorySizeMethod.invoke(osmxb);
+
             logData.put("phyMemFree",phyMemFree);
             logData.put("phyMemTotal",phyMemTotal);
             logData.put("phyMemRate",(phyMemFree*100)/phyMemTotal);

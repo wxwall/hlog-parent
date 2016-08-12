@@ -158,7 +158,6 @@ public class HLogMonitor {
 
     public static void end(String mcode,Object returnObj,boolean isError){
         //local.get().pop();
-
         Stack<Node> stack = null;
         String pid = null;
         boolean enableProcess = false;
@@ -541,7 +540,11 @@ public class HLogMonitor {
         logData.setMc(mcode);
         logData.setId(id);
         logData.setPId(pid);
-        logData.setGId(LogAgentContext.getThreadLogGroupId());
+        String gId = LogAgentContext.getThreadLogGroupId();
+        if(gId==null){
+            gId=pid!=null?pid:id;
+        }
+        logData.setGId(gId);
         logData.setTime(System.currentTimeMillis());
         return logData;
     }
