@@ -35,6 +35,10 @@ public abstract class HLogAgentConst {
      * 表示一个拦截入参并且不继续执行后续代码
      */
     public static final String MV_CODE_INTERCEPT_RET = "interceptRet";
+    /**
+     * 表示一个拦截事务的编码
+     */
+    public static final String MV_CODE_TRANSACTION = "transaction";
 
     public static final String HEADER_HLOG_AGENT_GID = "Hlog-Agent-Gid";
     public static final String HEADER_HLOG_AGENT_PID = "Hlog-Agent-Pid";
