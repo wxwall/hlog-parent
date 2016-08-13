@@ -1,6 +1,7 @@
 package com.asiainfo.hlog.agent.runtime;
 
 import com.asiainfo.hlog.agent.HLogAgentConst;
+import com.asiainfo.hlog.agent.runtime.dto.TranElapsedTimeDto;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
@@ -548,4 +549,28 @@ public class HLogMonitor {
         logData.setTime(System.currentTimeMillis());
         return logData;
     }
+
+    /**
+     * 监控数据库事务耗时
+     */
+    public static void transactionElapsedTimeMonitor() {
+        TranElapsedTimeDto dto = LogAgentContext.getTranElapsedTimeContext();
+        if(dto == null){
+            return ;
+        }
+        int index = dto.getMethodName().lastIndexOf(".");
+        String clsName = dto.getMethodName().substring(0,index);
+        String method = dto.getMethodName().substring(index+1);
+        String id = RuntimeContext.logId();
+        String pid = LogAgentContext.getThreadCurrentLogId();
+
+        LogData logData = createLogData(HLogAgentConst.MV_CODE_TRANSACTION,id,pid);
+        logData.put("elapsedTime",dto.getElapsedTime());
+        logData.put("method",method);
+        logData.put("clazz",clsName);
+
+        writeEvent(clsName,method,logData);
+    }
+
+
 }

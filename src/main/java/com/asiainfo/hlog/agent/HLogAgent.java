@@ -33,9 +33,9 @@ public class HLogAgent {
 
         if (classPreProcessorAgentAdapter == null) {
             //获取配置实例
-            HLogConfig config = HLogConfig.getInstance();
+            //HLogConfig config = HLogConfig.getInstance();
             //初始化配置信息,后需要从properties文件或服务端来获取
-            config.initConfig(true);
+            //config.initConfig(true);
             classPreProcessorAgentAdapter = createClassFileTransformer();
         }
 

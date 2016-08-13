@@ -27,9 +27,9 @@ public class ClassPreProcessorAgentAdapter implements ClassFileTransformer {
 
         LoaderHelper.setLoader(this.getClass().getClassLoader());
         //获取配置实例
-        HLogConfig config = HLogConfig.getInstance();
+        HLogConfig config = HLogConfig.getInstance(true);
         //初始化配置信息,后需要从properties文件或服务端来获取
-        config.initConfig();
+        //config.initConfig();
 
         //注册JMX观察
         try{
