@@ -72,10 +72,8 @@ public class HLogClassVisitor extends ClassVisitor {
 
         if (name.charAt(0) == '<' || ExcludeRuleUtils.isExcludeMethod(className,name)){
             return mv;
-        }else if(ExcludeRuleUtils.isGetOrSetMethod(className,name,desc)){
-            //如果是get和set方法不处理
-            return mv;
         }
+
         //获取方法的规则
         LogSwoopRule methodRule = processor.getSupportRule(className,name);
         //如果方法没有规则,使用类的
@@ -98,6 +96,12 @@ public class HLogClassVisitor extends ClassVisitor {
             Set<Map.Entry<String, String>> entries =  methodRule.getMcodeMap().entrySet();
             MethodVisitor newMethod = mv;
             for (Map.Entry<String, String> entry : entries) {
+                //如果是process的看是否排除掉get和set方法
+                if(ProcessMethodVisitor.CODE.equals(entry.getKey()) &&
+                        ExcludeRuleUtils.isGetOrSetMethod(className,name,desc)){
+                    //如果是get和set方法不处理
+                    return mv;
+                }
                 //根据不同的类型顺序执行字节码操作
                 newMethod = getMethodVisitorByCode(newMethod,access,name,desc,entry.getKey(),entry.getValue());
             }
