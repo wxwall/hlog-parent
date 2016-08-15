@@ -350,7 +350,7 @@ public class HLogMonitor {
     private static void doSendProcessLog(Node node ,String id,String pid,int status,boolean isTop,boolean isWriteErrLog){
         LogData logData = createLogData(HLogAgentConst.MV_CODE_PROCESS,id,pid);
         logData.put("status",status);
-        logData.put("clazz",node.className);
+        logData.put("clazz",node.className+"."+node.methodName);
         logData.put("method",node.methodName);
         logData.put("spend",node.speed);
         if(isTop){
@@ -379,12 +379,12 @@ public class HLogMonitor {
 
     /**
      * 监控sql执行耗时,如果耗时超过预设的值,记录执行的sql和入参
-     * @param speed
+     * @param start
      * @param className
      * @param sql
      * @param params
      */
-    public static void sqlMonitor(long speed,String className,String sql,String params,Object resObj) {
+    public static void sqlMonitor(long start,String className,String sql,String params,Object resObj) {
         if(!config.isEnableSqlTrack()){
             return ;
         }
@@ -404,7 +404,7 @@ public class HLogMonitor {
         }
         int size = 0 ;
         LogData logData = createLogData(HLogAgentConst.MV_CODE_SQL,id,pid);
-        logData.put("spend",speed);
+        logData.put("spend",System.currentTimeMillis()-start);
         logData.put("sql",sql);
         logData.put("params",params);
         if(resObj!=null){
