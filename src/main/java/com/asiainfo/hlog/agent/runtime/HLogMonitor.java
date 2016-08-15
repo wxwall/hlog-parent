@@ -384,7 +384,7 @@ public class HLogMonitor {
      * @param sql
      * @param params
      */
-    public static void sqlMonitor(long speed,String className,String sql,String params,Object resObj) {
+    public static void sqlMonitor(long start,String className,String sql,String params,Object resObj) {
         if(!config.isEnableSqlTrack()){
             return ;
         }
@@ -404,7 +404,7 @@ public class HLogMonitor {
         }
         int size = 0 ;
         LogData logData = createLogData(HLogAgentConst.MV_CODE_SQL,id,pid);
-        logData.put("spend",speed);
+        logData.put("spend",System.currentTimeMillis()-start);
         logData.put("sql",sql);
         logData.put("params",params);
         if(resObj!=null){

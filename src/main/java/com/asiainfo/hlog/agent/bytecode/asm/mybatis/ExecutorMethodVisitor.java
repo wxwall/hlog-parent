@@ -17,8 +17,20 @@ public class ExecutorMethodVisitor extends AbstractMethodVisitor {
 
     public static final String CODE = "mybatis.executor.sql";
 
+    private int startLVSlot ;
+
     public ExecutorMethodVisitor(int access, String className, String methodName, String desc, MethodVisitor pnv, byte[] datas, String mcode) {
         super(access, className, methodName, desc, pnv, datas, mcode);
+    }
+
+    @Override
+    public void visitCode() {
+        Label label = new Label();
+        visitLabel(label);
+        startLVSlot = defineLocalVariable("_startTime",long.class,label,null);
+        ASMUtils.visitStaticMethod(mv,System.class, ASMConsts.CURRENT_TIME_MILLIS,null);
+        mv.visitVarInsn(Opcodes.LSTORE, startLVSlot);
+        super.visitCode();
     }
 
     public void visitInsn(int opcode) {
@@ -39,8 +51,8 @@ public class ExecutorMethodVisitor extends AbstractMethodVisitor {
             }
 
 
-            //visitVarInsn(Opcodes.LLOAD, startLVSlot);
-            ASMUtils.visitStaticMethod(mv,System.class, ASMConsts.CURRENT_TIME_MILLIS,null);
+            visitVarInsn(Opcodes.LLOAD, startLVSlot);
+            ///ASMUtils.visitStaticMethod(mv,System.class, ASMConsts.CURRENT_TIME_MILLIS,null);
             visitVarInsn(Opcodes.ALOAD, 1);
             visitMethodInsn(Opcodes.INVOKEVIRTUAL, "org/apache/ibatis/mapping/MappedStatement", "getId", "()Ljava/lang/String;", false);
             visitMethodInsn(Opcodes.INVOKESTATIC, ASMConsts.MY_BATIS_ERROR_CONTEXT, "instance", "()Lorg/apache/ibatis/executor/ErrorContext;", false);
