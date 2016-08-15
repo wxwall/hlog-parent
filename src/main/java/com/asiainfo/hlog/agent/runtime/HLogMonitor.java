@@ -579,9 +579,9 @@ public class HLogMonitor {
         String pid = LogAgentContext.getThreadCurrentLogId();
 
         LogData logData = createLogData(HLogAgentConst.MV_CODE_TRANSACTION,id,pid);
-        logData.put("elapsedTime",dto.getElapsedTime());
+        logData.put("cost",dto.getElapsedTime());
         logData.put("method",method);
-        logData.put("clazz",clsName);
+        logData.put("clazz",dto.getMethodName());
 
         writeEvent(clsName,method,logData);
     }

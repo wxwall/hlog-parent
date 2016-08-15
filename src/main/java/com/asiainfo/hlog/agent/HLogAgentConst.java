@@ -38,7 +38,7 @@ public abstract class HLogAgentConst {
     /**
      * 表示一个拦截事务的编码
      */
-    public static final String MV_CODE_TRANSACTION = "transaction";
+    public static final String MV_CODE_TRANSACTION = "tran";
 
     public static final String HEADER_HLOG_AGENT_GID = "Hlog-Agent-Gid";
     public static final String HEADER_HLOG_AGENT_PID = "Hlog-Agent-Pid";
