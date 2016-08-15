@@ -580,8 +580,7 @@ public class HLogMonitor {
 
         LogData logData = createLogData(HLogAgentConst.MV_CODE_TRANSACTION,id,pid);
         logData.put("elapsedTime",dto.getElapsedTime());
-        logData.put("method",method);
-        logData.put("clazz",clsName);
+        logData.put("method",dto.getMethodName());
 
         writeEvent(clsName,method,logData);
     }
