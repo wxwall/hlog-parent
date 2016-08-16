@@ -34,15 +34,10 @@ public class TransactionMethodVisitor extends AbstractMethodVisitor {
     private void doTransactionEnd(){
         Label l1 = new Label();
         mv.visitLabel(l1);
-        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/HLogMonitor", "transactionElapsedTimeMonitor", "()V", false);
+        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/HLogMonitor", "transactionCostMonitor", "()V", false);
     }
 
     private void doTransactionBegin(){
-        Label start = new Label();
-        visitLabel(start);
-        int startSlot = defineLocalVariable("_start",long.class,start,null);
-        mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "currentTimeMillis", "()J", false);
-        mv.visitVarInsn(LSTORE, startSlot);
 
         Label method = new Label();
         mv.visitLabel(method);
@@ -51,9 +46,8 @@ public class TransactionMethodVisitor extends AbstractMethodVisitor {
         mv.visitMethodInsn(INVOKEINTERFACE, "org/springframework/transaction/TransactionDefinition", "getName", "()Ljava/lang/String;", true);
         mv.visitVarInsn(ASTORE, methodSlot);
 
-        mv.visitVarInsn(LLOAD, startSlot);
         mv.visitVarInsn(ALOAD, methodSlot);
-        mv.visitInsn(ICONST_0);
-        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/LogAgentContext", "setTranElapsedTimeContext", "(JLjava/lang/String;Z)V", false);
+        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/LogAgentContext", "setTranCost", "(Ljava/lang/String;)V", false);
+
     }
 }
