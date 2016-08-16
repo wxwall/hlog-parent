@@ -21,7 +21,11 @@ public class HLogJvmReport {
     private static Object pLock = new Object();
     private static HLogJvmReport p_instance = null;
     ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
-    private static String uuid = UUID.randomUUID().toString().replaceAll("-","");
+    private static String logId = RuntimeContext.logId();
+    /**
+     * 新增0，修改1
+     */
+    private static int upFlag = 0;
 
     private Method getFreePhysicalMemorySizeMethod = null;
     private Method getTotalPhysicalMemorySizeMethod = null;
@@ -75,20 +79,11 @@ public class HLogJvmReport {
         //操作系统物理内存
         OperatingSystemMXBean osmxb = ManagementFactory.getOperatingSystemMXBean();
 
-        //boolean ibmVendor = System.getProperty("java.vendor").contains("IBM");
         try{
             if(getFreePhysicalMemorySizeMethod==null ||
                     getTotalPhysicalMemorySizeMethod == null){
                 initMethods(osmxb.getClass());
             }
-            /*
-            Class osBeanClass = null;
-            if(ibmVendor) {
-                osBeanClass = Class.forName("com.ibm.lang.management.OperatingSystemMXBean");
-            }else {
-                osBeanClass = Class.forName("com.sun.management.OperatingSystemMXBean");
-            }
-            */
             long phyMemFree = (Long)getFreePhysicalMemorySizeMethod.invoke(osmxb);
             long phyMemTotal = (Long)getTotalPhysicalMemorySizeMethod.invoke(osmxb);
 
@@ -107,6 +102,8 @@ public class HLogJvmReport {
         ThreadMXBean thread = ManagementFactory.getThreadMXBean();
         logData.put("threadPeak",thread.getPeakThreadCount());
         logData.put("threadLive",thread.getThreadCount());
+        logData.put("at",upFlag);
+        upFlag = 1;
 
         RuntimeContext.writeEvent("jvm.log",null,logData);
     }
@@ -115,11 +112,10 @@ public class HLogJvmReport {
     public LogData createLogData() {
         LogData logData = new LogData();
         logData.setMc("jvm");
-        logData.setId(RuntimeContext.logId());
+        logData.setId(logId);
         logData.setPId(null);
         logData.setGId(null);
         logData.setTime(System.currentTimeMillis());
-        logData.put("uuid",uuid);
         return logData;
     }
 

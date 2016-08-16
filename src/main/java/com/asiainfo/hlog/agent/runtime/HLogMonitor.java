@@ -569,6 +569,7 @@ public class HLogMonitor {
      */
     public static void transactionElapsedTimeMonitor() {
         TranElapsedTimeDto dto = LogAgentContext.getTranElapsedTimeContext();
+        LogAgentContext.clearTranElapsedTimeContext();
         if(dto == null){
             return ;
         }
