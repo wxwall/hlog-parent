@@ -581,10 +581,9 @@ public class HLogMonitor {
         int index = dto.getMethodName().lastIndexOf(".");
         String clsName = dto.getMethodName().substring(0,index);
         String method = dto.getMethodName().substring(index+1);
-        String id = RuntimeContext.logId();
         String pid = LogAgentContext.getThreadCurrentLogId();
 
-        LogData logData = createLogData(HLogAgentConst.MV_CODE_TRANSACTION,id,pid);
+        LogData logData = createLogData(HLogAgentConst.MV_CODE_TRANSACTION,dto.getId(),pid);
         logData.put("cost",dto.getCost());
         logData.put("method",method);
         logData.put("clazz",dto.getMethodName());
