@@ -22,7 +22,10 @@ public class HLogJvmReport {
     private static HLogJvmReport p_instance = null;
     ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
     private static String logId = RuntimeContext.logId();
-    private static boolean isUpflag = false;
+    /**
+     * 新增0，修改1
+     */
+    private static int upFlag = 0;
 
     private Method getFreePhysicalMemorySizeMethod = null;
     private Method getTotalPhysicalMemorySizeMethod = null;
@@ -99,12 +102,8 @@ public class HLogJvmReport {
         ThreadMXBean thread = ManagementFactory.getThreadMXBean();
         logData.put("threadPeak",thread.getPeakThreadCount());
         logData.put("threadLive",thread.getThreadCount());
-        if(isUpflag){
-            logData.put("option","up");
-        }else{
-            logData.put("option","add");
-            isUpflag = true;
-        }
+        logData.put("at",upFlag);
+        upFlag = 1;
 
         RuntimeContext.writeEvent("jvm.log",null,logData);
     }
