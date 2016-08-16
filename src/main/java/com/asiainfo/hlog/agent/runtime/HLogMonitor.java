@@ -1,7 +1,7 @@
 package com.asiainfo.hlog.agent.runtime;
 
 import com.asiainfo.hlog.agent.HLogAgentConst;
-import com.asiainfo.hlog.agent.runtime.dto.TranElapsedTimeDto;
+import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
@@ -420,6 +420,11 @@ public class HLogMonitor {
         }
         logData.put("size",size);
 
+        TranCostDto tc = LogAgentContext.getTranCost();
+        if(tc!=null){
+            logData.put("tId",tc.getId());
+        }
+
         writeEvent(clsName,methodName,logData);
     }
 
@@ -567,9 +572,9 @@ public class HLogMonitor {
     /**
      * 监控数据库事务耗时
      */
-    public static void transactionElapsedTimeMonitor() {
-        TranElapsedTimeDto dto = LogAgentContext.getTranElapsedTimeContext();
-        LogAgentContext.clearTranElapsedTimeContext();
+    public static void transactionCostMonitor() {
+        TranCostDto dto = LogAgentContext.popTranCost();
+        LogAgentContext.clearTranCostContext();
         if(dto == null){
             return ;
         }
@@ -580,7 +585,7 @@ public class HLogMonitor {
         String pid = LogAgentContext.getThreadCurrentLogId();
 
         LogData logData = createLogData(HLogAgentConst.MV_CODE_TRANSACTION,id,pid);
-        logData.put("cost",dto.getElapsedTime());
+        logData.put("cost",dto.getCost());
         logData.put("method",method);
         logData.put("clazz",dto.getMethodName());
 

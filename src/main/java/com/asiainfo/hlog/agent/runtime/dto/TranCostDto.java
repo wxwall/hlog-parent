@@ -4,10 +4,11 @@ package com.asiainfo.hlog.agent.runtime.dto;
  * Created by chenYuanlong on 2016/8/11.
  * 事务耗时
  */
-public class TranElapsedTimeDto {
+public class TranCostDto {
     private long startTime;
     private String methodName;
-    private long elapsedTime;
+    private long cost;
+    private String id;
 
     public long getStartTime() {
         return startTime;
@@ -25,11 +26,19 @@ public class TranElapsedTimeDto {
         this.methodName = methodName;
     }
 
-    public long getElapsedTime () {
-        return elapsedTime;
+    public long getCost() {
+        return cost;
     }
 
-    public void setElapsed (long elapsedTime) {
-        this.elapsedTime = elapsedTime;
+    public void setCost(long cost) {
+        this.cost = cost;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

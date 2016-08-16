@@ -1,6 +1,8 @@
 package com.asiainfo.hlog.agent.runtime;
 
-import com.asiainfo.hlog.agent.runtime.dto.TranElapsedTimeDto;
+import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
+
+import java.util.Stack;
 
 /**
  * 运行时的各类变量值
@@ -29,7 +31,7 @@ public class LogAgentContext {
     /**
      * 事务耗时
      */
-    private static final ThreadLocal<TranElapsedTimeDto> tranElapsedTimeContext = new ThreadLocal<TranElapsedTimeDto>();
+    private static final ThreadLocal<Stack<TranCostDto>> tranCostContext = new ThreadLocal<Stack<TranCostDto>>();
 
 
     public static void setKeepContext(boolean keep){
@@ -104,30 +106,42 @@ public class LogAgentContext {
         return index;
     }
 
-    /**
-     *
-     * @param startTime 开始时间
-     * @param methodName 方法名称
-     * @param isCover 是否覆盖
-     */
-    public static void setTranElapsedTimeContext(long startTime,String methodName,boolean isCover){
-        TranElapsedTimeDto dto = tranElapsedTimeContext.get();
-        if(dto == null || isCover){
-            dto = new TranElapsedTimeDto();
-            dto.setMethodName(methodName);
-            dto.setStartTime(startTime);
-            tranElapsedTimeContext.set(dto);
+    public static void setTranCost(String methodName){
+        Stack<TranCostDto> stack = tranCostContext.get();
+        if(stack == null){
+            stack = new Stack<TranCostDto>();
+            tranCostContext.set(stack);
         }
+        TranCostDto dto = new TranCostDto();
+        dto.setId(RuntimeContext.logId());
+        dto.setMethodName(methodName);
+        dto.setStartTime(System.currentTimeMillis());
+        stack.push(dto);
     }
 
-    public  static TranElapsedTimeDto getTranElapsedTimeContext(){
-        TranElapsedTimeDto dto = tranElapsedTimeContext.get();
-        dto.setElapsed(System.currentTimeMillis() - dto.getStartTime());
+    public static TranCostDto getTranCost(){
+        Stack<TranCostDto> stack = tranCostContext.get();
+        if(stack!=null){
+            return stack.peek();
+        }
+        return null;
+    }
+
+    public static TranCostDto popTranCost(){
+        Stack<TranCostDto> stack = tranCostContext.get();
+        if(stack == null || stack.isEmpty()){
+            return null;
+        }
+        TranCostDto dto = stack.pop();
+        dto.setCost(System.currentTimeMillis() - dto.getStartTime());
         return dto;
     }
 
-    public  static void clearTranElapsedTimeContext(){
-        tranElapsedTimeContext.remove();
+    public static void clearTranCostContext(){
+        Stack<TranCostDto> stack = tranCostContext.get();
+        if(stack == null || stack.isEmpty()){
+            tranCostContext.remove();
+        }
     }
 }
 
