@@ -1,0 +1,60 @@
+package com.asiainfo;
+
+//import com.asiainfo.hlog.agent.runtime.RuntimeContext;
+
+import org.apache.ibatis.mapping.MappedStatement;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by chenfeng on 2016/4/21.
+ */
+public class TestASM {
+
+    private List _paramVals ;
+
+
+    public void addParamVal(int index,Object val){
+        if(_paramVals==null){
+            _paramVals = new ArrayList();
+        }
+        index = index -1;
+        if(index<_paramVals.size()){
+            _paramVals.remove(index);
+            _paramVals.add(index,val);
+        }else{
+            _paramVals.add(val);
+        }
+    }
+
+    public String getParamVals(){
+        if(_paramVals==null){
+            return "";
+        }
+        return _paramVals.toString();
+    }
+
+    public int test(MappedStatement ms){
+        int id = 0;
+        Integer.valueOf(id);
+        return id;
+    }
+    private static  TestASM testASM = new TestASM();
+    public static TestASM getTestASM(){
+        return testASM;
+    }
+
+    public static void main(String[] args) {
+        TestASM.getTestASM().addParamVal(1,"1212");
+        TestASM.getTestASM().addParamVal(1,"1212rr");
+        TestASM.getTestASM().addParamVal(2,"121e2");
+        TestASM.getTestASM().addParamVal(2,"121e2");
+        TestASM.getTestASM().addParamVal(2,"121d2");
+        TestASM.getTestASM().addParamVal(1,"abc");
+        System.out.println(TestASM.getTestASM().getParamVals());
+
+        long start = System.currentTimeMillis();
+    }
+
+}

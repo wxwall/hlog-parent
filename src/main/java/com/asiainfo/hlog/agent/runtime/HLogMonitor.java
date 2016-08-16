@@ -13,6 +13,7 @@ import java.util.*;
 
 import static com.asiainfo.hlog.agent.runtime.RuntimeContext.enable;
 import static com.asiainfo.hlog.agent.runtime.RuntimeContext.writeEvent;
+import static javax.swing.text.html.HTML.Tag.HEAD;
 
 /**
  * <p>运行时日志采集监控工具类：</p>
@@ -388,44 +389,49 @@ public class HLogMonitor {
         if(!config.isEnableSqlTrack()){
             return ;
         }
-        Node node = getCurrentNode();
-        String clsName ;
-        String methodName = null;
-        String id = RuntimeContext.logId();
-        String pid;
-        if(node==null){
-            pid = LogAgentContext.getThreadCurrentLogId();
-            clsName = className;
-        }else{
-            pid = node.logId;
-            clsName = node.className;
-            methodName = node.methodName;
-            node.sql=true;
-        }
-        int size = 0 ;
-        LogData logData = createLogData(HLogAgentConst.MV_CODE_SQL,id,pid);
-        logData.put("spend",System.currentTimeMillis()-start);
-        logData.put("sql",sql);
-        logData.put("params",params);
-        if(resObj!=null){
-            try{
-                if(resObj instanceof List){
-                    size = ((List) resObj).size();
-                }else{
-                    ((Integer)resObj).intValue();
-                }
-            }catch (Exception e){
-                size = -1;
+        try{
+            Node node = getCurrentNode();
+            String clsName ;
+            String methodName = null;
+            String id = RuntimeContext.logId();
+            String pid;
+            if(node==null){
+                pid = LogAgentContext.getThreadCurrentLogId();
+                clsName = className;
+            }else{
+                pid = node.logId;
+                clsName = node.className;
+                methodName = node.methodName;
+                node.sql=true;
             }
-        }
-        logData.put("size",size);
+            int size = 0 ;
+            LogData logData = createLogData(HLogAgentConst.MV_CODE_SQL,id,pid);
+            logData.put("spend",System.currentTimeMillis()-start);
+            logData.put("sql",sql);
+            logData.put("params",params);
+            if(resObj!=null){
+                try{
+                    if(resObj instanceof List){
+                        size = ((List) resObj).size();
+                    }else{
+                        ((Integer)resObj).intValue();
+                    }
+                }catch (Exception e){
+                    size = -1;
+                }
+            }
+            logData.put("size",size);
 
-        TranCostDto tc = LogAgentContext.getTranCost();
-        if(tc!=null){
-            logData.put("tId",tc.getId());
+            TranCostDto tc = LogAgentContext.getTranCost();
+            if(tc!=null){
+                logData.put("tId",tc.getId());
+            }
+
+            writeEvent(clsName,methodName,logData);
+        }catch (Throwable t){
+            Logger.error("sqlMonitor",t);
         }
 
-        writeEvent(clsName,methodName,logData);
     }
 
     /**
@@ -452,15 +458,20 @@ public class HLogMonitor {
      * @return
      */
     public static boolean isLoggerEnabled(String className,String level){
-        if(!config.isEnableLoggerTrack()){
-            return false;
+        try{
+            if(!config.isEnableLoggerTrack()){
+                return false;
+            }
+            Node node = getCurrentNode();
+            String methodName = null;
+            if(node!=null && node.className.equals(className)){
+                methodName = node.methodName;
+            }
+            return enable(HLogAgentConst.MV_CODE_LOGGER,className,methodName,level);
+        }catch (Throwable t){
+            Logger.error("isLoggerEnabled",t);
         }
-        Node node = getCurrentNode();
-        String methodName = null;
-        if(node!=null && node.className.equals(className)){
-            methodName = node.methodName;
-        }
-        return enable(HLogAgentConst.MV_CODE_LOGGER,className,methodName,level);
+        return false;
     }
 
     /**
@@ -573,23 +584,26 @@ public class HLogMonitor {
      * 监控数据库事务耗时
      */
     public static void transactionCostMonitor() {
-        TranCostDto dto = LogAgentContext.popTranCost();
-        LogAgentContext.clearTranCostContext();
-        if(dto == null){
-            return ;
+        try{
+            TranCostDto dto = LogAgentContext.popTranCost();
+            LogAgentContext.clearTranCostContext();
+            if(dto == null){
+                return ;
+            }
+            int index = dto.getMethodName().lastIndexOf(".");
+            String clsName = dto.getMethodName().substring(0,index);
+            String method = dto.getMethodName().substring(index+1);
+            String pid = LogAgentContext.getThreadCurrentLogId();
+
+            LogData logData = createLogData(HLogAgentConst.MV_CODE_TRANSACTION,dto.getId(),pid);
+            logData.put("cost",dto.getCost());
+            logData.put("method",method);
+            logData.put("clazz",dto.getMethodName());
+
+            writeEvent(clsName,method,logData);
+        }catch (Throwable t){
+            Logger.error("transactionCostMonitor",t);
         }
-        int index = dto.getMethodName().lastIndexOf(".");
-        String clsName = dto.getMethodName().substring(0,index);
-        String method = dto.getMethodName().substring(index+1);
-        String pid = LogAgentContext.getThreadCurrentLogId();
-
-        LogData logData = createLogData(HLogAgentConst.MV_CODE_TRANSACTION,dto.getId(),pid);
-        logData.put("cost",dto.getCost());
-        logData.put("method",method);
-        logData.put("clazz",dto.getMethodName());
-
-        writeEvent(clsName,method,logData);
     }
-
 
 }

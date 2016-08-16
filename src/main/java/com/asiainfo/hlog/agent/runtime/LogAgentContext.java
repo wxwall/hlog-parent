@@ -1,6 +1,7 @@
 package com.asiainfo.hlog.agent.runtime;
 
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
+import com.asiainfo.hlog.client.helper.Logger;
 
 import java.util.Stack;
 
@@ -107,16 +108,20 @@ public class LogAgentContext {
     }
 
     public static void setTranCost(String methodName){
-        Stack<TranCostDto> stack = tranCostContext.get();
-        if(stack == null){
-            stack = new Stack<TranCostDto>();
-            tranCostContext.set(stack);
+        try{
+            Stack<TranCostDto> stack = tranCostContext.get();
+            if(stack == null){
+                stack = new Stack<TranCostDto>();
+                tranCostContext.set(stack);
+            }
+            TranCostDto dto = new TranCostDto();
+            dto.setId(RuntimeContext.logId());
+            dto.setMethodName(methodName);
+            dto.setStartTime(System.currentTimeMillis());
+            stack.push(dto);
+        }catch (Throwable t){
+            Logger.error("setTranCost error",t);
         }
-        TranCostDto dto = new TranCostDto();
-        dto.setId(RuntimeContext.logId());
-        dto.setMethodName(methodName);
-        dto.setStartTime(System.currentTimeMillis());
-        stack.push(dto);
     }
 
     public static TranCostDto getTranCost(){
