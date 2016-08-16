@@ -13,6 +13,7 @@ import java.util.*;
 
 import static com.asiainfo.hlog.agent.runtime.RuntimeContext.enable;
 import static com.asiainfo.hlog.agent.runtime.RuntimeContext.writeEvent;
+import static javax.swing.text.html.HTML.Tag.HEAD;
 
 /**
  * <p>运行时日志采集监控工具类：</p>
@@ -584,7 +585,6 @@ public class HLogMonitor {
      */
     public static void transactionCostMonitor() {
         try{
-
             TranCostDto dto = LogAgentContext.popTranCost();
             LogAgentContext.clearTranCostContext();
             if(dto == null){
@@ -593,10 +593,9 @@ public class HLogMonitor {
             int index = dto.getMethodName().lastIndexOf(".");
             String clsName = dto.getMethodName().substring(0,index);
             String method = dto.getMethodName().substring(index+1);
-            String id = RuntimeContext.logId();
             String pid = LogAgentContext.getThreadCurrentLogId();
 
-            LogData logData = createLogData(HLogAgentConst.MV_CODE_TRANSACTION,id,pid);
+            LogData logData = createLogData(HLogAgentConst.MV_CODE_TRANSACTION,dto.getId(),pid);
             logData.put("cost",dto.getCost());
             logData.put("method",method);
             logData.put("clazz",dto.getMethodName());

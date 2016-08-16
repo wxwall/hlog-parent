@@ -42,19 +42,23 @@ public class HLogJvmReport {
     private HLogJvmReport() {
 
     }
-
+    private boolean isInitMethods = false;
     private void initMethods(Class mbeanClass) throws NoSuchMethodException {
         synchronized (this){
             getFreePhysicalMemorySizeMethod = mbeanClass.getMethod("getFreePhysicalMemorySize");
             getFreePhysicalMemorySizeMethod.setAccessible(true);
-            getTotalPhysicalMemorySizeMethod = mbeanClass.getMethod("getTotalPhysicalMemorySize");
+            if(mbeanClass.getName().startsWith("com.ibm")){
+                getTotalPhysicalMemorySizeMethod = mbeanClass.getMethod("getTotalPhysicalMemory");
+            }else{
+                getTotalPhysicalMemorySizeMethod = mbeanClass.getMethod("getTotalPhysicalMemorySize");
+            }
             getTotalPhysicalMemorySizeMethod.setAccessible(true);
+            isInitMethods = true;
         }
     }
 
     public void acquireJvmInfo(){
         Logger.debug("采集jvm信息");
-
         //堆内存
         MemoryMXBean mbean = ManagementFactory.getMemoryMXBean();
         LogData logData = createLogData();
@@ -80,12 +84,18 @@ public class HLogJvmReport {
         OperatingSystemMXBean osmxb = ManagementFactory.getOperatingSystemMXBean();
 
         try{
-            if(getFreePhysicalMemorySizeMethod==null ||
-                    getTotalPhysicalMemorySizeMethod == null){
+            if(!isInitMethods && (getFreePhysicalMemorySizeMethod==null ||
+                    getTotalPhysicalMemorySizeMethod == null)){
                 initMethods(osmxb.getClass());
             }
-            long phyMemFree = (Long)getFreePhysicalMemorySizeMethod.invoke(osmxb);
-            long phyMemTotal = (Long)getTotalPhysicalMemorySizeMethod.invoke(osmxb);
+            long phyMemFree = 0;
+            if(getFreePhysicalMemorySizeMethod!=null){
+                phyMemFree = (Long)getFreePhysicalMemorySizeMethod.invoke(osmxb);
+            }
+            long phyMemTotal = 0;
+            if(getTotalPhysicalMemorySizeMethod!=null){
+                phyMemTotal = (Long)getTotalPhysicalMemorySizeMethod.invoke(osmxb);
+            }
 
             logData.put("phyMemFree",phyMemFree);
             logData.put("phyMemTotal",phyMemTotal);
