@@ -1,7 +1,9 @@
 package com.asiainfo.hlog.agent.runtime;
 
 import com.asiainfo.hlog.agent.HLogAgentConst;
+import com.asiainfo.hlog.agent.jvm.HLogJvmReport;
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
+import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
@@ -13,7 +15,6 @@ import java.util.*;
 
 import static com.asiainfo.hlog.agent.runtime.RuntimeContext.enable;
 import static com.asiainfo.hlog.agent.runtime.RuntimeContext.writeEvent;
-import static javax.swing.text.html.HTML.Tag.HEAD;
 
 /**
  * <p>运行时日志采集监控工具类：</p>
@@ -38,6 +39,12 @@ public class HLogMonitor {
         excludeParamTypePaths.add("com.fasterxml");
         excludeParamTypePaths.add("org.mybatis");
         excludeParamTypePaths.add("com.fasterxml");
+
+        //jvm信息监控
+        String enableMonitor = HLogConfig.getInstance().getProperty(Constants.KEY_ENABLE_MONITOR_JVM, "true");
+        if ("true".equals(enableMonitor.toLowerCase())) {
+            HLogJvmReport.getInstance().start();
+        }
     }
 
     static final class Node{
@@ -354,7 +361,7 @@ public class HLogMonitor {
         logData.put("clazz",node.className+"."+node.methodName);
         logData.put("method",node.methodName);
         logData.put("spend",node.speed);
-        if(isTop){
+        if(isTop || "nvl".equals(pid)){
             logData.put("isTop",1);
         }
         if(isWriteErrLog){
