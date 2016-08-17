@@ -1,8 +1,6 @@
 package com.asiainfo.hlog.agent;
 
 import com.asiainfo.hlog.agent.bytecode.asm.HLogPreProcessor;
-import com.asiainfo.hlog.agent.jvm.HLogJvmReport;
-import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.config.jmx.HLogJMXReport;
 import com.asiainfo.hlog.client.helper.LoaderHelper;
@@ -36,11 +34,6 @@ public class ClassPreProcessorAgentAdapter implements ClassFileTransformer {
             HLogJMXReport.getHLogJMXReport().start();
         }catch (Throwable t){
             Logger.warn("Hlog注册JMX服务失败.",t);
-        }
-        //jvm信息监控
-        String enableMonitor = HLogConfig.getInstance().getProperty(Constants.KEY_ENABLE_MONITOR_JVM, "true");
-        if ("true".equals(enableMonitor.toLowerCase())) {
-            HLogJvmReport.getInstance().start();
         }
         //TODO 可根据配置来创建不同的实现
         preProcessor = new HLogPreProcessor();
