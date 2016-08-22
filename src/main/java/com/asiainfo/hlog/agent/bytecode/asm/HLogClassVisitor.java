@@ -1,5 +1,6 @@
 package com.asiainfo.hlog.agent.bytecode.asm;
 
+import com.asiainfo.hlog.client.config.PathType;
 import com.asiainfo.hlog.client.helper.ExcludeRuleUtils;
 import com.asiainfo.hlog.client.config.LogSwoopRule;
 import com.asiainfo.hlog.client.helper.Logger;
@@ -76,9 +77,13 @@ public class HLogClassVisitor extends ClassVisitor {
 
         //获取方法的规则
         LogSwoopRule methodRule = processor.getSupportRule(className,name);
+        boolean isExcludePath = processor.isExcludePath(className);
         //如果方法没有规则,使用类的
-        if(methodRule==null || methodRule.getMcodeMap().isEmpty()){
-            if (classRule != null) {
+        if(methodRule==null || isExcludePath || methodRule.getMcodeMap().isEmpty()){
+            //没有被排除或者规则为非包名规则
+            if (classRule != null &&
+                    (!isExcludePath ||
+                            classRule.getPath().getType()!= PathType.PACKAGE)) {
                 methodRule = classRule;
             } else {
                 //没有规则返回原始方法

@@ -130,7 +130,7 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
      * @param methodName
      * @return
      */
-    protected boolean isExcludeMethod(String className,String methodName){
+    public boolean isExcludeMethod(String className,String methodName){
         return ExcludeRuleUtils.isExcludeMethod(className,methodName);
     }
 
@@ -139,7 +139,7 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
      * @param name
      * @return
      */
-    protected boolean isExcludePath(String name){
+    public boolean isExcludePath(String name){
         return ExcludeRuleUtils.isExcludePath(name);
     }
     /**
