@@ -431,6 +431,7 @@ public class HLogMonitor {
 
             TranCostDto tc = LogAgentContext.getTranCost();
             if(tc!=null){
+                tc.sqlCountIncrement();
                 logData.put("tId",tc.getId());
             }
 
@@ -606,6 +607,7 @@ public class HLogMonitor {
             logData.put("cost",dto.getCost());
             logData.put("method",method);
             logData.put("clazz",dto.getMethodName());
+            logData.put("sqlCount",dto.getSqlCount());
 
             writeEvent(clsName,method,logData);
         }catch (Throwable t){
