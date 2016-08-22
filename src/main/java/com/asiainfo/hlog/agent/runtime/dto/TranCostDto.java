@@ -9,6 +9,7 @@ public class TranCostDto {
     private String methodName;
     private long cost;
     private String id;
+    private int sqlCount = 0;
 
     public long getStartTime() {
         return startTime;
@@ -40,5 +41,13 @@ public class TranCostDto {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public long getSqlCount(){
+        return  this.sqlCount;
+    }
+
+    public void sqlCountIncrement(){
+        this.sqlCount += 1;
     }
 }
