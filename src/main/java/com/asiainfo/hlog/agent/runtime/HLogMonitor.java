@@ -12,6 +12,9 @@ import com.asiainfo.hlog.org.objectweb.asm.Type;
 
 import java.lang.ref.SoftReference;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.asiainfo.hlog.agent.runtime.RuntimeContext.enable;
 import static com.asiainfo.hlog.agent.runtime.RuntimeContext.writeEvent;
@@ -28,6 +31,9 @@ public class HLogMonitor {
 
     private static Set<String> excludeParamTypes = new HashSet<String>();
     private static Set<String> excludeParamTypePaths = new HashSet<String>();
+    private static WeakHashMap<Object,String> loopMonitorMap = new WeakHashMap<Object,String>();
+    private static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+
     static {
         excludeParamTypes.add("javax.servlet.http.HttpServletResponse");
         excludeParamTypes.add("javax.servlet.http.HttpServletRequest");
@@ -45,11 +51,17 @@ public class HLogMonitor {
         if ("true".equals(enableMonitor.toLowerCase())) {
             HLogJvmReport.getInstance().start();
         }
+        //循环监控
+        String enableLoopMonitor = HLogConfig.getInstance().getProperty(Constants.KEY_ENABLE_MONITOR_LOOP, "true");
+        if ("true".equals(enableLoopMonitor.toLowerCase())) {
+            startLoopMonitor();
+        }
     }
 
     static final class Node{
         private String logId;
         private String logPid;
+        private String logGid;
         private final String className;
         private final String methodName;
         private final String description;
@@ -69,6 +81,7 @@ public class HLogMonitor {
         public Node(){
             logId = null;
             logPid = null;
+            logGid = null;
             className = null;
             methodName = null;
             description = null;
@@ -128,7 +141,6 @@ public class HLogMonitor {
         node.enableProcess = enableProcess;
         node.enableError = enableError;
         pushNode(node);
-
     }
 
     private static void pushNode(Node node) {
@@ -140,7 +152,15 @@ public class HLogMonitor {
         if(!stack.isEmpty()){
             stack.lastElement().leaf = false;
         }
+
+        String gId = LogAgentContext.getThreadLogGroupId();
+        if(gId==null){
+            gId=node.logPid!=null?node.logPid:node.logId;
+        }
+        node.logGid = gId;
         stack.push(node);
+        //添加循环监控
+        addLoopMonitor(node);
     }
     private static void checkNodeId(Node node){
         if(node!=null && node.logId==null){
@@ -177,6 +197,10 @@ public class HLogMonitor {
                 return ;
             }
             Node node = stack.pop();
+
+            //移除循环监控
+            removeLoopMonitor(node);
+
             if(node.isEmpty()){
                 return ;
             }
@@ -593,6 +617,9 @@ public class HLogMonitor {
      */
     public static void transactionCostMonitor() {
         try{
+            if(!config.isEnableTransaction()){
+                return;
+            }
             TranCostDto dto = LogAgentContext.popTranCost();
             LogAgentContext.clearTranCostContext();
             if(dto == null){
@@ -614,5 +641,81 @@ public class HLogMonitor {
             Logger.error("transactionCostMonitor",t);
         }
     }
+
+    /**
+     * 添加循环监控
+     * @param node
+     */
+    private static void addLoopMonitor(Node node){
+        synchronized (loopMonitorMap){
+            loopMonitorMap.put(node,null);
+        }
+    }
+
+    /**
+     * 移除循环监控
+     * @param node
+     */
+    private static void removeLoopMonitor(Node node){
+        synchronized (loopMonitorMap){
+            loopMonitorMap.remove(node);
+        }
+    }
+
+    public static void startLoopMonitor(){
+        Runnable task = new Runnable() {
+            public void run() {
+                try {
+                    String enableMonitor = HLogConfig.getInstance().getProperty(Constants.KEY_ENABLE_MONITOR_LOOP, "true");
+                    if ("true".equals(enableMonitor.toLowerCase())) {
+                        if (loopMonitorMap == null || loopMonitorMap.isEmpty()) {
+                            return;
+                        }
+                        int timeout = Integer.parseInt(HLogConfig.getInstance().getProperty(Constants.KEY_MONITOR_LOOP_TIMEOUT, "300")) * 1000;
+                        synchronized (loopMonitorMap) {
+                            Iterator<Map.Entry<Object, String>> iterator = loopMonitorMap.entrySet().iterator();
+                            while (iterator.hasNext()) {
+                                Map.Entry<Object, String> entry = iterator.next();
+                                Node node = (Node) entry.getKey();
+                                node.speed = System.currentTimeMillis() - node.beginTime;
+                                if (node.speed > timeout) {
+                                    LogData logData = new LogData();
+                                    logData.setMc(HLogAgentConst.MV_CODE_LOOP);
+                                    logData.setId(node.logId);
+                                    logData.setPId(node.logPid);
+                                    logData.setGId(node.logGid);
+                                    logData.setTime(System.currentTimeMillis());
+                                    logData.put("clazz", node.className + "." + node.methodName);
+                                    logData.put("method", node.methodName);
+                                    logData.put("spend", node.speed);
+                                    if(node.logPid == null || "nvl".equals(node.logPid)){
+                                        logData.put("isTop",1);
+                                    }
+                                    writeEvent(node.className, node.methodName, logData);
+                                    iterator.remove();
+                                }
+                            }
+                        }
+                    }
+                }catch (Throwable t){
+                    Logger.error("循环监控出错",t);
+                }
+            }
+        };
+        try {
+            String interval = HLogConfig.getInstance().getProperty(Constants.KEY_MONITOR_LOOP_INTERVAL_TIME, "30");
+            //每隔interval秒执行task任务
+            scheduledExecutorService.scheduleAtFixedRate(
+                    task,
+                    0,
+                    Integer.parseInt(interval),
+                    TimeUnit.SECONDS);
+
+        }catch (Throwable t){
+            Logger.error("执行循环监控任务出错",t);
+        }
+
+    }
+
 
 }
