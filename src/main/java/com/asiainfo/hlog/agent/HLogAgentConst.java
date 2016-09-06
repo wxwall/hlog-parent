@@ -40,6 +40,11 @@ public abstract class HLogAgentConst {
      */
     public static final String MV_CODE_TRANSACTION = "tran";
 
+    /**
+     * 表示一个循环监控的编码
+     */
+    public static final String MV_CODE_LOOP = "loop";
+
     public static final String HEADER_HLOG_AGENT_GID = "Hlog-Agent-Gid";
     public static final String HEADER_HLOG_AGENT_PID = "Hlog-Agent-Pid";
 }
