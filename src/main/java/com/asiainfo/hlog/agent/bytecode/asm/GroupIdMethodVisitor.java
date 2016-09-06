@@ -15,11 +15,10 @@ public class GroupIdMethodVisitor extends AbstractMethodVisitor {
 
     @Override
     public void visitCode() {
-        Logger.debug("GroupIdMethodVisitor#[{0}.{1}]",className,methodName);
-        Label label = new Label();
-        visitLabel(label);
-        mv.visitVarInsn(ALOAD, 0);
-        mv.visitMethodInsn(INVOKEVIRTUAL, "com/asiainfo/hlog/agent/runtime/LogAgentContext", "getThreadLogGroupId", "()Ljava/lang/String;", false);
+        System.err.println("@@@@@@@@@@@GroupIdMethodVisitor#"+className+"."+methodName);
+        Label start = new Label();
+        mv.visitLabel(start);
+        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/LogAgentContext", "getThreadLogGroupId", "()Ljava/lang/String;", false);
         mv.visitInsn(ARETURN);
         super.visitCode();
     }
