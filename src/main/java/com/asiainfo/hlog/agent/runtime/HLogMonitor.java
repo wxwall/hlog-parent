@@ -662,46 +662,55 @@ public class HLogMonitor {
         }
     }
 
+    /**
+     * 循环监控
+     */
+    private static void loopMonitor(){
+        try {
+            String enableMonitor = HLogConfig.getInstance().getProperty(Constants.KEY_ENABLE_MONITOR_LOOP, "true");
+            if (!"true".equals(enableMonitor.toLowerCase())) {
+                return;
+            }
+            if (loopMonitorMap == null || loopMonitorMap.isEmpty()) {
+                return;
+            }
+            int timeout = Integer.parseInt(HLogConfig.getInstance().getProperty(Constants.KEY_MONITOR_LOOP_TIMEOUT, "300")) * 1000;
+            synchronized (loopMonitorMap) {
+                Iterator<Map.Entry<Object, String>> iterator = loopMonitorMap.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry<Object, String> entry = iterator.next();
+                    Node node = (Node) entry.getKey();
+                    node.speed = System.currentTimeMillis() - node.beginTime;
+                    if (node.speed > timeout) {
+                        LogData logData = new LogData();
+                        logData.setMc(HLogAgentConst.MV_CODE_LOOP);
+                        logData.setId(node.logId);
+                        logData.setPId(node.logPid);
+                        logData.setGId(node.logGid);
+                        logData.setTime(System.currentTimeMillis());
+                        logData.put("clazz", node.className + "." + node.methodName);
+                        logData.put("method", node.methodName);
+                        logData.put("spend", node.speed);
+                        if(node.logPid == null || "nvl".equals(node.logPid)){
+                            logData.put("isTop",1);
+                        }
+                        writeEvent(node.className, node.methodName, logData);
+                        iterator.remove();
+                    }
+                }
+            }
+        }catch (Throwable t){
+            Logger.error("循环监控出错",t);
+        }
+    }
+
     public static void startLoopMonitor(){
         Runnable task = new Runnable() {
             public void run() {
-                try {
-                    String enableMonitor = HLogConfig.getInstance().getProperty(Constants.KEY_ENABLE_MONITOR_LOOP, "true");
-                    if ("true".equals(enableMonitor.toLowerCase())) {
-                        if (loopMonitorMap == null || loopMonitorMap.isEmpty()) {
-                            return;
-                        }
-                        int timeout = Integer.parseInt(HLogConfig.getInstance().getProperty(Constants.KEY_MONITOR_LOOP_TIMEOUT, "300")) * 1000;
-                        synchronized (loopMonitorMap) {
-                            Iterator<Map.Entry<Object, String>> iterator = loopMonitorMap.entrySet().iterator();
-                            while (iterator.hasNext()) {
-                                Map.Entry<Object, String> entry = iterator.next();
-                                Node node = (Node) entry.getKey();
-                                node.speed = System.currentTimeMillis() - node.beginTime;
-                                if (node.speed > timeout) {
-                                    LogData logData = new LogData();
-                                    logData.setMc(HLogAgentConst.MV_CODE_LOOP);
-                                    logData.setId(node.logId);
-                                    logData.setPId(node.logPid);
-                                    logData.setGId(node.logGid);
-                                    logData.setTime(System.currentTimeMillis());
-                                    logData.put("clazz", node.className + "." + node.methodName);
-                                    logData.put("method", node.methodName);
-                                    logData.put("spend", node.speed);
-                                    if(node.logPid == null || "nvl".equals(node.logPid)){
-                                        logData.put("isTop",1);
-                                    }
-                                    writeEvent(node.className, node.methodName, logData);
-                                    iterator.remove();
-                                }
-                            }
-                        }
-                    }
-                }catch (Throwable t){
-                    Logger.error("循环监控出错",t);
-                }
+                loopMonitor();
             }
         };
+
         try {
             String interval = HLogConfig.getInstance().getProperty(Constants.KEY_MONITOR_LOOP_INTERVAL_TIME, "30");
             //每隔interval秒执行task任务
