@@ -42,13 +42,20 @@ public class HttpMonitor {
     private static HLogConfig config = HLogConfig.getInstance();
 
     public static void receiveHlogId(String _gid,String _pid){
-        LogAgentContext.clear();
+        //LogAgentContext.clear();
+        //如果没有上游系统传递gId的话,从当前线程中获取
+        if(_gid==null){
+            _gid = LogAgentContext.getThreadLogGroupId();
+        }
+
+        //如果当前线程也是空的,产生一个gId
         if(_gid==null){
             _gid = RuntimeContext.logId();
             _pid = RuntimeContext.buildLogPId(_gid);
         }else if(_pid==null){
             _pid = RuntimeContext.buildLogPId(_gid);
         }
+
         LogAgentContext.setThreadLogGroupId(_gid);
         LogAgentContext.setThreadCurrentLogId(_pid);
         LogAgentContext.setKeepContext(true);
