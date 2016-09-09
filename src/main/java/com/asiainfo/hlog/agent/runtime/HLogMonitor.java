@@ -8,8 +8,15 @@ import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
+import com.asiainfo.hlog.comm.PropHelper;
+import com.asiainfo.hlog.comm.context.PropertyHolder;
 import com.asiainfo.hlog.org.objectweb.asm.Type;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -32,7 +39,9 @@ public class HLogMonitor {
     private static Set<String> excludeParamTypes = new HashSet<String>();
     private static Set<String> excludeParamTypePaths = new HashSet<String>();
     private static WeakHashMap<Object,String> loopMonitorMap = new WeakHashMap<Object,String>();
-    private static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+    private static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
+    private static long configFileModifyTime = -1;
+
 
     static {
         excludeParamTypes.add("javax.servlet.http.HttpServletResponse");
@@ -56,6 +65,7 @@ public class HLogMonitor {
         if ("true".equals(enableLoopMonitor.toLowerCase())) {
             startLoopMonitor();
         }
+        startConfigReloadTask();
     }
 
     static final class Node{
@@ -724,6 +734,61 @@ public class HLogMonitor {
             Logger.error("执行循环监控任务出错",t);
         }
 
+    }
+
+    /**
+     * 配置文件重新加载任务
+     */
+    public static void startConfigReloadTask(){
+        final String propFile = HLogConfig.getInstance().getHLogAgentDir()+Constants.FIEL_NAME_HLOG_CONFS;
+        Runnable task = new Runnable() {
+            public void run() {
+                try {
+                    File file = new File(propFile);
+                    long modifyTime = file.lastModified();
+                    if (configFileModifyTime != modifyTime) {
+                        Logger.info("刷新配置文件");
+                        HLogConfig.getInstance().localProperties();
+                        configFileModifyTime = modifyTime;
+                    }
+                }catch (Exception e){
+                    Logger.error("定时任务刷新配置文件失败",e);
+                }
+            }
+        };
+
+        try {
+            int interval = 15;
+            //每隔interval秒执行task任务
+            scheduledExecutorService.scheduleWithFixedDelay(
+                    task,
+                    0,
+                    interval,
+                    TimeUnit.SECONDS);
+
+        }catch (Throwable t){
+            Logger.error("启动刷新配置文件定时任务失败",t);
+        }
+
+    }
+
+    public static boolean pageRedirect(HttpServletRequest req, HttpServletResponse resp){
+        try {
+            String uri = req.getRequestURI();
+            System.err.println("###########uri:=" + uri);
+            if(uri.contains("/web/pages/")){
+                String fileName = uri.substring(12)+".html";
+                WebPageParser.returnResourceFile(fileName,req.getRequestURI(),resp);
+                return true;
+            }else if(uri.contains("/web/statics/")){
+                String fileName = uri.substring(12);
+                WebPageParser.returnResourceFile(fileName,req.getRequestURI(),resp);
+                return true;
+            }
+        }catch (Exception e){
+            Logger.error("HLogWeb页面出错",e);
+        }
+        return  false;
     }
 
 
