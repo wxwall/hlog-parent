@@ -9,8 +9,9 @@ import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
 import com.asiainfo.hlog.org.objectweb.asm.Type;
-
+import java.io.File;
 import java.lang.ref.SoftReference;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -32,7 +33,10 @@ public class HLogMonitor {
     private static Set<String> excludeParamTypes = new HashSet<String>();
     private static Set<String> excludeParamTypePaths = new HashSet<String>();
     private static WeakHashMap<Object,String> loopMonitorMap = new WeakHashMap<Object,String>();
-    private static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+    private static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
+    private static long configFileModifyTime = -1;
+    private static long extConfigFileModifyTime = -1;
+
 
     static {
         excludeParamTypes.add("javax.servlet.http.HttpServletResponse");
@@ -56,6 +60,7 @@ public class HLogMonitor {
         if ("true".equals(enableLoopMonitor.toLowerCase())) {
             startLoopMonitor();
         }
+        startConfigReloadTask();
     }
 
     static final class Node{
@@ -726,5 +731,56 @@ public class HLogMonitor {
 
     }
 
+    /**
+     * 配置文件重新加载任务
+     */
+    public static void startConfigReloadTask(){
+       Runnable task = new Runnable() {
+            public void run() {
+                try {
+                    String filePath = HLogConfig.getInstance().getHLogAgentDir()+Constants.FIEL_NAME_HLOG_CONFS;
+                    boolean isModify = false;
+                    //判断hlog-confs.properties是否修改
+                    File file = new File(filePath);
+                    long modifyTime = file.lastModified();
+                    if(configFileModifyTime != modifyTime){
+                        isModify = true;
+                        configFileModifyTime = modifyTime;
+                    }
+                    //判断hlog-{0}-confs.properties是否修改
+                    if(HLogConfig.hlogCfgName!=null){
+                        String extFilePath = HLogConfig.getInstance().getHLogAgentDir() + MessageFormat.format(Constants.FILE_NAME_HLOG_EXT_CONFS, HLogConfig.hlogCfgName);
+                        File extFile = new File(extFilePath);
+                        long extModifyTime = extFile.lastModified();
+                        if(extConfigFileModifyTime != extModifyTime){
+                            isModify = true;
+                            extConfigFileModifyTime = extModifyTime;
+                        }
+                    }
+
+                    if (isModify) {
+                        Logger.info("刷新配置文件");
+                        HLogConfig.getInstance().localProperties();
+                    }
+                }catch (Exception e){
+                    Logger.error("定时任务刷新配置文件失败",e);
+                }
+            }
+        };
+
+        try {
+            int interval = 15;
+            //每隔interval秒执行task任务
+            scheduledExecutorService.scheduleWithFixedDelay(
+                    task,
+                    0,
+                    interval,
+                    TimeUnit.SECONDS);
+
+        }catch (Throwable t){
+            Logger.error("启动刷新配置文件定时任务失败",t);
+        }
+
+    }
 
 }
