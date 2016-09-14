@@ -49,15 +49,15 @@ public class HLogMonitor {
         excludeParamTypePaths.add("com.fasterxml");
         excludeParamTypePaths.add("org.mybatis");
         excludeParamTypePaths.add("com.fasterxml");
+        excludeParamTypePaths.add("net.sf.json");
+        excludeParamTypePaths.add("org.codehaus");
 
         //jvm信息监控
-        String enableMonitor = HLogConfig.getInstance().getProperty(Constants.KEY_ENABLE_MONITOR_JVM, "true");
-        if ("true".equals(enableMonitor.toLowerCase())) {
+        if (HLogConfig.getInstance().isEnableJVMMonitor()) {
             HLogJvmReport.getInstance().start();
         }
         //循环监控
-        String enableLoopMonitor = HLogConfig.getInstance().getProperty(Constants.KEY_ENABLE_MONITOR_LOOP, "true");
-        if ("true".equals(enableLoopMonitor.toLowerCase())) {
+        if (HLogConfig.getInstance().isEnableLoopMonitor()) {
             startLoopMonitor();
         }
         startConfigReloadTask();
@@ -114,10 +114,14 @@ public class HLogMonitor {
 
     private static HLogConfig config = HLogConfig.getInstance();
 
-    public static void start(boolean enableProcess,boolean enableError,String className,String methodName,String desc,String[] paramNames,Object[] params){
+    public static void start(boolean isProcess,boolean isError,String className,String methodName,String desc,String[] paramNames,Object[] params){
 
-        //enable(HLogAgentConst.MV_CODE_PROCESS, className,methodName);
-        //enable(HLogAgentConst.MV_CODE_ERROR, className,methodName);
+        boolean enableProcess = isProcess;
+        boolean enableError = isError;
+        if(config.isEnableDynamicProcessSwitch()){
+            enableProcess = enable(HLogAgentConst.MV_CODE_PROCESS, className,methodName);
+            enableError = enable(HLogAgentConst.MV_CODE_ERROR, className,methodName);
+        }
 
         if(!enableProcess && !enableError){
             Node node = new Node();
