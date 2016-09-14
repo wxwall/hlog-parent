@@ -38,7 +38,7 @@ public class PageRedirectMethodVisitor extends AbstractMethodVisitor {
         mv.visitLabel(start);
         mv.visitVarInsn(ALOAD, reqIdx);
         mv.visitVarInsn(ALOAD, respIdx);
-        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/HLogMonitor", "pageRedirect", "(Ljavax/servlet/http/HttpServletRequest;Ljavax/servlet/http/HttpServletResponse;)Z", false);
+        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/http/HttpMonitor", "pageRedirect", "(Ljava/lang/Object;Ljava/lang/Object;)Z", false);
         Label ifLabel = new Label();
         mv.visitJumpInsn(IFEQ, ifLabel);
         mv.visitInsn(RETURN);

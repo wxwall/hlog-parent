@@ -4,8 +4,11 @@ import com.asiainfo.hlog.agent.runtime.HLogMonitor;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 import com.asiainfo.hlog.agent.runtime.RuntimeContext;
 import com.asiainfo.hlog.client.config.HLogConfig;
+import com.asiainfo.hlog.client.helper.ClassHelper;
+import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
 
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -104,6 +107,31 @@ public class HttpMonitor {
             }
         }
         return requestUrl.substring(length-index,length);
+    }
+
+    private static Method  pageRedirectMethod = null;
+    public static boolean pageRedirect(Object req, Object resp){
+        try {
+            if(pageRedirectMethod == null){
+                synchronized (HttpMonitor.class){
+                    Class webPageParserClass = ClassHelper.loadClass("com.asiainfo.hlog.web.WebPageParser");
+                    Method[] methods = webPageParserClass.getMethods();
+                    for (Method method : methods){
+                        if(method.getName().equals("pageRedirect")){
+                            pageRedirectMethod = method;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(pageRedirectMethod != null){
+                return (Boolean) pageRedirectMethod.invoke(null,req,resp);
+            }
+            return false;
+        }catch (Exception e){
+            Logger.error("HLogWeb页面出错",e);
+        }
+        return  false;
     }
 
 }
