@@ -3,6 +3,8 @@ package com.asiainfo.hlog.agent.runtime;
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
 import com.asiainfo.hlog.client.helper.Logger;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -33,6 +35,8 @@ public class LogAgentContext {
      * 事务耗时
      */
     private static final ThreadLocal<Stack<TranCostDto>> tranCostContext = new ThreadLocal<Stack<TranCostDto>>();
+
+    private static final ThreadLocal<Map<String,Object>> threadSession = new ThreadLocal<Map<String,Object>>();
 
 
     public static void setKeepContext(boolean keep){
@@ -93,6 +97,7 @@ public class LogAgentContext {
         */
         threadLogGroupId.remove();
         threadCurrentLogId.remove();
+        threadSession.remove();
         threadCurrentIndex.set(new Integer(0));
         keepContext.set(false);
     }
@@ -147,6 +152,18 @@ public class LogAgentContext {
         if(stack == null || stack.isEmpty()){
             tranCostContext.remove();
         }
+    }
+
+    public static Map<String, Object> getThreadSession() {
+        return threadSession.get();
+    }
+
+    public static void setThreadSession(Map<String, Object> map){
+        threadSession.set(map);
+    }
+
+    public static void clearThreadSession(){
+        threadSession.remove();
     }
 }
 
