@@ -1,15 +1,22 @@
 package com.asiainfo.hlog.agent.runtime.http;
 
+import com.alibaba.fastjson.JSON;
 import com.asiainfo.hlog.agent.runtime.HLogMonitor;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 import com.asiainfo.hlog.agent.runtime.RuntimeContext;
+import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.ClassHelper;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
+import com.asiainfo.hlog.web.HLogHttpRequest;
+import org.mvel2.MVEL;
 
+import javax.servlet.http.HttpSession;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -87,8 +94,13 @@ public class HttpMonitor {
         logData.put("remoteAddr",addr);
         logData.put("spend",System.currentTimeMillis()-start);
         logData.put("status",status);
+        if(config.isEnableSession()){
+           Map session = LogAgentContext.getThreadSession();
+            if(session != null && !session.isEmpty()){
+                logData.put("session",session);
+            }
+        }
         RuntimeContext.writeEvent("request.log",null,logData);
-
         LogAgentContext.clear();
     }
 
@@ -132,6 +144,43 @@ public class HttpMonitor {
             Logger.error("HLogWeb页面出错",e);
         }
         return  false;
+    }
+
+    public static void sessionInfo(Object req0){
+        if(!config.isEnableSession()){
+            return;
+        }
+        try{
+            //排除一些资源的请求
+            HLogHttpRequest req = new HLogHttpRequest(req0);
+            String expand = getExpand(req.getRequestURL());
+            if(excludeExpands.contains(expand)){
+                return ;
+            }
+            Object session = req.getSession();
+            if(session == null){
+                return;
+            }
+            String sessionKeys = config.getProperty(Constants.KEY_HLOG_SESSION);
+            if(sessionKeys == null || sessionKeys.length() == 0){
+                return;
+            }
+            String[] keys = sessionKeys.split(",");
+            Map<String,Object> sessionMap = new HashMap<String, Object>();
+            for(int i = 0; i < keys.length;i++){
+                String path = keys[i].trim()+".";
+                path = "getAttribute('" + path.replaceFirst("\\.","').");
+                path = path.substring(0, path.length() - 1);
+                Object val = MVEL.eval(path, session);
+                if(val != null){
+                    sessionMap.put(keys[i], val);
+
+                }
+            }
+            LogAgentContext.setThreadSession(sessionMap);
+        }catch (Exception e){
+            Logger.error("session采集失败",e);
+        }
     }
 
 }

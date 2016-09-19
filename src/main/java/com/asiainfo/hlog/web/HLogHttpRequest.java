@@ -1,5 +1,6 @@
 package com.asiainfo.hlog.web;
 
+import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.HashMap;
  */
 public class HLogHttpRequest {
     private static HashMap<String,Method> methodMap = new HashMap<String, Method>();
+    private static Method methodSessionGetAttribute = null;
     private Object req;
     public HLogHttpRequest(Object req){
         this.req = req;
@@ -41,5 +43,24 @@ public class HLogHttpRequest {
 
     public BufferedReader getReader() throws Exception{
         return (BufferedReader)getMethod("getReader").invoke(req);
+    }
+
+    public StringBuffer getRequestURL() throws Exception{
+        return (StringBuffer)getMethod("getRequestURL").invoke(req);
+    }
+
+    public Object getSessionAttribute(String key) throws Exception{
+        Object session = getSession();
+        if(methodSessionGetAttribute == null){
+            methodSessionGetAttribute = session.getClass().getMethod("getAttribute",String.class);
+        }
+        return methodSessionGetAttribute.invoke(session,key);
+    }
+
+    public Object getSession()  throws Exception{
+        if(!methodMap.containsKey("getSession")){
+            methodMap.put("getSession",req.getClass().getMethod("getSession"));
+        }
+        return methodMap.get("getSession").invoke(req);
     }
 }
