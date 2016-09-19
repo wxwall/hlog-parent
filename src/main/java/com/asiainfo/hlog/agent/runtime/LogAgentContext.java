@@ -3,7 +3,6 @@ package com.asiainfo.hlog.agent.runtime;
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
 import com.asiainfo.hlog.client.helper.Logger;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
@@ -100,6 +99,7 @@ public class LogAgentContext {
         threadSession.remove();
         threadCurrentIndex.set(new Integer(0));
         keepContext.set(false);
+        clearThreadSession();
     }
 
     public static int getIndex(){

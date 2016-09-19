@@ -1,18 +1,15 @@
 package com.asiainfo.hlog.agent.runtime.http;
 
-import com.alibaba.fastjson.JSON;
 import com.asiainfo.hlog.agent.runtime.HLogMonitor;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 import com.asiainfo.hlog.agent.runtime.RuntimeContext;
-import com.asiainfo.hlog.client.config.Constants;
+import com.asiainfo.hlog.agent.runtime.RutimeCallFactory;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.ClassHelper;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
 import com.asiainfo.hlog.web.HLogHttpRequest;
-import org.mvel2.MVEL;
 
-import javax.servlet.http.HttpSession;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -161,6 +158,7 @@ public class HttpMonitor {
             if(session == null){
                 return;
             }
+            /*
             String sessionKeys = config.getProperty(Constants.KEY_HLOG_SESSION);
             if(sessionKeys == null || sessionKeys.length() == 0){
                 return;
@@ -175,6 +173,19 @@ public class HttpMonitor {
                 if(val != null){
                     sessionMap.put(keys[i], val);
 
+                }
+            }*/
+            Map<String,String> keyPaths = config.getSessionKeyPath();
+            Map<String,Object> sessionMap = new HashMap<String, Object>();
+            for(String keypath : keyPaths.keySet()){
+                try{
+                    Object val = RutimeCallFactory.getRutimeCall().eval(keyPaths.get(keypath),session);
+                    if(val != null){
+                        sessionMap.put(keypath, val);
+                    }
+                }catch (Throwable t){
+                    //sessionMap.put(keypath,t.getMessage());
+                    Logger.warn("获取session信息[{0}]异常:{1}",keypath,t.getMessage());
                 }
             }
             LogAgentContext.setThreadSession(sessionMap);

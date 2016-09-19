@@ -12,4 +12,12 @@ public interface IRutimeCall {
      * @return
      */
     String toJson(Object obj);
+
+    /**
+     * 运行表达式
+     * @param expr
+     * @param object
+     * @return
+     */
+    Object eval(String expr, Object object);
 }
