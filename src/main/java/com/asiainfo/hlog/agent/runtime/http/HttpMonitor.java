@@ -1,5 +1,6 @@
 package com.asiainfo.hlog.agent.runtime.http;
 
+import com.alibaba.fastjson.JSON;
 import com.asiainfo.hlog.agent.runtime.HLogMonitor;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 import com.asiainfo.hlog.agent.runtime.RuntimeContext;
@@ -94,7 +95,7 @@ public class HttpMonitor {
         if(config.isEnableSession()){
            Map session = LogAgentContext.getThreadSession();
             if(session != null && !session.isEmpty()){
-                logData.put("session",session);
+                logData.put("sesinfo",session);
             }
         }
         RuntimeContext.writeEvent("request.log",null,logData);
