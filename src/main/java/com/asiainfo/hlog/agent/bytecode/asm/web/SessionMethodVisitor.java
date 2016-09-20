@@ -1,11 +1,11 @@
 package com.asiainfo.hlog.agent.bytecode.asm.web;
 
 import com.asiainfo.hlog.agent.bytecode.asm.AbstractMethodVisitor;
-import com.asiainfo.hlog.org.objectweb.asm.Label;
 import com.asiainfo.hlog.org.objectweb.asm.MethodVisitor;
 import com.asiainfo.hlog.org.objectweb.asm.Type;
 
-import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.*;
+import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.ALOAD;
+import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.INVOKESTATIC;
 
 /**
  * <p>按业务条件（工号，渠道）采集、统计</p>
@@ -29,8 +29,8 @@ public class SessionMethodVisitor extends AbstractMethodVisitor {
 
     @Override
     public void visitCode() {
-        Label start = new Label();
-        mv.visitLabel(start);
+        //Label start = new Label();
+        //mv.visitLabel(start);
         mv.visitVarInsn(ALOAD, reqIdx);
         mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/http/HttpMonitor", "sessionInfo", "(Ljava/lang/Object;)V", false);
         super.visitCode();
