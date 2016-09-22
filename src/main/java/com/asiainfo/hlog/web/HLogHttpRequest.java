@@ -23,6 +23,7 @@ public class HLogHttpRequest {
         for(Method method : methods){
             if(method.getName().equals(name)){
                 methodMap.put(name,method);
+                method.setAccessible(true);
                 return method;
             }
         }
@@ -53,13 +54,16 @@ public class HLogHttpRequest {
         Object session = getSession();
         if(methodSessionGetAttribute == null){
             methodSessionGetAttribute = session.getClass().getMethod("getAttribute",String.class);
+            methodSessionGetAttribute.setAccessible(true);
         }
         return methodSessionGetAttribute.invoke(session,key);
     }
 
     public Object getSession()  throws Exception{
         if(!methodMap.containsKey("getSession")){
-            methodMap.put("getSession",req.getClass().getMethod("getSession"));
+            Method method = req.getClass().getMethod("getSession");
+            method.setAccessible(true);
+            methodMap.put("getSession",method);
         }
         return methodMap.get("getSession").invoke(req);
     }
