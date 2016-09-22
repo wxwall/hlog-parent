@@ -64,7 +64,7 @@ public class WebRequestParser {
         File[] tempList = file.listFiles();
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < tempList.length; i++){
-            if(tempList[i].isFile()){
+            if(tempList[i].isFile() && !tempList[i].getName().endsWith(".jar")){
                 sb.append(tempList[i].getName()).append(",");
             }
         }
