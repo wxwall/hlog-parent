@@ -89,6 +89,7 @@ public class WebRequestParser {
         FileOutputStream fos = null;
         try{
             String filePath = HLogConfig.getInstance().getHLogAgentDir()+fileName;
+            Logger.debug("保存配置文件：{0},内容为：{1}",filePath,content);
             File file =new File(filePath);
             if(!file.exists()){
                 file.createNewFile();
