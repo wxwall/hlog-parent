@@ -1,6 +1,5 @@
 package com.asiainfo.hlog.agent.runtime.http;
 
-import com.alibaba.fastjson.JSON;
 import com.asiainfo.hlog.agent.runtime.HLogMonitor;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 import com.asiainfo.hlog.agent.runtime.RuntimeContext;
@@ -26,6 +25,7 @@ import java.util.Set;
 public class HttpMonitor {
 
     private static Set<String> excludeExpands = new HashSet<String>();
+    private  static Map<String,Object> sessionKeyExpr = new HashMap<String,Object>();
 
     static {
         excludeExpands.add("js");
@@ -44,6 +44,13 @@ public class HttpMonitor {
         excludeExpands.add("rar");
         excludeExpands.add("doc");
         excludeExpands.add("xsl");
+
+        Map<String,String> keyPaths = HLogConfig.getInstance().getSessionKeyPath();
+        for(String keypath : keyPaths.keySet()){
+            Object complied = RutimeCallFactory.getRutimeCall().compileExpression(keyPaths.get(keypath));
+            sessionKeyExpr.put(keypath,complied);
+        }
+
         //TODO 增加可配置
     }
 
@@ -159,28 +166,11 @@ public class HttpMonitor {
             if(session == null){
                 return;
             }
-            /*
-            String sessionKeys = config.getProperty(Constants.KEY_HLOG_SESSION);
-            if(sessionKeys == null || sessionKeys.length() == 0){
-                return;
-            }
-            String[] keys = sessionKeys.split(",");
-            Map<String,Object> sessionMap = new HashMap<String, Object>();
-            for(int i = 0; i < keys.length;i++){
-                String path = keys[i].trim()+".";
-                path = "getAttribute('" + path.replaceFirst("\\.","').");
-                path = path.substring(0, path.length() - 1);
-                Object val = MVEL.eval(path, session);
-                if(val != null){
-                    sessionMap.put(keys[i], val);
 
-                }
-            }*/
-            Map<String,String> keyPaths = config.getSessionKeyPath();
             Map<String,Object> sessionMap = new HashMap<String, Object>();
-            for(String keypath : keyPaths.keySet()){
+            for(String keypath : sessionKeyExpr.keySet()){
                 try{
-                    Object val = RutimeCallFactory.getRutimeCall().eval(keyPaths.get(keypath),session);
+                    Object val = RutimeCallFactory.getRutimeCall().executeExpression(sessionKeyExpr.get(keypath),session);
                     if(val != null){
                         sessionMap.put(keypath, val);
                     }

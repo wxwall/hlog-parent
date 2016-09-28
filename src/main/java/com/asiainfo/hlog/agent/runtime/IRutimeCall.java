@@ -20,4 +20,14 @@ public interface IRutimeCall {
      * @return
      */
     Object eval(String expr, Object object);
+
+    /**
+     * 运行表达式
+     * @param expr
+     * @param object
+     * @return
+     */
+    Object executeExpression(Object expr, Object object);
+
+    Object compileExpression(String expr);
 }
