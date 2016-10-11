@@ -8,6 +8,7 @@ import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
+import com.asiainfo.hlog.comm.StringUtil;
 import com.asiainfo.hlog.org.objectweb.asm.Type;
 import java.io.File;
 import java.lang.ref.SoftReference;
@@ -63,23 +64,25 @@ public class HLogMonitor {
         startConfigReloadTask();
     }
 
-    static final class Node{
-        private String logId;
-        private String logPid;
-        private String logGid;
-        private final String className;
-        private final String methodName;
-        private final String description;
-        private final String[] paramNames;
-        private final SoftReference<Object>[]  params;
+    static final public class Node{
+        public String logId;
+        public String logPid;
+        public String logGid;
+        public final String className;
+        public final String methodName;
+        public final String description;
+        public final String[] paramNames;
+        public final SoftReference<Object>[]  params;
         //private final Object[] params;
-        private final long beginTime;
-        private long speed = 0;
+        public final long beginTime;
+        public long speed = 0;
         private int isError = 0;
         private boolean enableProcess;
         private boolean enableError ;
         private boolean leaf = true;
         private boolean sql = false;
+        public String type;
+        public String requestUrl;
 
         private SoftReference<Throwable> rootThrowable ;
 
@@ -93,6 +96,18 @@ public class HLogMonitor {
             paramNames = null;
             params = null;
             beginTime = 0;
+        }
+
+        public Node(String logId,String logPid,String className, String methodName, Long beginTime) {
+            this.logId = logId;
+            this.logPid = logPid;
+            this.className = className;
+            this.methodName = methodName;
+            this.beginTime = beginTime;
+
+            this.description = null;
+            this.paramNames = null;
+            this.params = null;
         }
 
         public Node(String logId,String logPid,String className, String methodName, String description, String[] paramNames, SoftReference[] params) {
@@ -149,6 +164,7 @@ public class HLogMonitor {
         Node node = new Node(id,pid,className,methodName,desc,paramNames,softReferences);
         node.enableProcess = enableProcess;
         node.enableError = enableError;
+        node.type = HLogAgentConst.LOOP_TYPE_METHOD;
         pushNode(node);
     }
 
@@ -655,7 +671,14 @@ public class HLogMonitor {
      * 添加循环监控
      * @param node
      */
-    private static void addLoopMonitor(Node node){
+    public static void addLoopMonitor(Node node){
+        String enableMonitor = HLogConfig.getInstance().getProperty(Constants.KEY_ENABLE_MONITOR_LOOP, "true");
+        if (!"true".equals(enableMonitor.toLowerCase())) {
+            return;
+        }
+        if(node == null){
+            return;
+        }
         synchronized (loopMonitorMap){
             loopMonitorMap.put(node,null);
         }
@@ -665,7 +688,10 @@ public class HLogMonitor {
      * 移除循环监控
      * @param node
      */
-    private static void removeLoopMonitor(Node node){
+    public static void removeLoopMonitor(Node node){
+        if(node == null){
+            return;
+        }
         synchronized (loopMonitorMap){
             loopMonitorMap.remove(node);
         }
@@ -700,6 +726,10 @@ public class HLogMonitor {
                         logData.put("clazz", node.className + "." + node.methodName);
                         logData.put("method", node.methodName);
                         logData.put("spend", node.speed);
+                        logData.put("ltype",node.type);
+                        if(node.requestUrl!=null){
+                            logData.put("requestUrl",node.requestUrl);
+                        }
                         if(node.logPid == null || "nvl".equals(node.logPid)){
                             logData.put("isTop",1);
                         }

@@ -24,6 +24,7 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
     private int paramIndex = -1;
 
     private int _startLVSlot;
+    private int _nodeSlot;
 
     public HttpRequestMethodVisitor(int access, String className, String methodName, String desc, MethodVisitor pnv, byte[] datas, String mcode) {
         super(access, className, methodName, desc, pnv, datas,mcode);
@@ -60,6 +61,26 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
         mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "currentTimeMillis", "()J", false);
         mv.visitVarInsn(LSTORE, _startLVSlot);
 
+        Label nodeLabel = new Label();
+        mv.visitLabel(nodeLabel);
+        _nodeSlot = defineLocalVariable("_node",Object.class,nodeLabel,null);
+
+        mv.visitVarInsn(ALOAD,paramIndex);
+        mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getRequestURL", "()Ljava/lang/StringBuffer;", true);
+        mv.visitVarInsn(LLOAD, _startLVSlot);
+        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/client/helper/LogUtil", "logId", "()Ljava/lang/String;", false);
+        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/RuntimeContext", "getLogId", "()Ljava/lang/String;", false);
+        mv.visitLdcInsn(className);
+        mv.visitLdcInsn(methodName);
+        //,StringBuffer requestUrl,long start,String logId,String pId,String className, String methodName
+        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/http/HttpMonitor", "requestBegin", "(Ljava/lang/StringBuffer;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/asiainfo/hlog/agent/runtime/HLogMonitor$Node;", false);
+        mv.visitVarInsn(ASTORE, _nodeSlot);
+
+        Label addNodeLabel = new Label();
+        mv.visitLabel(addNodeLabel);
+        mv.visitVarInsn(ALOAD, _nodeSlot);
+        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/HLogMonitor", "addLoopMonitor", "(Lcom/asiainfo/hlog/agent/runtime/HLogMonitor$Node;)V", false);
+
         super.visitCode();
     }
 
@@ -80,7 +101,8 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
         mv.visitVarInsn(LLOAD,_startLVSlot);
         //mv.visitInsn(LCONST_1);
         mv.visitIntInsn(BIPUSH, status);
-        visitMethodInsn(Opcodes.INVOKESTATIC,"com/asiainfo/hlog/agent/runtime/http/HttpMonitor","request",
-                "(Ljava/lang/StringBuffer;Ljava/lang/String;JI)V", false);
+        mv.visitVarInsn(ALOAD,_nodeSlot);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC,"com/asiainfo/hlog/agent/runtime/http/HttpMonitor","request",
+                "(Ljava/lang/StringBuffer;Ljava/lang/String;JILcom/asiainfo/hlog/agent/runtime/HLogMonitor$Node;)V", false);
     }
 }

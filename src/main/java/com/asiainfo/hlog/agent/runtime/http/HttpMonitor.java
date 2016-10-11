@@ -1,9 +1,12 @@
 package com.asiainfo.hlog.agent.runtime.http;
 
+import com.asiainfo.hlog.agent.HLogAgent;
+import com.asiainfo.hlog.agent.HLogAgentConst;
 import com.asiainfo.hlog.agent.runtime.HLogMonitor;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 import com.asiainfo.hlog.agent.runtime.RuntimeContext;
 import com.asiainfo.hlog.agent.runtime.RutimeCallFactory;
+import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.ClassHelper;
 import com.asiainfo.hlog.client.helper.Logger;
@@ -80,7 +83,32 @@ public class HttpMonitor {
         LogAgentContext.clear();
     }
 
-    public static void request(StringBuffer requestUrl,String addr,long start,int status){
+    public static HLogMonitor.Node requestBegin(StringBuffer requestUrl,long beginTime,String logId,String pId,String className, String methodName){
+        //String logId,String logPid,String className, String methodName, Long beginTime
+        try {
+            String enableMonitor = HLogConfig.getInstance().getProperty(Constants.KEY_ENABLE_MONITOR_LOOP, "true");
+            if (!"true".equals(enableMonitor.toLowerCase())) {
+                return null;
+            }
+            HLogMonitor.Node node = new HLogMonitor.Node(logId,pId,className,methodName,beginTime);
+            node.requestUrl = requestUrl.toString();
+            node.type = HLogAgentConst.LOOP_TYPE_REQUEST;
+            String gId = LogAgentContext.getThreadLogGroupId();
+            if(gId==null){
+                gId=node.logPid!=null?node.logPid:node.logId;
+                LogAgentContext.setThreadLogGroupId(gId);
+            }
+            node.logGid = gId;
+            return node;
+
+        }catch (Exception e){
+            Logger.error("请求超时监控异常",e);
+        }
+        return  null;
+    }
+
+    public static void request(StringBuffer requestUrl, String addr, long start, int status, HLogMonitor.Node node){
+        HLogMonitor.removeLoopMonitor(node);
         //判断是否开启收集
         if(!config.isEnableRequest()){
             return;
@@ -92,9 +120,9 @@ public class HttpMonitor {
         if(excludeExpands.contains(expand)){
             return ;
         }
-        String pid = RuntimeContext.getLogId();
-        String id = RuntimeContext.logId();
-        LogData logData = HLogMonitor.createLogData("request",id,pid);
+        //String pid = RuntimeContext.getLogId();
+        //String id = RuntimeContext.logId();
+        LogData logData = HLogMonitor.createLogData("request",node.logId,node.logPid);
         logData.put("url",requestUrl.toString());
         logData.put("remoteAddr",addr);
         logData.put("spend",System.currentTimeMillis()-start);
