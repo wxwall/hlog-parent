@@ -1,10 +1,12 @@
 package com.asiainfo.hlog.agent.runtime.http;
 
-import com.alibaba.fastjson.JSON;
+import com.asiainfo.hlog.agent.HLogAgent;
+import com.asiainfo.hlog.agent.HLogAgentConst;
 import com.asiainfo.hlog.agent.runtime.HLogMonitor;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 import com.asiainfo.hlog.agent.runtime.RuntimeContext;
 import com.asiainfo.hlog.agent.runtime.RutimeCallFactory;
+import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.ClassHelper;
 import com.asiainfo.hlog.client.helper.Logger;
@@ -26,6 +28,7 @@ import java.util.Set;
 public class HttpMonitor {
 
     private static Set<String> excludeExpands = new HashSet<String>();
+    private  static Map<String,Object> sessionKeyExpr = new HashMap<String,Object>();
 
     static {
         excludeExpands.add("js");
@@ -44,6 +47,13 @@ public class HttpMonitor {
         excludeExpands.add("rar");
         excludeExpands.add("doc");
         excludeExpands.add("xsl");
+
+        Map<String,String> keyPaths = HLogConfig.getInstance().getSessionKeyPath();
+        for(String keypath : keyPaths.keySet()){
+            Object complied = RutimeCallFactory.getRutimeCall().compileExpression(keyPaths.get(keypath));
+            sessionKeyExpr.put(keypath,complied);
+        }
+
         //TODO 增加可配置
     }
 
@@ -73,7 +83,32 @@ public class HttpMonitor {
         LogAgentContext.clear();
     }
 
-    public static void request(StringBuffer requestUrl,String addr,long start,int status){
+    public static HLogMonitor.Node requestBegin(StringBuffer requestUrl,long beginTime,String logId,String pId,String className, String methodName){
+        //String logId,String logPid,String className, String methodName, Long beginTime
+        try {
+            String enableMonitor = HLogConfig.getInstance().getProperty(Constants.KEY_ENABLE_MONITOR_LOOP, "true");
+            if (!"true".equals(enableMonitor.toLowerCase())) {
+                return null;
+            }
+            HLogMonitor.Node node = new HLogMonitor.Node(logId,pId,className,methodName,beginTime);
+            node.requestUrl = requestUrl.toString();
+            node.type = HLogAgentConst.LOOP_TYPE_REQUEST;
+            String gId = LogAgentContext.getThreadLogGroupId();
+            if(gId==null){
+                gId=node.logPid!=null?node.logPid:node.logId;
+                LogAgentContext.setThreadLogGroupId(gId);
+            }
+            node.logGid = gId;
+            return node;
+
+        }catch (Exception e){
+            Logger.error("请求超时监控异常",e);
+        }
+        return  null;
+    }
+
+    public static void request(StringBuffer requestUrl, String addr, long start, int status, HLogMonitor.Node node){
+        HLogMonitor.removeLoopMonitor(node);
         //判断是否开启收集
         if(!config.isEnableRequest()){
             return;
@@ -85,9 +120,9 @@ public class HttpMonitor {
         if(excludeExpands.contains(expand)){
             return ;
         }
-        String pid = RuntimeContext.getLogId();
-        String id = RuntimeContext.logId();
-        LogData logData = HLogMonitor.createLogData("request",id,pid);
+        //String pid = RuntimeContext.getLogId();
+        //String id = RuntimeContext.logId();
+        LogData logData = HLogMonitor.createLogData("request",node.logId,node.logPid);
         logData.put("url",requestUrl.toString());
         logData.put("remoteAddr",addr);
         logData.put("spend",System.currentTimeMillis()-start);
@@ -159,28 +194,11 @@ public class HttpMonitor {
             if(session == null){
                 return;
             }
-            /*
-            String sessionKeys = config.getProperty(Constants.KEY_HLOG_SESSION);
-            if(sessionKeys == null || sessionKeys.length() == 0){
-                return;
-            }
-            String[] keys = sessionKeys.split(",");
-            Map<String,Object> sessionMap = new HashMap<String, Object>();
-            for(int i = 0; i < keys.length;i++){
-                String path = keys[i].trim()+".";
-                path = "getAttribute('" + path.replaceFirst("\\.","').");
-                path = path.substring(0, path.length() - 1);
-                Object val = MVEL.eval(path, session);
-                if(val != null){
-                    sessionMap.put(keys[i], val);
 
-                }
-            }*/
-            Map<String,String> keyPaths = config.getSessionKeyPath();
             Map<String,Object> sessionMap = new HashMap<String, Object>();
-            for(String keypath : keyPaths.keySet()){
+            for(String keypath : sessionKeyExpr.keySet()){
                 try{
-                    Object val = RutimeCallFactory.getRutimeCall().eval(keyPaths.get(keypath),session);
+                    Object val = RutimeCallFactory.getRutimeCall().executeExpression(sessionKeyExpr.get(keypath),session);
                     if(val != null){
                         sessionMap.put(keypath, val);
                     }

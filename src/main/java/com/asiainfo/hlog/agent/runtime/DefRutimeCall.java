@@ -14,4 +14,12 @@ public class DefRutimeCall implements IRutimeCall {
     public Object eval(String expr, Object object){
         return MVEL.eval(expr, object);
     }
+
+    public Object executeExpression(Object expr, Object object){
+        return MVEL.executeExpression(expr,object);
+    }
+
+    public Object compileExpression(String expr){
+        return MVEL.compileExpression(expr);
+    }
 }

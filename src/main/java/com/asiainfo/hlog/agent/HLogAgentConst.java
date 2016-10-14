@@ -45,6 +45,17 @@ public abstract class HLogAgentConst {
      */
     public static final String MV_CODE_LOOP = "loop";
 
+    /**
+    * 表示一个循环监控的类型，方法
+    */
+    public static final String LOOP_TYPE_METHOD = "method";
+    /**
+     * 表示一个循环监控的类型，请求
+     */
+    public static final String LOOP_TYPE_REQUEST = "request";
+
     public static final String HEADER_HLOG_AGENT_GID = "Hlog-Agent-Gid";
     public static final String HEADER_HLOG_AGENT_PID = "Hlog-Agent-Pid";
+
+
 }

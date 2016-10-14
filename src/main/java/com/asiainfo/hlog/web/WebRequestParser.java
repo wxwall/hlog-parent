@@ -25,7 +25,6 @@ public class WebRequestParser {
                 out = configContent(req.getParameter("file"));
             }else if(action.equals("save")){
                 String body = readBodyText(req);
-
                 writeFile(req.getParameter("file"),body);
                 out = "保存成功";
             }else{
