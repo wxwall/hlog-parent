@@ -2,7 +2,6 @@ package com.asiainfo.hlog.agent.bytecode.asm;
 
 import com.asiainfo.hlog.agent.AbstractPreProcessor;
 import com.asiainfo.hlog.client.config.LogSwoopRule;
-import com.asiainfo.hlog.client.config.jmx.HLogJMXReport;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.org.objectweb.asm.ClassReader;
 import com.asiainfo.hlog.org.objectweb.asm.ClassWriter;
@@ -100,11 +99,11 @@ public class HLogPreProcessor extends AbstractPreProcessor {
 
             saveWaveClassFile(className,code);
 
-            HLogJMXReport.getHLogJMXReport().getRunStatusInfo().incrementWeaveClassNum();
+            //HLogJMXReport.getHLogJMXReport().getRunStatusInfo().incrementWeaveClassNum();
 
             return code;
         }catch (Throwable t){
-            HLogJMXReport.getHLogJMXReport().getRunStatusInfo().incrementweaveErrClassNum();
+            //HLogJMXReport.getHLogJMXReport().getRunStatusInfo().incrementweaveErrClassNum();
             Logger.error("解析["+clazz+"]类时遇到问题,放弃解析返回原类内容.(不影响程序运行):{0}",null,t.getMessage());
             if(Logger.isDebug()){
                 Logger.error("解析遇到问题的详细信息:",t);

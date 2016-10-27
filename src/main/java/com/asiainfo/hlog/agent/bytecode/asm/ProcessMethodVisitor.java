@@ -2,7 +2,6 @@ package com.asiainfo.hlog.agent.bytecode.asm;
 
 import com.asiainfo.hlog.agent.HLogAgentConst;
 import com.asiainfo.hlog.agent.runtime.HLogMonitor;
-import com.asiainfo.hlog.agent.runtime.RuntimeContext;
 import com.asiainfo.hlog.org.objectweb.asm.MethodVisitor;
 import com.asiainfo.hlog.org.objectweb.asm.commons.LocalVariablesSorter;
 
@@ -51,7 +50,7 @@ public class ProcessMethodVisitor extends AbstractTryCatchMethodVisitor {
      */
     protected void callMonitorStart(){
         //判断是否开启这个类的监控耗时开关
-        boolean f = RuntimeContext.enable(HLogAgentConst.MV_CODE_PROCESS,className,null);
+        boolean f = enable(HLogAgentConst.MV_CODE_PROCESS,className,null);
         if(f){
             mv.visitInsn(ICONST_1);
         }else{
