@@ -69,6 +69,7 @@ config.save = function () {
     $.ajax({
         url: home.getRootPath()+"/hlogweb/action/save?file="+$("#text-select").val(),
         type: "POST",
+        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
         data:cfgEditor.doc.getValue(),
         success: function(msg){
             if (msg == "-1") {
