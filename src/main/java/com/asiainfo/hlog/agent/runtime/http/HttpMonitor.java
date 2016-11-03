@@ -1,6 +1,5 @@
 package com.asiainfo.hlog.agent.runtime.http;
 
-import com.asiainfo.hlog.agent.HLogAgent;
 import com.asiainfo.hlog.agent.HLogAgentConst;
 import com.asiainfo.hlog.agent.runtime.HLogMonitor;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
@@ -49,11 +48,12 @@ public class HttpMonitor {
         excludeExpands.add("xsl");
 
         Map<String,String> keyPaths = HLogConfig.getInstance().getSessionKeyPath();
-        for(String keypath : keyPaths.keySet()){
-            Object complied = RutimeCallFactory.getRutimeCall().compileExpression(keyPaths.get(keypath));
-            sessionKeyExpr.put(keypath,complied);
+        if(keyPaths!=null){
+            for(String keypath : keyPaths.keySet()){
+                Object complied = RutimeCallFactory.getRutimeCall().compileExpression(keyPaths.get(keypath));
+                sessionKeyExpr.put(keypath,complied);
+            }
         }
-
         //TODO 增加可配置
     }
 

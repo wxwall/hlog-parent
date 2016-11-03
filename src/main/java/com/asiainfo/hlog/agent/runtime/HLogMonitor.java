@@ -605,6 +605,7 @@ public class HLogMonitor {
             String pid = LogAgentContext.getThreadCurrentLogId();
             LogData logData = createLogData(mcode, id, pid);
             logData.put("amc","ipt");
+            logData.put("clazz",className+"."+methodName);
             for (int i=0;i<paramNames.length;i++) {
                 String paramName = paramNames[i];
                 if(logData.containsKey(paramName)){
