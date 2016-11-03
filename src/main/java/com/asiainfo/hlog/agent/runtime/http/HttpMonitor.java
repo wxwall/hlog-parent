@@ -198,9 +198,14 @@ public class HttpMonitor {
             Map<String,Object> sessionMap = new HashMap<String, Object>();
             for(String keypath : sessionKeyExpr.keySet()){
                 try{
+                    String[] keypathArray = keypath.split(":");
+                    String sessionKey = keypathArray[0].trim().replace(".","_");
+                    if(keypathArray.length == 2){
+                        sessionKey = keypathArray[1];
+                    }
                     Object val = RutimeCallFactory.getRutimeCall().executeExpression(sessionKeyExpr.get(keypath),session);
                     if(val != null){
-                        sessionMap.put(keypath, val);
+                        sessionMap.put(sessionKey, val);
                     }
                 }catch (Throwable t){
                     //sessionMap.put(keypath,t.getMessage());
