@@ -52,6 +52,8 @@ public class HLogMonitor {
         excludeParamTypePaths.add("com.fasterxml");
         excludeParamTypePaths.add("net.sf.json");
         excludeParamTypePaths.add("org.codehaus");
+        excludeParamTypePaths.add("java.lang.reflect");
+        excludeParamTypePaths.add("java.lang.Object");
 
         //jvm信息监控
         if (HLogConfig.getInstance().isEnableJVMMonitor()) {
@@ -339,9 +341,12 @@ public class HLogMonitor {
                 for (int i = 0; i < ilen; i++) {
                     SoftReference<Object> p = node.params[i];
                     try{
+                        String cls = paramsDesc[i].getClassName();
+
                         //是否是排除的参数类型
-                        boolean isExclude = isExcludeParamType(paramsDesc[i].getClassName());
+                        boolean isExclude = isExcludeParamType(cls,node);
                         if(!isExclude){
+                            System.out.println("cls="+cls);
                             jsonMap.put(pns[i],p);
                         }else{
                             jsonMap.put(pns[i],"--");
@@ -366,7 +371,7 @@ public class HLogMonitor {
         writeEvent(node.className,node.methodName,logData);
     }
 
-    private static boolean isExcludeParamType(String clazz) {
+    private static boolean isExcludeParamType(String clazz,Node node) {
         for (String excludeParamType : excludeParamTypes) {
             if (excludeParamType.equals(clazz)) {
                 return true;
