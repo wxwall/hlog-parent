@@ -8,9 +8,11 @@ import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
-import com.asiainfo.hlog.comm.StringUtil;
 import com.asiainfo.hlog.org.objectweb.asm.Type;
+
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.ref.SoftReference;
 import java.text.MessageFormat;
 import java.util.*;
@@ -54,7 +56,8 @@ public class HLogMonitor {
         excludeParamTypePaths.add("org.codehaus");
         excludeParamTypePaths.add("java.lang.reflect");
         excludeParamTypePaths.add("java.lang.Object");
-
+        excludeParamTypePaths.add("java.io");
+        excludeParamTypePaths.add("java.nio");
         //jvm信息监控
         if (HLogConfig.getInstance().isEnableJVMMonitor()) {
             HLogJvmReport.getInstance().start();
@@ -344,9 +347,9 @@ public class HLogMonitor {
                         String cls = paramsDesc[i].getClassName();
 
                         //是否是排除的参数类型
-                        boolean isExclude = isExcludeParamType(cls,node);
+                        boolean isExclude = isExcludeParamType(cls,p);
+
                         if(!isExclude){
-                            System.out.println("cls="+cls);
                             jsonMap.put(pns[i],p);
                         }else{
                             jsonMap.put(pns[i],"--");
@@ -371,7 +374,7 @@ public class HLogMonitor {
         writeEvent(node.className,node.methodName,logData);
     }
 
-    private static boolean isExcludeParamType(String clazz,Node node) {
+    private static boolean isExcludeParamType(String clazz,SoftReference<Object> p) {
         for (String excludeParamType : excludeParamTypes) {
             if (excludeParamType.equals(clazz)) {
                 return true;
@@ -382,6 +385,11 @@ public class HLogMonitor {
             if (clazz.startsWith(excludeParamTypePath)) {
                 return true;
             }
+        }
+
+        Object o = p.get();
+        if(o instanceof OutputStream || o instanceof InputStream){
+            return true;
         }
 
         return false;
