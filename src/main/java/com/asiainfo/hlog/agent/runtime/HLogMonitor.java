@@ -406,6 +406,7 @@ public class HLogMonitor {
         LogData logData = createLogData(HLogAgentConst.MV_CODE_ERROR,id,pid);
         String errMsg = RuntimeContext.error(err);
         logData.setDesc(errMsg);
+        logData.put("clazz",node.className+"."+node.methodName);
         logData.put("errCode",RuntimeContext.errorCode(err));
         writeEvent(node.className,node.methodName,logData);
     }
