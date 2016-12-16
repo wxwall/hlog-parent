@@ -46,6 +46,7 @@ public class HLogMonitor {
         excludeParamTypes.add("javax.servlet.http.HttpServletRequest");
         excludeParamTypes.add("javax.servlet.http.HttpSession");
         excludeParamTypePaths.add("javax.");
+        excludeParamTypePaths.add("org.w3c");
         excludeParamTypePaths.add("org.springframework");
         excludeParamTypePaths.add("org.apache");
         excludeParamTypePaths.add("org.jdom");
@@ -406,6 +407,7 @@ public class HLogMonitor {
         LogData logData = createLogData(HLogAgentConst.MV_CODE_ERROR,id,pid);
         String errMsg = RuntimeContext.error(err);
         logData.setDesc(errMsg);
+        logData.put("clazz",node.className+"."+node.methodName);
         logData.put("errCode",RuntimeContext.errorCode(err));
         writeEvent(node.className,node.methodName,logData);
     }
@@ -477,6 +479,7 @@ public class HLogMonitor {
             LogData logData = createLogData(HLogAgentConst.MV_CODE_SQL,id,pid);
             logData.put("spend",System.currentTimeMillis()-start);
             logData.put("sql",sql);
+            logData.put("sqlc","s"+sql.hashCode());
             logData.put("params",params);
             if(resObj!=null){
                 try{
