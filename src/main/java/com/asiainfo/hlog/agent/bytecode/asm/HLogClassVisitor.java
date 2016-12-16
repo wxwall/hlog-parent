@@ -38,6 +38,7 @@ public class HLogClassVisitor extends ClassVisitor {
     private boolean isProxy = false;
 
     private boolean toVisit = false;
+    private boolean isExcludePath = false;
 
     public HLogClassVisitor(HLogPreProcessor processor, LogSwoopRule classRule, String className, byte[] datas, ClassWriter classVisitor) {
         super(Opcodes.ASM5, classVisitor);
@@ -45,6 +46,7 @@ public class HLogClassVisitor extends ClassVisitor {
         this.classRule = classRule;
         this.className = className;
         this.datas = datas;
+        isExcludePath = processor.isExcludePath(className);
     }
 
     private MethodVisitor getMethodVisitorByCode(MethodVisitor mv,int access, String name, String desc,String code,String mcode){
@@ -77,7 +79,7 @@ public class HLogClassVisitor extends ClassVisitor {
 
         //获取方法的规则
         LogSwoopRule methodRule = processor.getSupportRule(className,name);
-        boolean isExcludePath = processor.isExcludePath(className);
+
         //如果方法没有规则,使用类的
         if(methodRule==null || isExcludePath || methodRule.getMcodeMap().isEmpty()){
             //没有被排除或者规则为非包名规则
