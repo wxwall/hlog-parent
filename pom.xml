@@ -10,7 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>hlog-agent</artifactId>
-    <version>0.4.1</version>
+    <version>0.5.1</version>
     <repositories>
         <repository>
             <id>io.spring</id>
@@ -21,12 +21,12 @@
         <dependency>
             <groupId>com.asiainfo.hlog</groupId>
             <artifactId>hlog-comm</artifactId>
-            <version>0.4.1</version>
+            <version>0.5.1</version>
         </dependency>
         <dependency>
             <groupId>com.asiainfo.hlog</groupId>
             <artifactId>hlog-client</artifactId>
-            <version>0.4.1</version>
+            <version>0.5.1</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
