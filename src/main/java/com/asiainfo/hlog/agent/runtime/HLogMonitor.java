@@ -68,6 +68,18 @@ public class HLogMonitor {
             startLoopMonitor();
         }
         startConfigReloadTask();
+        sendAgentVersionInfo();
+    }
+
+    private static void sendAgentVersionInfo(){
+        LogData logData = new LogData();
+        logData.setMc("agent_ver");
+        logData.setId(RuntimeContext.logId());
+        logData.setTime(System.currentTimeMillis());
+        logData.put("ver",HLogConfig.VERSION);
+        logData.put("ver_num",HLogConfig.VER_NUM);
+        logData.put("ver_dt",HLogConfig.VER_START_DT);
+        writeEvent("agent.version",null,logData);
     }
 
     static final public class Node{

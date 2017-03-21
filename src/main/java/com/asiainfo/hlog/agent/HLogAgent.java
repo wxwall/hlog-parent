@@ -3,6 +3,7 @@ package com.asiainfo.hlog.agent;
 import com.asiainfo.hlog.agent.classloader.ClassLoaderHolder;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.LoaderHelper;
+import com.asiainfo.hlog.client.helper.Logger;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
@@ -26,6 +27,7 @@ public class HLogAgent {
     private static void domain(Instrumentation inst){
 
         System.out.println("========== Asiainfo HLog Agent ["+HLogConfig.VERSION+"] ==============\n");
+        printVersionInfo();
 
         if (HLogAgent.inst == null) {
             HLogAgent.inst = inst;
@@ -43,6 +45,14 @@ public class HLogAgent {
 
         LoaderHelper.setLoader(ClassLoaderHolder.getInstance().getClassLoader());
 
+    }
+
+    private static void printVersionInfo(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("VERSION=").append(HLogConfig.VERSION).append(";");
+        sb.append("VER_NUM=").append(HLogConfig.VER_NUM).append(";");
+        sb.append("VER_START_DT=").append(HLogConfig.VER_START_DT).append(";");
+        System.err.println(sb.toString());
     }
 
     public static void premain(String agentArgs, Instrumentation inst)
