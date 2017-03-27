@@ -13,6 +13,7 @@
     <version>0.5.1</version>
     <properties>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
+        <version-num>65</version-num>
     </properties>
     <repositories>
         <repository>
@@ -67,6 +68,8 @@
                         </manifestFile>
                         <manifestEntries>
                             <Build-Date>${maven.build.timestamp}</Build-Date>
+                            <Build-Version>${version}</Build-Version>
+                            <Build-Version-Num>${version-num}</Build-Version-Num>
                         </manifestEntries>
                     </archive>
                 </configuration>
