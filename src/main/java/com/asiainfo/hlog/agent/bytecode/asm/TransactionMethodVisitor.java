@@ -47,7 +47,7 @@ public class TransactionMethodVisitor extends AbstractMethodVisitor {
         mv.visitVarInsn(ASTORE, methodSlot);
 
         mv.visitVarInsn(ALOAD, methodSlot);
-        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/LogAgentContext", "setTranCost", "(Ljava/lang/String;)V", false);
+        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/HLogMonitor", "startTranCost", "(Ljava/lang/String;)V", false);
 
     }
 }

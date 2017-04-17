@@ -1,6 +1,7 @@
 package com.asiainfo.hlog.agent.runtime;
 
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
+import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.Logger;
 
 import java.util.Map;
@@ -100,6 +101,7 @@ public class LogAgentContext {
         threadCurrentIndex.set(new Integer(0));
         keepContext.set(false);
         clearThreadSession();
+        tranCostContext.remove();
     }
 
     public static int getIndex(){
@@ -112,21 +114,13 @@ public class LogAgentContext {
         return index;
     }
 
-    public static void setTranCost(String methodName){
-        try{
-            Stack<TranCostDto> stack = tranCostContext.get();
-            if(stack == null){
-                stack = new Stack<TranCostDto>();
-                tranCostContext.set(stack);
-            }
-            TranCostDto dto = new TranCostDto();
-            dto.setId(RuntimeContext.logId());
-            dto.setMethodName(methodName);
-            dto.setStartTime(System.currentTimeMillis());
-            stack.push(dto);
-        }catch (Throwable t){
-            Logger.error("setTranCost error",t);
+    public static Stack<TranCostDto> getTranCostContext(){
+        Stack<TranCostDto> stack = tranCostContext.get();
+        if(stack == null){
+            stack = new Stack<TranCostDto>();
+            tranCostContext.set(stack);
         }
+        return stack;
     }
 
     public static TranCostDto getTranCost(){

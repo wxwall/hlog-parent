@@ -68,6 +68,18 @@ public class HLogMonitor {
             startLoopMonitor();
         }
         startConfigReloadTask();
+        sendAgentVersionInfo();
+    }
+
+    private static void sendAgentVersionInfo(){
+        LogData logData = new LogData();
+        logData.setMc("agent_ver");
+        logData.setId(RuntimeContext.logId());
+        logData.setTime(System.currentTimeMillis());
+        logData.put("ver",HLogConfig.VERSION);
+        logData.put("ver_num",HLogConfig.VER_NUM);
+        logData.put("ver_dt",HLogConfig.VER_START_DT);
+        writeEvent("agent.version",null,logData);
     }
 
     static final public class Node{
@@ -659,11 +671,11 @@ public class HLogMonitor {
      */
     public static void transactionCostMonitor() {
         try{
+            TranCostDto dto = LogAgentContext.popTranCost();
+            LogAgentContext.clearTranCostContext();
             if(!config.isEnableTransaction()){
                 return;
             }
-            TranCostDto dto = LogAgentContext.popTranCost();
-            LogAgentContext.clearTranCostContext();
             if(dto == null){
                 return ;
             }
@@ -684,13 +696,28 @@ public class HLogMonitor {
         }
     }
 
+    public static void startTranCost(String methodName){
+        try{
+            if(!config.isEnableTransaction()){
+                return;
+            }
+            Stack<TranCostDto> stack = LogAgentContext.getTranCostContext();
+            TranCostDto dto = new TranCostDto();
+            dto.setId(RuntimeContext.logId());
+            dto.setMethodName(methodName);
+            dto.setStartTime(System.currentTimeMillis());
+            stack.push(dto);
+        }catch (Throwable t){
+            Logger.error("setTranCost error",t);
+        }
+    }
+
     /**
      * 添加循环监控
      * @param node
      */
     public static void addLoopMonitor(Node node){
-        String enableMonitor = HLogConfig.getInstance().getProperty(Constants.KEY_ENABLE_MONITOR_LOOP, "true");
-        if (!"true".equals(enableMonitor.toLowerCase())) {
+        if (!config.isEnableLoopMonitor()) {
             return;
         }
         if(node == null){
@@ -719,8 +746,7 @@ public class HLogMonitor {
      */
     private static void loopMonitor(){
         try {
-            String enableMonitor = HLogConfig.getInstance().getProperty(Constants.KEY_ENABLE_MONITOR_LOOP, "true");
-            if (!"true".equals(enableMonitor.toLowerCase())) {
+            if (!config.isEnableLoopMonitor()) {
                 return;
             }
             if (loopMonitorMap == null || loopMonitorMap.isEmpty()) {
