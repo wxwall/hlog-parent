@@ -60,7 +60,8 @@ public class HttpMonitor {
     private static HLogConfig config = HLogConfig.getInstance();
 
     public static void receiveHlogId(String _gid,String _pid){
-        //LogAgentContext.clear();
+
+        HttpMonitor.clearReceiveHlogId();
         //如果没有上游系统传递gId的话,从当前线程中获取
         if(_gid==null){
             _gid = LogAgentContext.getThreadLogGroupId();

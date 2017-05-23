@@ -469,7 +469,7 @@ public class HLogMonitor {
      * @param params
      */
     public static void sqlMonitor(long start,String className,String sql,String params,Object resObj) {
-        if(!config.isEnableSqlTrack()){
+        if(!config.isEnableSqlTrack() || sql==null){
             return ;
         }
         try{

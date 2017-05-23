@@ -236,7 +236,7 @@ public class SocketOutputStreamNewMethods implements IHLogNewMethods,Opcodes {
         mv.visitLabel(l18);
         mv.visitLineNumber(64, l18);
         mv.visitVarInsn(ALOAD, 10);
-        mv.visitLdcInsn("HlogGid: ");
+        mv.visitLdcInsn("hloggid: ");
         mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
         mv.visitVarInsn(ALOAD, 6);
         mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
@@ -253,7 +253,7 @@ public class SocketOutputStreamNewMethods implements IHLogNewMethods,Opcodes {
         mv.visitLabel(l21);
         mv.visitLineNumber(66, l21);
         mv.visitVarInsn(ALOAD, 10);
-        mv.visitLdcInsn("HlogPid: ");
+        mv.visitLdcInsn("hlogpid: ");
         mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
         mv.visitVarInsn(ALOAD, 9);
         mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
