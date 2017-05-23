@@ -9,6 +9,7 @@ import com.asiainfo.hlog.client.model.Event;
 import com.asiainfo.hlog.client.model.LogData;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * 运行状态下的各种上下文判断
@@ -23,12 +24,21 @@ public class RuntimeContext {
     private static IRutimeCall rutimeCall = RutimeCallFactory.getRutimeCall();
 
 
+    private static String[] errCodeMethodNames = null;
+
     public static String[] getErrorCodeTypes(){
-        String values = HLogConfig.getInstance().getProperty(Constants.KEY_ERROR_CODE_TYPES,"code");
-        if(values!=null){
-            return values.split(",");
+        if(errCodeMethodNames!=null){
+            return errCodeMethodNames;
         }
-        return new String[]{"code"};
+
+        String values = HLogConfig.getInstance().getProperty(Constants.KEY_ERROR_CODE_TYPES,"code");
+        String[] names = values.split(",");
+        errCodeMethodNames = new String[names.length];
+        for (int i = 0; i < names.length; i++) {
+            String name = names[i];
+            errCodeMethodNames[i]= "get"+name.substring(0,1).toUpperCase()+name.substring(1);
+        }
+        return errCodeMethodNames;
     }
 
 
@@ -138,9 +148,9 @@ public class RuntimeContext {
         String[] codeTypeArray = getErrorCodeTypes();
         for(String codeType : codeTypeArray){
             try {
-                Field field = t.getClass().getDeclaredField(codeType);
-                field.setAccessible(true);
-                Object value = field.get(t);
+                Method method = t.getClass().getMethod(codeType,null);
+                method.setAccessible(true);
+                Object value = method.invoke(t,null);
                 if(value!=null){
                     return value.toString();
                 }
@@ -151,7 +161,6 @@ public class RuntimeContext {
         }
         return t.getClass().getSimpleName();
     }
-
 }
 
 

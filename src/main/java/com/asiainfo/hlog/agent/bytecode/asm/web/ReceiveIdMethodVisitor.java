@@ -1,7 +1,7 @@
 package com.asiainfo.hlog.agent.bytecode.asm.web;
 
 import com.asiainfo.hlog.agent.bytecode.asm.ASMUtils;
-import com.asiainfo.hlog.agent.bytecode.asm.AbstractTryCatchMethodVisitor;
+import com.asiainfo.hlog.agent.bytecode.asm.AbstractMethodVisitor;
 import com.asiainfo.hlog.agent.runtime.http.HttpMonitor;
 import com.asiainfo.hlog.org.objectweb.asm.MethodVisitor;
 import com.asiainfo.hlog.org.objectweb.asm.Opcodes;
@@ -16,7 +16,7 @@ import static com.asiainfo.hlog.org.objectweb.asm.Opcodes.INVOKEINTERFACE;
  * <p>所以要求被处理的方法入参必须要有{@link javax.servlet.http.HttpServletRequest}类型</p>
  * Created by chenfeng on 2016/5/8.
  */
-public class ReceiveIdMethodVisitor extends AbstractTryCatchMethodVisitor {
+public class ReceiveIdMethodVisitor extends AbstractMethodVisitor {
 
     public static final String CODE  = "receive.id";
 
@@ -42,38 +42,27 @@ public class ReceiveIdMethodVisitor extends AbstractTryCatchMethodVisitor {
 
     public void visitCode() {
 
-        defineThrowable();
+        //defineThrowable();
 
         if(paramIndex==-1){
             super.visitCode();
             return ;
         }
         mv.visitIntInsn(ALOAD,paramIndex);
-        mv.visitLdcInsn("HlogGid");
+        mv.visitLdcInsn("hloggid");
         mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getHeader", "(Ljava/lang/String;)Ljava/lang/String;", true);
 
         mv.visitIntInsn(ALOAD,paramIndex);
-        mv.visitLdcInsn("HlogPid");
+        mv.visitLdcInsn("hlogpid");
         mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getHeader", "(Ljava/lang/String;)Ljava/lang/String;", true);
 
-        //ASMUtils.visitStaticMethod(mv, HttpMonitor.class,"receiveHlogId", ServletRequest.class);
         visitMethodInsn(Opcodes.INVOKESTATIC,"com/asiainfo/hlog/agent/runtime/http/HttpMonitor","receiveHlogId",
                 "(Ljava/lang/String;Ljava/lang/String;)V", false);
         super.visitCode();
     }
 
-    protected void beforeReturn(boolean isVoid) {
-        doClean();
-    }
-
-    protected void beforeThrow(int flag) {
-        if(flag==1){
-            doClean();
-        }
-    }
 
     private void doClean(){
-        //mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/http/HttpMonitor", "clearReceiveHlogId", "()V", false);
         ASMUtils.visitStaticMethod(mv, HttpMonitor.class,"clearReceiveHlogId",null);
     }
 

@@ -2,7 +2,6 @@ package com.asiainfo.hlog.agent.runtime;
 
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
 import com.asiainfo.hlog.client.config.HLogConfig;
-import com.asiainfo.hlog.client.helper.Logger;
 
 import java.util.Map;
 import java.util.Stack;
@@ -66,6 +65,13 @@ public class LogAgentContext {
     }
 
     public static void setThreadLogGroupId(String logGroupId){
+        if(HLogConfig.hlogGidTrace) {
+            System.out.println("setThreadLogGroupId------------------:" + Thread.currentThread().getId() + ",gid=" + logGroupId);
+            StackTraceElement[] sts = Thread.currentThread().getStackTrace();
+            for (StackTraceElement st : sts) {
+                System.out.println("--" + st.getClassName() + "." + st.getMethodName());
+            }
+        }
         threadLogGroupId.set(logGroupId);
     }
     public static String getThreadLogGroupId(){
@@ -76,6 +82,13 @@ public class LogAgentContext {
         return gId;
     }
     public static void clearLogGroupId(){
+        if(HLogConfig.hlogGidTrace) {
+            System.out.println("clearLogGroupId------------------:" + Thread.currentThread().getId() + ",gid=" + threadLogGroupId.get());
+            StackTraceElement[] sts = Thread.currentThread().getStackTrace();
+            for (StackTraceElement st : sts) {
+                System.out.println("--" + st.getClassName() + "." + st.getMethodName());
+            }
+        }
         threadLogGroupId.remove();
     }
 
@@ -88,13 +101,6 @@ public class LogAgentContext {
     }
 
     public static void clear(){
-        /*
-        System.out.println("-------------------public static void clear()");
-        StackTraceElement[] tt = Thread.currentThread().getStackTrace();
-        for (StackTraceElement stackTraceElement : tt) {
-            System.out.println(stackTraceElement);
-        }
-        */
         threadLogGroupId.remove();
         threadCurrentLogId.remove();
         threadSession.remove();

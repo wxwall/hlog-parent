@@ -12,6 +12,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
+import static java.lang.Thread.currentThread;
+
 /**
  * 自定义类加载器,主要职责让agent端加载和使用第三方的jar</br>
  *
@@ -28,11 +30,13 @@ public class ClassLoaderHolder  {
         public Class<?> loadClass(String name) throws ClassNotFoundException {
             Class<?> clazz ;
             try{
-                if(!name.startsWith("org.slf4j.") && (name.startsWith("com.asiainfo.hlog.client.model.") ||
+                if(!name.startsWith("org.slf4j.") &&
+                !name.startsWith("org.apache.log4j.")
+                        && (name.startsWith("com.asiainfo.hlog.client.model.") ||
                         name.endsWith("IRutimeCall") ||
                         name.endsWith("ITransmitter") ||
-                        //name.endsWith("HLogConfig") ||
-                        //name.endsWith("HLogConfig") ||
+                        name.endsWith("RuntimeContext") ||
+                        name.endsWith("RutimeCallFactory") ||
                         name.endsWith("TransmitterFactory"))){
                     clazz = super.loadClass(name);
                 }else{
@@ -42,7 +46,11 @@ public class ClassLoaderHolder  {
                 try{
                     clazz = super.loadClass(name);
                 }catch (ClassNotFoundException cfe2){
-                    clazz = getInstance().getParent().loadClass(name);
+                    try{
+                        clazz = getInstance().getParent().loadClass(name);
+                    }catch (ClassNotFoundException cfe3){
+                        clazz = loader.loadClass(name);
+                    }
                 }
             }
             return clazz;
@@ -60,7 +68,7 @@ public class ClassLoaderHolder  {
     }
 
     public ClassLoader getParent(){
-        return Thread.currentThread().getContextClassLoader();
+        return currentThread().getContextClassLoader();
     }
 
     public ClassLoader getClassLoader(){
@@ -144,6 +152,14 @@ public class ClassLoaderHolder  {
                 if(extClassesFile.exists()){
                     jarList.add(extClassesFile.toURI().toURL());
                 }
+
+                System.out.println("loaded ext jars:"+jarList);
+                System.out.println("---------------------------------------------:");
+                StackTraceElement[] ses = Thread.currentThread().getStackTrace();
+                for (StackTraceElement se : ses) {
+                    System.out.println("----:"+se.getClassName()+"-"+se.getMethodName()+":"+se.getLineNumber());
+                }
+
                 //jarLis
                 URL[] urls = jarList.toArray(new URL[jarList.size()]);
 
