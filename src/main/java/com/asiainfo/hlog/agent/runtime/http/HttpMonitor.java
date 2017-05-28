@@ -8,6 +8,7 @@ import com.asiainfo.hlog.agent.runtime.RutimeCallFactory;
 import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.ClassHelper;
+import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
 import com.asiainfo.hlog.web.HLogHttpRequest;
@@ -60,7 +61,6 @@ public class HttpMonitor {
     private static HLogConfig config = HLogConfig.getInstance();
 
     public static void receiveHlogId(String _gid,String _pid){
-
         HttpMonitor.clearReceiveHlogId();
         //如果没有上游系统传递gId的话,从当前线程中获取
         if(_gid==null){
@@ -84,14 +84,11 @@ public class HttpMonitor {
         LogAgentContext.clear();
     }
 
-    public static HLogMonitor.Node requestBegin(StringBuffer requestUrl,long beginTime,String logId,String pId,String className, String methodName){
+    public static HLogMonitor.Node requestBegin(StringBuffer requestUrl,long beginTime,String className, String methodName){
         //String logId,String logPid,String className, String methodName, Long beginTime
         try {
-            String enableMonitor = HLogConfig.getInstance().getProperty(Constants.KEY_ENABLE_MONITOR_LOOP, "true");
-            if (!"true".equals(enableMonitor.toLowerCase())) {
-                return null;
-            }
-            HLogMonitor.Node node = new HLogMonitor.Node(logId,pId,className,methodName,beginTime);
+            String id = LogUtil.logId();
+            HLogMonitor.Node node = new HLogMonitor.Node(id,RuntimeContext.buildLogPId(id),className,methodName,beginTime);
             node.requestUrl = requestUrl.toString();
             node.type = HLogAgentConst.LOOP_TYPE_REQUEST;
             String gId = LogAgentContext.getThreadLogGroupId();
@@ -100,8 +97,11 @@ public class HttpMonitor {
                 LogAgentContext.setThreadLogGroupId(gId);
             }
             node.logGid = gId;
+            String enableMonitor = HLogConfig.getInstance().getProperty(Constants.KEY_ENABLE_MONITOR_LOOP, "true");
+            if (!"true".equals(enableMonitor.toLowerCase())) {
+                HLogMonitor.addLoopMonitor(node);
+            }
             return node;
-
         }catch (Exception e){
             Logger.error("请求超时监控异常",e);
         }
@@ -121,12 +121,25 @@ public class HttpMonitor {
         if(excludeExpands.contains(expand)){
             return ;
         }
+        String pid = null;
+        String id = null;
+        if(node!=null){
+            pid = node.logPid;
+            id = node.logId;
+            //System.out.println("1-----url="+requestUrl+",id="+id+",pid="+pid);
+        }else{
+            pid = RuntimeContext.getLogId();
+            id = RuntimeContext.logId();
+            //System.out.println("2-----url="+requestUrl+",id="+id+",pid="+pid);
+        }
+
         //String pid = RuntimeContext.getLogId();
         //String id = RuntimeContext.logId();
-        LogData logData = HLogMonitor.createLogData("request",node.logId,node.logPid);
+        LogData logData = HLogMonitor.createLogData("request",id,pid);
         logData.put("url",requestUrl.toString());
         logData.put("remoteAddr",addr);
-        logData.put("spend",System.currentTimeMillis()-start);
+        long spend = System.currentTimeMillis()-start;
+        logData.put("spend",spend);
         logData.put("status",status);
         if(config.isEnableSession()){
            Map session = LogAgentContext.getThreadSession();
@@ -135,6 +148,11 @@ public class HttpMonitor {
             }
         }
         RuntimeContext.writeEvent("request.log",null,logData);
+
+        //将url也当作process写入
+        node.speed=spend;
+        HLogMonitor.doSendProcessLog(node,id,pid,status,"nvl".equals(pid),false);
+
         LogAgentContext.clear();
     }
 

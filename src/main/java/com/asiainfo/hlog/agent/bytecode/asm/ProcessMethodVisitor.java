@@ -99,14 +99,14 @@ public class ProcessMethodVisitor extends AbstractTryCatchMethodVisitor {
 
     protected void beforeThrow(int flag) {
         // 调用日志监控结束,并记录发生的异常
-        if(flag==1){
+        //if(flag==0){
             //visitVarInsn(ALOAD, getIdxExce());
             //mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Throwable", "printStackTrace", "()V", false);
             visitLdcInsn(mcode);
             visitVarInsn(ALOAD, getIdxExce());
             visitInsn(ICONST_1);
             ASMUtils.visitStaticMethod(mv,HLogMonitor.class,"end",String.class,Object.class,boolean.class);
-        }
+        //}
     }
 
 

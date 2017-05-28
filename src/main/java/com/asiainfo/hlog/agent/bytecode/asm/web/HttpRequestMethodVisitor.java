@@ -68,18 +68,16 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
         mv.visitVarInsn(ALOAD,paramIndex);
         mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getRequestURL", "()Ljava/lang/StringBuffer;", true);
         mv.visitVarInsn(LLOAD, _startLVSlot);
-        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/client/helper/LogUtil", "logId", "()Ljava/lang/String;", false);
-        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/RuntimeContext", "getLogId", "()Ljava/lang/String;", false);
+        //mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/client/helper/LogUtil", "logId", "()Ljava/lang/String;", false);
+        //mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/RuntimeContext", "getLogId", "()Ljava/lang/String;", false);
         mv.visitLdcInsn(className);
         mv.visitLdcInsn(methodName);
         //,StringBuffer requestUrl,long start,String logId,String pId,String className, String methodName
-        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/http/HttpMonitor", "requestBegin", "(Ljava/lang/StringBuffer;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/asiainfo/hlog/agent/runtime/HLogMonitor$Node;", false);
+        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/http/HttpMonitor", "requestBegin", "(Ljava/lang/StringBuffer;JLjava/lang/String;Ljava/lang/String;)Lcom/asiainfo/hlog/agent/runtime/HLogMonitor$Node;", false);
         mv.visitVarInsn(ASTORE, _nodeSlot);
 
-        Label addNodeLabel = new Label();
-        mv.visitLabel(addNodeLabel);
-        mv.visitVarInsn(ALOAD, _nodeSlot);
-        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/HLogMonitor", "addLoopMonitor", "(Lcom/asiainfo/hlog/agent/runtime/HLogMonitor$Node;)V", false);
+        //mv.visitVarInsn(ALOAD, _nodeSlot);
+        //mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/HLogMonitor", "addLoopMonitor", "(Lcom/asiainfo/hlog/agent/runtime/HLogMonitor$Node;)V", false);
 
         super.visitCode();
     }

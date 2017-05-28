@@ -54,6 +54,10 @@ public class HLogPreProcessor extends AbstractPreProcessor {
         if(isExcludePath(clazz) && !fullClass.contains(clazz)){
             return null;
         }
+        if(classLoader!=null && classLoader.equals(getClass().getClassLoader())){
+            return null;
+        }
+
 
         // 获取类的采集规则
         LogSwoopRule classRule = getSupportRule(clazz,null);

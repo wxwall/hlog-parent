@@ -29,30 +29,44 @@ public class ClassLoaderHolder  {
 
         public Class<?> loadClass(String name) throws ClassNotFoundException {
             Class<?> clazz ;
+            //int index = 0;
             try{
                 if(!name.startsWith("org.slf4j.") &&
                 !name.startsWith("org.apache.log4j.")
-                        && (name.startsWith("com.asiainfo.hlog.client.model.") ||
+                        && (
+                        name.startsWith("java") ||
+                        name.startsWith("com.asiainfo.hlog.client.model.") ||
                         name.endsWith("IRutimeCall") ||
                         name.endsWith("ITransmitter") ||
                         name.endsWith("RuntimeContext") ||
                         name.endsWith("RutimeCallFactory") ||
                         name.endsWith("TransmitterFactory"))){
                     clazz = super.loadClass(name);
+                    //index = 1;
                 }else{
                     clazz = findClass(name);
+                    //index = 2;
                 }
             }catch (ClassNotFoundException cfe){
                 try{
                     clazz = super.loadClass(name);
+                    //index = 3;
                 }catch (ClassNotFoundException cfe2){
                     try{
                         clazz = getInstance().getParent().loadClass(name);
+                        //index = 4;
                     }catch (ClassNotFoundException cfe3){
-                        clazz = loader.loadClass(name);
+                        throw cfe3;
                     }
                 }
             }
+            /*
+            String classLoader = null;
+            if(clazz!=null && clazz.getClassLoader()!=null){
+                classLoader = clazz.getClassLoader().getClass().getName();
+            }
+            Logger.debug(index+",load="+name+","+classLoader);
+            */
             return clazz;
         }
     }
@@ -152,14 +166,6 @@ public class ClassLoaderHolder  {
                 if(extClassesFile.exists()){
                     jarList.add(extClassesFile.toURI().toURL());
                 }
-
-                System.out.println("loaded ext jars:"+jarList);
-                System.out.println("---------------------------------------------:");
-                StackTraceElement[] ses = Thread.currentThread().getStackTrace();
-                for (StackTraceElement se : ses) {
-                    System.out.println("----:"+se.getClassName()+"-"+se.getMethodName()+":"+se.getLineNumber());
-                }
-
                 //jarLis
                 URL[] urls = jarList.toArray(new URL[jarList.size()]);
 
