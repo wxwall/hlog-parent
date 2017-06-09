@@ -20,7 +20,7 @@ public class LoadPropInfo {
         loadMethocVisitorConfig(inputStream,classMap);
 
         //读取扩展配置
-        String extDir = HLogConfig.getInstance().getHLogAgentDir();
+        String extDir = HLogConfig.getHLogAgentDir();
         InputStream in = null;
         FileInputStream fis = null;
         try {

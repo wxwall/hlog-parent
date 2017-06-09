@@ -59,7 +59,7 @@ public class WebRequestParser {
     }
 
     private static String getFileNameList(){
-        String dir = HLogConfig.getInstance().getHLogAgentDir();
+        String dir = HLogConfig.getHLogAgentDir();
         File file=new File(dir);
         File[] tempList = file.listFiles();
         StringBuilder sb = new StringBuilder();
@@ -72,7 +72,7 @@ public class WebRequestParser {
     }
 
     private static String configContent(String fileName){
-        String dir = HLogConfig.getInstance().getHLogAgentDir();
+        String dir = HLogConfig.getHLogAgentDir();
         try {
             String text = ResourceUtils.read(new FileInputStream(new File(dir+fileName)));
             return text;
@@ -88,7 +88,7 @@ public class WebRequestParser {
         OutputStreamWriter out = null;
         FileOutputStream fos = null;
         try{
-            String filePath = HLogConfig.getInstance().getHLogAgentDir()+fileName;
+            String filePath = HLogConfig.getHLogAgentDir()+fileName;
             Logger.debug("保存配置文件：{0},内容为：{1}",filePath,content);
             File file =new File(filePath);
             if(!file.exists()){

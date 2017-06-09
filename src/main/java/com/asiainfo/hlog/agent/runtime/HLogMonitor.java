@@ -184,6 +184,13 @@ public class HLogMonitor {
         node.enableError = enableError;
         node.type = HLogAgentConst.LOOP_TYPE_METHOD;
         pushNode(node);
+
+        int size = 0;
+        Stack s = local.get();
+        if(s!=null){
+            size = s.size();
+        }
+        //System.out.println(Thread.currentThread().getId()+","+className+"."+methodName+"-----------------------------start 4 id="+id+" _pid="+pid+",size="+size);
     }
 
     private static void pushNode(Node node) {
@@ -239,14 +246,15 @@ public class HLogMonitor {
                 clear();
                 return ;
             }
+            int size = stack.size();
             Node node = stack.pop();
-
             //移除循环监控
             removeLoopMonitor(node);
 
             if(node.isEmpty()){
                 return ;
             }
+            //System.out.println(Thread.currentThread().getId()+","+node.className+"."+node.methodName+"-----------------------------end 5.1 _pid="+node.logPid+",size="+size);
             node.speed = System.currentTimeMillis() - node.beginTime;
             //如果产生多个日志,这里的logId保持一致
             //String id = node.logId ;
@@ -431,7 +439,7 @@ public class HLogMonitor {
      * @param pid
      * @param status
      */
-    private static void doSendProcessLog(Node node ,String id,String pid,int status,boolean isTop,boolean isWriteErrLog){
+    public static void doSendProcessLog(Node node ,String id,String pid,int status,boolean isTop,boolean isWriteErrLog){
         LogData logData = createLogData(HLogAgentConst.MV_CODE_PROCESS,id,pid);
         logData.put("status",status);
         logData.put("clazz",node.className+"."+node.methodName);
@@ -447,6 +455,9 @@ public class HLogMonitor {
         //logData.put("leaf",node.leaf?1:0);
         if(node.sql){
             logData.put("sql",1);
+        }
+        if(node.requestUrl!=null){
+            logData.put("url",node.requestUrl);
         }
         writeEvent(node.className,node.methodName,logData);
     }
@@ -815,7 +826,7 @@ public class HLogMonitor {
        Runnable task = new Runnable() {
             public void run() {
                 try {
-                    String filePath = HLogConfig.getInstance().getHLogAgentDir()+Constants.FIEL_NAME_HLOG_CONFS;
+                    String filePath = HLogConfig.getHLogAgentDir()+Constants.FIEL_NAME_HLOG_CONFS;
                     boolean isModify = false;
                     //判断hlog-confs.properties是否修改
                     File file = new File(filePath);
@@ -826,7 +837,7 @@ public class HLogMonitor {
                     }
                     //判断hlog-{0}-confs.properties是否修改
                     if(HLogConfig.hlogCfgName!=null){
-                        String extFilePath = HLogConfig.getInstance().getHLogAgentDir() + MessageFormat.format(Constants.FILE_NAME_HLOG_EXT_CONFS, HLogConfig.hlogCfgName);
+                        String extFilePath = HLogConfig.getHLogAgentDir() + MessageFormat.format(Constants.FILE_NAME_HLOG_EXT_CONFS, HLogConfig.hlogCfgName);
                         File extFile = new File(extFilePath);
                         long extModifyTime = extFile.lastModified();
                         if(extConfigFileModifyTime != extModifyTime){
