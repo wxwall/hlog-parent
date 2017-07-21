@@ -2,6 +2,7 @@ package com.asiainfo.hlog.agent.runtime;
 
 import com.asiainfo.hlog.agent.HLogAgentConst;
 import com.asiainfo.hlog.agent.jvm.HLogJvmReport;
+import com.asiainfo.hlog.agent.runtime.dto.SqlInfoDto;
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
 import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
@@ -9,6 +10,7 @@ import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
 import com.asiainfo.hlog.org.objectweb.asm.Type;
+import org.apache.commons.collections4.bag.SynchronizedSortedBag;
 
 import java.io.File;
 import java.io.InputStream;
@@ -869,6 +871,43 @@ public class HLogMonitor {
             Logger.error("启动刷新配置文件定时任务失败",t);
         }
 
+    }
+
+    public static void setHibernateSql(String sql){
+        if(config.isEnableHibernateSql()) {
+            LogAgentContext.clearHibernateSql();
+            SqlInfoDto d = new SqlInfoDto();
+            d.setSql(sql);
+            d.setStartTime(Calendar.getInstance().getTimeInMillis());
+            LogAgentContext.setHibernateSql(d);
+        }
+    }
+
+    public static void addHibernateParam(Object val){
+        SqlInfoDto d = LogAgentContext.getHibernateSql();
+        if(d != null){
+            d.getParams().add(val);
+        }
+    }
+
+    public static void sendHibernateSql(){
+        SqlInfoDto d = LogAgentContext.getHibernateSql();
+        if(d != null){
+            try {
+                String pId = LogAgentContext.getThreadCurrentLogId();
+                LogData data = createLogData(HLogAgentConst.MV_CODE_SQL, LogUtil.logId(), pId);
+                data.put("sql", d.getSql());
+                data.put("params", RuntimeContext.toJson(d.getParams()));
+                data.put("sqlc", "s" + d.getSql().hashCode());
+                data.put("spend",Calendar.getInstance().getTimeInMillis()-d.getStartTime());
+                writeEvent("hibernate.sql",null,data);
+            }catch (Exception e){
+                Logger.error("sendHibernateSql",e);
+            }finally {
+                LogAgentContext.clearHibernateSql();
+            }
+
+        }
     }
 
 }

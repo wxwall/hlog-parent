@@ -1,5 +1,6 @@
 package com.asiainfo.hlog.agent.bytecode.asm;
 
+import com.asiainfo.hlog.agent.bytecode.asm.hibernate.Hibernate3MethodVisitor;
 import com.asiainfo.hlog.agent.bytecode.asm.mybatis.BaseJdbcLoggerMethodVisitor;
 import com.asiainfo.hlog.agent.bytecode.asm.mybatis.MyBatisSQLMethodVisitor;
 import com.asiainfo.hlog.client.helper.Logger;
@@ -32,6 +33,7 @@ public abstract class HLogMethodVisitorFactory {
             mvClassMap.put(BaseJdbcLoggerMethodVisitor.CODE,BaseJdbcLoggerMethodVisitor.class);
             mvClassMap.put(InterceptMethodVisitor.CODE,InterceptMethodVisitor.class);
             mvClassMap.put(InterceptRetMethodVisitor.CODE,InterceptRetMethodVisitor.class);
+            mvClassMap.put(Hibernate3MethodVisitor.CODE,Hibernate3MethodVisitor.class);
         }
     }
 

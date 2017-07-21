@@ -1,5 +1,6 @@
 package com.asiainfo.hlog.agent.runtime;
 
+import com.asiainfo.hlog.agent.runtime.dto.SqlInfoDto;
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
 import com.asiainfo.hlog.client.config.HLogConfig;
 
@@ -36,6 +37,8 @@ public class LogAgentContext {
     private static final ThreadLocal<Stack<TranCostDto>> tranCostContext = new ThreadLocal<Stack<TranCostDto>>();
 
     private static final ThreadLocal<Map<String,Object>> threadSession = new ThreadLocal<Map<String,Object>>();
+
+    private static final ThreadLocal<SqlInfoDto> hibernateSqlContext = new ThreadLocal<SqlInfoDto>();
 
 
     public static void setKeepContext(boolean keep){
@@ -164,6 +167,17 @@ public class LogAgentContext {
 
     public static void clearThreadSession(){
         threadSession.remove();
+    }
+
+    public static SqlInfoDto getHibernateSql(){
+        return hibernateSqlContext.get();
+    }
+    public static void setHibernateSql(SqlInfoDto d){
+        hibernateSqlContext.set(d);
+    }
+
+    public static void clearHibernateSql(){
+        hibernateSqlContext.remove();
     }
 }
 
