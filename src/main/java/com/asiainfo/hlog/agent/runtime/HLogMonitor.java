@@ -875,7 +875,6 @@ public class HLogMonitor {
 
     public static void setHibernateSql(String sql){
         if(config.isEnableHibernateSql()) {
-            System.out.println("----setHibernateSql");
             LogAgentContext.clearHibernateSql();
             SqlInfoDto d = new SqlInfoDto();
             d.setSql(sql);
