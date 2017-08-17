@@ -10,7 +10,6 @@ import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
 import com.asiainfo.hlog.org.objectweb.asm.Type;
-import org.apache.commons.collections4.bag.SynchronizedSortedBag;
 
 import java.io.File;
 import java.io.InputStream;
