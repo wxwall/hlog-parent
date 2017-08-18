@@ -41,6 +41,18 @@ public class RuntimeContext {
         return errCodeMethodNames;
     }
 
+    private static StackTraceElement[] getTargetStackTrace(Throwable t){
+        if(t==null){
+            return null;
+        }
+        StackTraceElement[] stes = t.getStackTrace();
+
+        if((stes==null || stes.length==0) && t.getCause()!=null){
+            return getTargetStackTrace(t.getCause());
+        }
+
+        return stes;
+    }
 
     /**
      * <p>给异常一个编号,并返回一个异常栈的字符串.</p>
@@ -48,9 +60,10 @@ public class RuntimeContext {
      * @return
      */
     public static String error(Throwable t){
+
         StringBuilder builder = new StringBuilder();
 
-        StackTraceElement[] stes = t.getStackTrace();
+        StackTraceElement[] stes = getTargetStackTrace(t);
 
         boolean enable = false;
         for(StackTraceElement ste : stes){

@@ -425,9 +425,13 @@ public class HLogMonitor {
      * @param err
      */
     private static void doSendErrorLog(Node node, String id, String pid, Throwable err) {
+        if(err==null){
+            return;
+        }
         LogData logData = createLogData(HLogAgentConst.MV_CODE_ERROR,id,pid);
         String errMsg = RuntimeContext.error(err);
         logData.setDesc(errMsg);
+        logData.put("msg",err.getMessage());
         logData.put("clazz",node.className+"."+node.methodName);
         logData.put("errCode",RuntimeContext.errorCode(err));
         writeEvent(node.className,node.methodName,logData);
