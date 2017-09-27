@@ -59,6 +59,8 @@ public class ClassLoaderHolder  {
                         throw cfe3;
                     }
                 }
+            }catch (LinkageError t){
+                clazz = super.loadClass(name);
             }
             /*
             String classLoader = null;
