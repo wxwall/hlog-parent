@@ -10,7 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>hlog-agent</artifactId>
-    <version>0.5.1</version>
+    <version>0.6.1</version>
     <properties>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
         <version-num>65</version-num>
@@ -25,12 +25,12 @@
         <dependency>
             <groupId>com.asiainfo.hlog</groupId>
             <artifactId>hlog-comm</artifactId>
-            <version>0.5.1</version>
+            <version>0.6.1</version>
         </dependency>
         <dependency>
             <groupId>com.asiainfo.hlog</groupId>
             <artifactId>hlog-client</artifactId>
-            <version>0.5.1</version>
+            <version>0.6.1</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
