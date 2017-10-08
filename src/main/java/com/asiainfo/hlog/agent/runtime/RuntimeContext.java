@@ -8,6 +8,8 @@ import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.Event;
 import com.asiainfo.hlog.client.model.LogData;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -75,13 +77,11 @@ public class RuntimeContext {
         if(!enable){
             return null;
         }
-        int realLineNum = 0 ;
-        builder.append(t);
-        for(StackTraceElement ste : stes){
-            builder.append("\nat ").append(ste.getClassName()).append(".")
-                    .append(ste.getMethodName()).append("(").append(realLineNum>0?realLineNum:ste.getLineNumber()).append(")");
-            realLineNum = 0 ;
-        }
+
+        StringPrintWriter spw = new StringPrintWriter();
+        t.printStackTrace(spw);
+        builder.append(spw.getString());
+
         //将日志ID写入到异常对象中
         if(messageField==null){
             try{
@@ -176,4 +176,35 @@ public class RuntimeContext {
     }
 }
 
+class StringPrintWriter extends PrintWriter {
 
+    /**
+     * Constructs a new instance.
+     */
+    public StringPrintWriter() {
+        super(new StringWriter());
+    }
+
+    /**
+     * Constructs a new instance using the specified initial string-buffer
+     * size.
+     *
+     * @param initialSize  an int specifying the initial size of the buffer.
+     */
+    public StringPrintWriter(int initialSize) {
+        super(new StringWriter(initialSize));
+    }
+
+    /**
+     * <p>Since toString() returns information *about* this object, we
+     * want a separate method to extract just the contents of the
+     * internal buffer as a String.</p>
+     *
+     * @return the contents of the internal string buffer
+     */
+    public String getString() {
+        flush();
+        return ((StringWriter) this.out).toString();
+    }
+
+}
