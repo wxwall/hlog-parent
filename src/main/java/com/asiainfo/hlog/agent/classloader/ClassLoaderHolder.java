@@ -1,10 +1,10 @@
 package com.asiainfo.hlog.agent.classloader;
 
+import com.asiainfo.hlog.client.helper.HlogClassLoader;
 import com.asiainfo.hlog.client.helper.Logger;
 
 import java.io.*;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -21,57 +21,6 @@ import static java.lang.Thread.currentThread;
  */
 public class ClassLoaderHolder  {
 
-    private static class HlogClassLoader extends URLClassLoader{
-
-        public HlogClassLoader(URL[] urls, ClassLoader parent) {
-            super(urls, parent);
-        }
-
-        public Class<?> loadClass(String name) throws ClassNotFoundException {
-            Class<?> clazz ;
-            //int index = 0;
-            try{
-                if(!name.startsWith("org.slf4j.") &&
-                !name.startsWith("org.apache.log4j.")
-                        && (
-                        name.startsWith("java") ||
-                        name.startsWith("com.asiainfo.hlog.client.model.") ||
-                        name.endsWith("IRutimeCall") ||
-                        name.endsWith("ITransmitter") ||
-                        name.endsWith("RuntimeContext") ||
-                        name.endsWith("RutimeCallFactory") ||
-                        name.endsWith("TransmitterFactory"))){
-                    clazz = super.loadClass(name);
-                    //index = 1;
-                }else{
-                    clazz = findClass(name);
-                    //index = 2;
-                }
-            }catch (ClassNotFoundException cfe){
-                try{
-                    clazz = super.loadClass(name);
-                    //index = 3;
-                }catch (ClassNotFoundException cfe2){
-                    try{
-                        clazz = getInstance().getParent().loadClass(name);
-                        //index = 4;
-                    }catch (ClassNotFoundException cfe3){
-                        throw cfe3;
-                    }
-                }
-            }catch (LinkageError t){
-                clazz = super.loadClass(name);
-            }
-            /*
-            String classLoader = null;
-            if(clazz!=null && clazz.getClassLoader()!=null){
-                classLoader = clazz.getClassLoader().getClass().getName();
-            }
-            Logger.debug(index+",load="+name+","+classLoader);
-            */
-            return clazz;
-        }
-    }
 
     public static final String tmpdir = System.getProperty("java.io.tmpdir");
 
