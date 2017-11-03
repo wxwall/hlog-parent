@@ -20,8 +20,11 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
     public static final String CODE  = "http.request";
 
     private final String ServletRequest = "javax/servlet/http/HttpServletRequest";
+    private final String ServletResponse = "javax/servlet/http/HttpServletResponse";
 
     private int paramIndex = -1;
+
+    private int respIndex = -1;
 
     private int _startLVSlot;
     private int _nodeSlot;
@@ -34,7 +37,9 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
             Type type = types[i];
             if (ServletRequest.equals(type.getInternalName())) {
                 paramIndex = i+1;
-                break;
+                //break;
+            }else if(ServletResponse.equals(type.getInternalName())){
+                respIndex = i+1;
             }
         }
     }
@@ -92,6 +97,16 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
         }
     }
     private void doEnd(int status){
+
+
+        //将gid回写到head中
+        if(respIndex!=-1){
+            mv.visitVarInsn(ALOAD, respIndex);
+            mv.visitLdcInsn("_hGid");
+            mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/LogAgentContext", "getThreadLogGroupId", "()Ljava/lang/String;", false);
+            mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletResponse", "setHeader", "(Ljava/lang/String;Ljava/lang/String;)V", true);
+        }
+
         mv.visitVarInsn(ALOAD,paramIndex);
         mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getRequestURL", "()Ljava/lang/StringBuffer;", true);
         mv.visitVarInsn(ALOAD,paramIndex);
@@ -102,5 +117,6 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
         mv.visitVarInsn(ALOAD,_nodeSlot);
         mv.visitMethodInsn(Opcodes.INVOKESTATIC,"com/asiainfo/hlog/agent/runtime/http/HttpMonitor","request",
                 "(Ljava/lang/StringBuffer;Ljava/lang/String;JILcom/asiainfo/hlog/agent/runtime/HLogMonitor$Node;)V", false);
+
     }
 }
