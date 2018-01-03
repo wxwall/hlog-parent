@@ -14,7 +14,6 @@
     <properties>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
         <version-num>66</version-num>
-        <hlog-comm.version>0.6.1</hlog-comm.version>
         <hlog-client.version>0.6.2</hlog-client.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <premain.class>com.asiainfo.hlog.agent.HLogAgent</premain.class>
