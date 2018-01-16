@@ -4,7 +4,6 @@ import com.asiainfo.hlog.agent.classloader.ClassLoaderHolder;
 import com.asiainfo.hlog.client.config.HLogConfig;
 import com.asiainfo.hlog.client.helper.IdHepler;
 import com.asiainfo.hlog.client.helper.LoaderHelper;
-import com.asiainfo.hlog.client.helper.Logger;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;

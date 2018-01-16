@@ -79,12 +79,12 @@ public class HLogMonitor {
 
     private static void sendAgentVersionInfo(){
         LogData logData = new LogData();
-        logData.setMc("agent_ver");
+        logData.setMc("hlogver");
         logData.setId(RuntimeContext.logId());
         logData.setTime(System.currentTimeMillis());
         logData.put("ver",HLogConfig.VERSION);
-        logData.put("ver_num",HLogConfig.VER_NUM);
-        logData.put("ver_dt",HLogConfig.VER_START_DT);
+        logData.put("vernum",HLogConfig.VER_NUM);
+        logData.put("verdt",HLogConfig.VER_START_DT);
         writeEvent("agent.version",null,logData);
     }
 
