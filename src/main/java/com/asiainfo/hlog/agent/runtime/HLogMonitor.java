@@ -46,6 +46,9 @@ public class HLogMonitor {
         excludeParamTypes.add("javax.servlet.http.HttpServletResponse");
         excludeParamTypes.add("javax.servlet.http.HttpServletRequest");
         excludeParamTypes.add("javax.servlet.http.HttpSession");
+        excludeParamTypes.add("com.ailk.eaap.op2.serviceagent.common.MessageBO");
+
+        excludeParamTypePaths.add("org.apache.velocity.");
         excludeParamTypePaths.add("javax.");
         excludeParamTypePaths.add("org.w3c");
         excludeParamTypePaths.add("org.springframework");
@@ -60,6 +63,8 @@ public class HLogMonitor {
         excludeParamTypePaths.add("java.lang.Object");
         excludeParamTypePaths.add("java.io");
         excludeParamTypePaths.add("java.nio");
+        excludeParamTypePaths.add("sun.nio");
+
         //jvm信息监控
         if (HLogConfig.getInstance().isEnableJVMMonitor()) {
             HLogJvmReport.getInstance().start();
@@ -74,12 +79,12 @@ public class HLogMonitor {
 
     private static void sendAgentVersionInfo(){
         LogData logData = new LogData();
-        logData.setMc("agent_ver");
+        logData.setMc("hlogver");
         logData.setId(RuntimeContext.logId());
         logData.setTime(System.currentTimeMillis());
         logData.put("ver",HLogConfig.VERSION);
-        logData.put("ver_num",HLogConfig.VER_NUM);
-        logData.put("ver_dt",HLogConfig.VER_START_DT);
+        logData.put("vernum",HLogConfig.VER_NUM);
+        logData.put("verdt",HLogConfig.VER_START_DT);
         writeEvent("agent.version",null,logData);
     }
 
@@ -180,17 +185,27 @@ public class HLogMonitor {
         }else{
             pid = RuntimeContext.getLogId();
         }
-        Node node = new Node(id,pid,className,methodName,desc,paramNames,softReferences);
-        node.enableProcess = enableProcess;
-        node.enableError = enableError;
-        node.type = HLogAgentConst.LOOP_TYPE_METHOD;
-        pushNode(node);
 
         int size = 0;
         Stack s = local.get();
         if(s!=null){
             size = s.size();
         }
+
+        int limitStackSize = Integer.parseInt(HLogConfig.getInstance().getProperty(Constants.KEY_HLOG_LIMIT_STACK_SIZE,"-1"));
+        if(limitStackSize > 0 && size >= limitStackSize){
+            paramNames = null;
+            softReferences = null;
+            desc = "stack out";
+        }
+
+        Node node = new Node(id,pid,className,methodName,desc,paramNames,softReferences);
+        node.enableProcess = enableProcess;
+        node.enableError = enableError;
+        node.type = HLogAgentConst.LOOP_TYPE_METHOD;
+        pushNode(node);
+
+
         //System.out.println(Thread.currentThread().getId()+","+className+"."+methodName+"-----------------------------start 4 id="+id+" _pid="+pid+",size="+size);
     }
 
@@ -209,6 +224,7 @@ public class HLogMonitor {
             gId=node.logPid!=null?node.logPid:node.logId;
         }
         node.logGid = gId;
+
         stack.push(node);
         //添加循环监控
         addLoopMonitor(node);
@@ -292,8 +308,8 @@ public class HLogMonitor {
             }
 
             long ptime = config.getProcessTime();
-            //耗时达到某值是记录
-            if(enableProcess && node.speed>ptime){
+            //耗时达到某值时或出现异常时记录
+            if(enableProcess && (node.speed>=ptime||isError)){
                 //记录运行耗时超过
                 doSendProcessLog(node,node.logId,pid,node.isError,stack.isEmpty(),isWriteErrLog);
                 //如果本节点超过预警值,追加写已经执行过的子过程节点
@@ -303,7 +319,7 @@ public class HLogMonitor {
                 if(node.speed>config.getProcessTimeWithout()){
                     havWriteLog = true;
                 }
-            }else if(enableSaveWithoutSubs && enableProcess && ptime>0){
+            }else if(enableSaveWithoutSubs && enableProcess && ptime>=0){
                 pushSubNode(node,ptime);
             }
 
@@ -749,6 +765,9 @@ public class HLogMonitor {
      * @param node
      */
     public static void removeLoopMonitor(Node node){
+        if (!config.isEnableLoopMonitor()) {
+            return;
+        }
         if(node == null){
             return;
         }

@@ -2,8 +2,8 @@ package com.asiainfo.hlog.agent;
 
 import com.asiainfo.hlog.agent.classloader.ClassLoaderHolder;
 import com.asiainfo.hlog.client.config.HLogConfig;
+import com.asiainfo.hlog.client.helper.IdHepler;
 import com.asiainfo.hlog.client.helper.LoaderHelper;
-import com.asiainfo.hlog.client.helper.Logger;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
@@ -33,6 +33,8 @@ public class HLogAgent {
             HLogAgent.inst = inst;
         }
 
+        IdHepler.init();
+
         if (classPreProcessorAgentAdapter == null) {
             //获取配置实例
             //HLogConfig config = HLogConfig.getInstance();
@@ -44,7 +46,6 @@ public class HLogAgent {
         inst.addTransformer(classPreProcessorAgentAdapter);
 
         LoaderHelper.setLoader(ClassLoaderHolder.getInstance().getClassLoader());
-
     }
 
     private static void printVersionInfo(){
