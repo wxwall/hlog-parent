@@ -10,11 +10,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>hlog-agent</artifactId>
-    <version>0.6.2</version>
+    <version>0.6.3</version>
     <properties>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
-        <version-num>66</version-num>
-        <hlog-client.version>0.6.2</hlog-client.version>
+        <version-num>67</version-num>
+        <hlog-client.version>0.6.3</hlog-client.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <premain.class>com.asiainfo.hlog.agent.HLogAgent</premain.class>
         <shade.package>com.asiainfo.hlog.dependencies</shade.package>
@@ -83,6 +83,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -99,7 +100,7 @@
                     </archive>
                 </configuration>
             </plugin>
-            -->
+ -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -124,14 +125,14 @@
                             <createSourcesJar>true</createSourcesJar>
                             <shadeSourcesContent>true</shadeSourcesContent>
                             <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>hlog-agent</resource>
                                 </transformer>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Premain-Class>${premain.class}</Premain-Class>
+                                        <HLog-Agent-Version>${hlog-client.version}</HLog-Agent-Version>
+                                        <Build-Date>${maven.build.timestamp}</Build-Date>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
@@ -172,10 +173,6 @@
                                 <relocation>
                                     <pattern>org.apache.jute</pattern>
                                     <shadedPattern>${shade.package}.org.apache.jute</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.slf4j</pattern>
-                                    <shadedPattern>${shade.package}.org.slf4j</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.slf4j</pattern>
