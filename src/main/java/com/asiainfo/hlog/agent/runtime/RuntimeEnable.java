@@ -6,7 +6,7 @@ import com.asiainfo.hlog.client.config.HLogConfigRule;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.comm.context.IPropertyListener;
 import com.asiainfo.hlog.comm.context.PropertyEvent;
-import com.asiainfo.hlog.comm.context.PropertyHolder;
+import com.asiainfo.hlog.comm.context.PropHolder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +26,7 @@ public class RuntimeEnable {
      */
 
     public RuntimeEnable(){
-        PropertyHolder.addListener(new IPropertyListener() {
+        PropHolder.addListener(new IPropertyListener() {
             public void changed(PropertyEvent event) {
                 String key = event.getKey();
                 if(key.startsWith(Constants.KEY_HLOG_CAPTURE_ENABLE)

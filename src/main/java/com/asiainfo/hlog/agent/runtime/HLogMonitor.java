@@ -6,6 +6,7 @@ import com.asiainfo.hlog.agent.runtime.dto.SqlInfoDto;
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
 import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
+import com.asiainfo.hlog.client.helper.IdHepler;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
@@ -74,6 +75,7 @@ public class HLogMonitor {
         if (HLogConfig.getInstance().isEnableLoopMonitor()) {
             startLoopMonitor();
         }
+        IdHepler.init();
         startConfigReloadTask();
         sendAgentVersionInfo();
     }
@@ -872,6 +874,7 @@ public class HLogMonitor {
             public void run() {
                 try {
                     String filePath = HLogConfig.getHLogAgentDir()+Constants.FIEL_NAME_HLOG_CONFS;
+                    //System.out.println("load hlog agent config file = "+filePath);
                     boolean isModify = false;
                     //判断hlog-confs.properties是否修改
                     File file = new File(filePath);

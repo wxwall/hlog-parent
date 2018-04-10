@@ -10,11 +10,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>hlog-agent</artifactId>
-    <version>0.6.3</version>
+    <version>0.7.0</version>
     <properties>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
-        <version-num>67</version-num>
-        <hlog-client.version>0.6.3</hlog-client.version>
+        <version-num>70</version-num>
+        <hlog-client.version>0.7.0</hlog-client.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <premain.class>com.asiainfo.hlog.agent.HLogAgent</premain.class>
         <shade.package>com.asiainfo.hlog.dependencies</shade.package>
@@ -48,59 +48,8 @@
         </dependency>
     </dependencies>
     <build>
+        <finalName>hlog-agent</finalName>
         <plugins>
-            <!--把hlog-comm和hlog-client解包打到hlog-agent里
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.asiainfo.hlog</groupId>
-                                    <artifactId>hlog-comm</artifactId>
-                                    <version>${hlog-comm.version}</version>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>./target/classes</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.asiainfo.hlog</groupId>
-                                    <artifactId>hlog-client</artifactId>
-                                    <version>${hlog-client.version}</version>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>./target/classes</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestFile>
-                            src/main/resources/META-INF/MANIFEST.MF
-                        </manifestFile>
-                        <manifestEntries>
-                            <Build-Date>${maven.build.timestamp}</Build-Date>
-                            <Build-Version>${version}</Build-Version>
-                            <Build-Version-Num>${version-num}</Build-Version-Num>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
- -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -133,6 +82,7 @@
                                         <Premain-Class>${premain.class}</Premain-Class>
                                         <HLog-Agent-Version>${hlog-client.version}</HLog-Agent-Version>
                                         <Build-Date>${maven.build.timestamp}</Build-Date>
+                                        <Built-By>YOU2B</Built-By>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
@@ -155,6 +105,8 @@
                                     <exclude>com.google.inject:*</exclude>
                                     <exclude>com.al:*</exclude>
                                     <exclude>aopalliance:*</exclude>
+                                    <exclude>ch.qos.logback:*</exclude>
+                                    <exclude>org.apache.logging.log4j:*</exclude>
                                 </excludes>
                             </artifactSet>
                             <relocations>
@@ -178,12 +130,35 @@
                                     <pattern>org.slf4j</pattern>
                                     <shadedPattern>${shade.package}.org.slf4j</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons.logging</pattern>
+                                    <shadedPattern>${shade.package}.org.apache.commons.logging</shadedPattern>
+                                </relocation>
+
                             </relocations>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <mkdir dir="${project.basedir}/../packages"/>
+                                <copy file="${project.build.directory}/hlog-agent.jar"
+                                      tofile="${project.basedir}/../packages/hlog-agent.jar" overwrite="true"/>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <distributionManagement>

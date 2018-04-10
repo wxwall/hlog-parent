@@ -8,8 +8,9 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>hlog-agent</artifactId>
-  <version>0.6.3</version>
+  <version>0.7.0</version>
   <build>
+    <finalName>hlog-agent</finalName>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -39,8 +40,9 @@
                 <transformer>
                   <manifestEntries>
                     <Premain-Class>${premain.class}</Premain-Class>
-                    <Hlog-Agent-Version>${hlog-client.version}</Hlog-Agent-Version>
+                    <HLog-Agent-Version>${hlog-client.version}</HLog-Agent-Version>
                     <Build-Date>${maven.build.timestamp}</Build-Date>
+                    <Built-By>YOU2B</Built-By>
                   </manifestEntries>
                 </transformer>
               </transformers>
@@ -63,6 +65,8 @@
                   <exclude>com.google.inject:*</exclude>
                   <exclude>com.al:*</exclude>
                   <exclude>aopalliance:*</exclude>
+                  <exclude>ch.qos.logback:*</exclude>
+                  <exclude>org.apache.logging.log4j:*</exclude>
                 </excludes>
               </artifactSet>
               <relocations>
@@ -87,10 +91,27 @@
                   <shadedPattern>${shade.package}.org.slf4j</shadedPattern>
                 </relocation>
                 <relocation>
-                  <pattern>org.slf4j</pattern>
-                  <shadedPattern>${shade.package}.org.slf4j</shadedPattern>
+                  <pattern>org.apache.commons.logging</pattern>
+                  <shadedPattern>${shade.package}.org.apache.commons.logging</shadedPattern>
                 </relocation>
               </relocations>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <mkdir />
+                <copy />
+              </tasks>
             </configuration>
           </execution>
         </executions>
@@ -140,9 +161,9 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <version-num>67</version-num>
+    <version-num>70</version-num>
     <shade.package>com.asiainfo.hlog.dependencies</shade.package>
-    <hlog-client.version>0.6.3</hlog-client.version>
+    <hlog-client.version>0.7.0</hlog-client.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
     <premain.class>com.asiainfo.hlog.agent.HLogAgent</premain.class>
