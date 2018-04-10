@@ -33,8 +33,6 @@ public class HLogAgent {
             HLogAgent.inst = inst;
         }
 
-        IdHepler.init();
-
         if (classPreProcessorAgentAdapter == null) {
             //获取配置实例
             //HLogConfig config = HLogConfig.getInstance();

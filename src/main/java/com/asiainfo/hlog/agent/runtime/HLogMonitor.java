@@ -6,6 +6,7 @@ import com.asiainfo.hlog.agent.runtime.dto.SqlInfoDto;
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
 import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
+import com.asiainfo.hlog.client.helper.IdHepler;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
@@ -65,6 +66,7 @@ public class HLogMonitor {
         excludeParamTypePaths.add("java.nio");
         excludeParamTypePaths.add("sun.nio");
 
+        excludeParamType();
         //jvm信息监控
         if (HLogConfig.getInstance().isEnableJVMMonitor()) {
             HLogJvmReport.getInstance().start();
@@ -73,8 +75,28 @@ public class HLogMonitor {
         if (HLogConfig.getInstance().isEnableLoopMonitor()) {
             startLoopMonitor();
         }
+        IdHepler.init();
         startConfigReloadTask();
         sendAgentVersionInfo();
+    }
+
+    private static void excludeParamType(){
+        String type = HLogConfig.getInstance().getProperty(Constants.KEY_HLOG_EXCLUDE_PARAM_TYPES);
+        Logger.debug("CONFIG EXCLUDE_PARAM_TYPES = {0}",type);
+        if(type != null && type.length() > 0){
+            String[] arr = type.split(",");
+            for(int i = 0; i < arr.length; i++){
+                excludeParamTypes.add(arr[i]);
+            }
+        }
+        String paths = HLogConfig.getInstance().getProperty(Constants.KEY_HLOG_EXCLUDE_PARAM_TYPE_PATHS);
+        Logger.debug("CONFIG EXCLUDE_PARAM_TYPE_PATHS = {0}",paths);
+        if(paths != null && paths.length() > 0){
+            String[] arr = paths.split(",");
+            for(int i = 0; i < arr.length; i++){
+                excludeParamTypePaths.add(arr[i]);
+            }
+        }
     }
 
     private static void sendAgentVersionInfo(){
@@ -413,6 +435,7 @@ public class HLogMonitor {
     }
 
     private static boolean isExcludeParamType(String clazz,SoftReference<Object> p) {
+        Logger.debug("ParamType = {0}",clazz);
         for (String excludeParamType : excludeParamTypes) {
             if (excludeParamType.equals(clazz)) {
                 return true;
@@ -851,6 +874,7 @@ public class HLogMonitor {
             public void run() {
                 try {
                     String filePath = HLogConfig.getHLogAgentDir()+Constants.FIEL_NAME_HLOG_CONFS;
+                    //System.out.println("load hlog agent config file = "+filePath);
                     boolean isModify = false;
                     //判断hlog-confs.properties是否修改
                     File file = new File(filePath);
@@ -929,6 +953,13 @@ public class HLogMonitor {
                 LogAgentContext.clearHibernateSql();
             }
 
+        }
+    }
+
+    public static void csfService(String srvCode, Map sysMap, Map busiMap){
+        String pId = LogAgentContext.getThreadCurrentLogId();
+        if(pId != null){
+            busiMap.put("_pId",pId);
         }
     }
 
