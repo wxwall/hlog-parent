@@ -12,7 +12,6 @@ import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
 import com.asiainfo.hlog.web.HLogHttpRequest;
-import com.sun.xml.internal.messaging.saaj.soap.GifDataContentHandler;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -110,7 +109,7 @@ public class HttpMonitor {
         return  null;
     }
 
-    public static void request(StringBuffer requestUrl, String addr, long start, int status, HLogMonitor.Node node){
+    public static void request(StringBuffer requestUrl, String addr, long start, int status, HLogMonitor.Node node,Object httpReq0){
         HLogMonitor.removeLoopMonitor(node);
         //判断是否开启收集
         if(!config.isEnableRequest()){
@@ -135,10 +134,20 @@ public class HttpMonitor {
             //System.out.println("2-----url="+requestUrl+",id="+id+",pid="+pid);
         }
 
+        HLogHttpRequest req = new HLogHttpRequest(httpReq0);
+        String  url = requestUrl.toString();
+        try {
+            String srvCode = req.getParameter("serviceCode");
+            if(srvCode != null){
+                url = url + "?serviceCode=" + srvCode;
+            }
+        } catch (Exception e) {
+        }
+
         //String pid = RuntimeContext.getLogId();
         //String id = RuntimeContext.logId();
         LogData logData = HLogMonitor.createLogData("request",id,pid);
-        logData.put("url",requestUrl.toString());
+        logData.put("url",url);
         logData.put("remoteAddr",addr);
         long spend = System.currentTimeMillis()-start;
         logData.put("spend",spend);

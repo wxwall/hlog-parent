@@ -57,21 +57,8 @@ public class TestASM {
                     }
                 }else if(isHttp && b[index]==10 && b[index-1]==13){
                     int newIndex = index+1;
-                    //1、发关前部分
-                    String pid = _getLogId("getThreadCurrentLogId");
-                    //2、追加Hlog头
-                    StringBuilder head = new StringBuilder();
-                    head.append("Hlog-Agent-Gid:").append(gid).append("\r\n");
-                    if(pid!=null){
-                        head.append("Hlog-Agent-Pid:").append(pid).append("\r\n");
-                    }
-                    String tag = _getLogId("getCollectTag");
-                    if(tag != null){
-                        head.append("Hlog-Agent-Tag:").append(tag).append("\r\n");
-                    }
-                    byte[] headBytes = head.toString().getBytes();
-
-
+                    String head = SocketUtils.buildHeader();
+                    byte[] headBytes = head.getBytes();
                     byte[] newdatas = new byte[len+headBytes.length];
 
                     System.arraycopy(b,off,newdatas,0,newIndex);

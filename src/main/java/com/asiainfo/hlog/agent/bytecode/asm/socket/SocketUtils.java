@@ -15,24 +15,24 @@ public class SocketUtils {
         String pid = LogAgentContext.getThreadCurrentLogId();
         String ctag = LogAgentContext.getCollectTag();
         if(gid != null){
-            head.append("hloggid:").append(gid).append("\r\n");
+            head.append("hloggid: ").append(gid).append("\r\n");
         }
         if(pid != null){
-            head.append("hloggid:").append(pid).append("\r\n");
+            head.append("hlogpid: ").append(pid).append("\r\n");
         }
         if(ctag != null){
-            head.append("hlogctag:").append(ctag).append("\r\n");
+            head.append("hlogctag: ").append(ctag).append("\r\n");
         }
 
         Map<String,Object> session = LogAgentContext.getThreadSession();
         if(session != null) {
             String deviceId = (String) session.get("deviceId");
             if(deviceId != null){
-                head.append("deviceId:").append(deviceId).append("\r\n");
+                head.append("deviceId: ").append(deviceId).append("\r\n");
             }
             String staffCode = (String) session.get("staffCode");
             if(staffCode != null){
-                head.append("staffCode:").append(staffCode).append("\r\n");
+                head.append("staffCode: ").append(staffCode).append("\r\n");
             }
         }
         return head.toString();
