@@ -54,8 +54,4 @@ public abstract class HLogAgentConst {
      */
     public static final String LOOP_TYPE_REQUEST = "request";
 
-    public static final String HEADER_HLOG_AGENT_GID = "Hlog-Agent-Gid";
-    public static final String HEADER_HLOG_AGENT_PID = "Hlog-Agent-Pid";
-
-
 }

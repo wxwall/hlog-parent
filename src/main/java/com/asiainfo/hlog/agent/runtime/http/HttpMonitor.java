@@ -12,6 +12,7 @@ import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
 import com.asiainfo.hlog.web.HLogHttpRequest;
+import com.sun.xml.internal.messaging.saaj.soap.GifDataContentHandler;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -60,7 +61,7 @@ public class HttpMonitor {
 
     private static HLogConfig config = HLogConfig.getInstance();
 
-    public static void receiveHlogId(String _gid,String _pid){
+    public static void receiveHlogId(String _gid,String _pid,String  _tag){
         HttpMonitor.clearReceiveHlogId();
         //如果没有上游系统传递gId的话,从当前线程中获取
         if(_gid==null){
@@ -77,6 +78,7 @@ public class HttpMonitor {
 
         LogAgentContext.setThreadLogGroupId(_gid);
         LogAgentContext.setThreadCurrentLogId(_pid);
+        LogAgentContext.setCollectTag(_tag);
         LogAgentContext.setKeepContext(true);
     }
 
@@ -141,17 +143,21 @@ public class HttpMonitor {
         long spend = System.currentTimeMillis()-start;
         logData.put("spend",spend);
         logData.put("status",status);
+        System.out.println("+++++++++++++++++++++++++++" + LogAgentContext.getThreadSession());
         if(config.isEnableSession()){
            Map session = LogAgentContext.getThreadSession();
             if(session != null && !session.isEmpty()){
                 logData.put("sesinfo",session);
             }
         }
+        if(pid == null || pid.equals("nvl") || id.equals(pid) || pid.equals(logData.getGId())){
+            logData.put("isTop",1);
+        }
         RuntimeContext.writeEvent("request.log",null,logData);
 
         //将url也当作process写入
         node.speed=spend;
-        HLogMonitor.doSendProcessLog(node,id,pid,status,"nvl".equals(pid),false);
+        //HLogMonitor.doSendProcessLog(node,id,pid,status,"nvl".equals(pid),false);
 
         LogAgentContext.clear();
     }

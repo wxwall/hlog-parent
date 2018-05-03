@@ -32,6 +32,15 @@ public class HLogGidPidMethodVistor extends AbstractMethodVisitor {
             visitInsn(Opcodes.ARETURN);
         }
 
+        if ("putCollectTag".equals(methodName)) {
+            visitVarInsn(Opcodes.ALOAD, 0);
+            ASMUtils.visitStaticMethod(mv, LogAgentContext.class,"setCollectTag",String.class);
+        }
+
+        if ("fetchCollectTag".equals(methodName)) {
+            ASMUtils.visitStaticMethod(mv, LogAgentContext.class,"getCollectTag");
+            visitInsn(Opcodes.ARETURN);
+        }
 
         super.visitCode();
     }

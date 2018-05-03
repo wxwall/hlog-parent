@@ -1,5 +1,6 @@
 package com.asiainfo.hlog.agent.runtime;
 
+import com.asiainfo.hlog.agent.CollectRateKit;
 import com.asiainfo.hlog.agent.HLogAgentConst;
 import com.asiainfo.hlog.agent.jvm.HLogJvmReport;
 import com.asiainfo.hlog.agent.runtime.dto.SqlInfoDto;
@@ -192,6 +193,15 @@ public class HLogMonitor {
             return ;
         }
 
+        //采集率判断
+        boolean isCollect = CollectRateKit.isCollect();
+        CollectRateKit.incrTotal();
+        if(!isCollect){
+            return;
+        }
+        CollectRateKit.incrCurrNum();
+
+
         SoftReference[] softReferences = null;
         if(params!=null){
             softReferences = new SoftReference[params.length];
@@ -226,8 +236,6 @@ public class HLogMonitor {
         node.enableError = enableError;
         node.type = HLogAgentConst.LOOP_TYPE_METHOD;
         pushNode(node);
-
-
         //System.out.println(Thread.currentThread().getId()+","+className+"."+methodName+"-----------------------------start 4 id="+id+" _pid="+pid+",size="+size);
     }
 
@@ -489,9 +497,14 @@ public class HLogMonitor {
         logData.put("clazz",node.className+"."+node.methodName);
         logData.put("method",node.methodName);
         logData.put("spend",node.speed);
-        if(isTop || "nvl".equals(pid)){
+
+        if(pid == null || pid.equals("nvl") || id.equals(pid) || pid.equals(logData.getGId())){
             logData.put("isTop",1);
         }
+//
+//        if(isTop || "nvl".equals(pid)){
+//            logData.put("isTop",1);
+//        }
         if(isWriteErrLog){
             logData.put("havErr",1);
         }

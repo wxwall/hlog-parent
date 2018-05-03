@@ -13,6 +13,10 @@ import java.util.Stack;
  */
 public class LogAgentContext {
 
+    /**
+     * 采样标识
+     */
+    private static final ThreadLocal<String> collectTag = new ThreadLocal<String>();
 
     /**
      * 日志组ID
@@ -111,6 +115,7 @@ public class LogAgentContext {
         keepContext.set(false);
         clearThreadSession();
         tranCostContext.remove();
+        collectTag.remove();
     }
 
     public static int getIndex(){
@@ -178,6 +183,14 @@ public class LogAgentContext {
 
     public static void clearHibernateSql(){
         hibernateSqlContext.remove();
+    }
+
+    public static String getCollectTag(){
+        return collectTag.get();
+    }
+
+    public static void setCollectTag(String tag){
+        collectTag.set(tag);
     }
 }
 
