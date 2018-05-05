@@ -177,7 +177,6 @@ public class HLogMonitor {
     private static HLogConfig config = HLogConfig.getInstance();
 
     public static void start(boolean isProcess,boolean isError,String className,String methodName,String desc,String[] paramNames,Object[] params){
-
         boolean enableProcess = isProcess;
         boolean enableError = isError;
         if(config.isEnableDynamicProcessSwitch()){
@@ -192,15 +191,6 @@ public class HLogMonitor {
             pushNode(node);
             return ;
         }
-
-        //采集率判断
-        boolean isCollect = CollectRateKit.isCollect();
-        CollectRateKit.incrTotal();
-        if(!isCollect){
-            return;
-        }
-        CollectRateKit.incrCurrNum();
-
 
         SoftReference[] softReferences = null;
         if(params!=null){
@@ -283,6 +273,7 @@ public class HLogMonitor {
     }
 
     public static void end(String mcode,Object returnObj,boolean isError){
+
         //local.get().pop();
         Stack<Node> stack = null;
         String pid = null;
@@ -399,6 +390,12 @@ public class HLogMonitor {
         if(node==null){
             return;
         }
+        //采样率判断
+        boolean isCollect = CollectRateKit.isCollect();
+        if(!isCollect){
+            return;
+        }
+
         LogData logData = createLogData(HLogAgentConst.MV_CODE_PARAMS,node.logId,node.logPid);
         if(node.paramNames==null || node.paramNames.length==0 ){
             logData.put("params","{}");
@@ -492,6 +489,11 @@ public class HLogMonitor {
      * @param status
      */
     public static void doSendProcessLog(Node node ,String id,String pid,int status,boolean isTop,boolean isWriteErrLog){
+        //采样率判断
+        boolean isCollect = CollectRateKit.isCollect();
+        if(!isCollect){
+            return;
+        }
         LogData logData = createLogData(HLogAgentConst.MV_CODE_PROCESS,id,pid);
         logData.put("status",status);
         logData.put("clazz",node.className+"."+node.methodName);
@@ -539,6 +541,11 @@ public class HLogMonitor {
     public static void sqlMonitor(long start,String className,String sql,String params,Object resObj) {
         if(!config.isEnableSqlTrack() || sql==null){
             return ;
+        }
+        //采样率判断
+        boolean isCollect = CollectRateKit.isCollect();
+        if(!isCollect){
+            return;
         }
         try{
             Node node = getCurrentNode();
@@ -637,6 +644,11 @@ public class HLogMonitor {
         if(!config.isEnableLoggerTrack()){
             return;
         }
+        //采样率判断
+        boolean isCollect = CollectRateKit.isCollect();
+        if(!isCollect){
+            return;
+        }
         try{
             Node node = getCurrentNode();
             String methodName = null;
@@ -731,6 +743,11 @@ public class HLogMonitor {
         }
         logData.setGId(gId);
         logData.setTime(System.currentTimeMillis());
+
+        Map<String,Object> session = LogAgentContext.getThreadSession();
+        if(HLogConfig.getInstance().isEnableSession() && session != null){
+            logData.put("sesinfo",session);
+        }
         return logData;
     }
 

@@ -28,11 +28,11 @@ public class SocketUtils {
         if(session != null) {
             String deviceId = (String) session.get("deviceId");
             if(deviceId != null){
-                head.append("deviceId: ").append(deviceId).append("\r\n");
+                head.append("hlog-deviceid: ").append(deviceId).append("\r\n");
             }
             String staffCode = (String) session.get("staffCode");
             if(staffCode != null){
-                head.append("staffCode: ").append(staffCode).append("\r\n");
+                head.append("hlog-staffcode: ").append(staffCode).append("\r\n");
             }
         }
         return head.toString();

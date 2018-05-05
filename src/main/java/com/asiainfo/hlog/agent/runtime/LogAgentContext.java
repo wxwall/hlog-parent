@@ -3,7 +3,7 @@ package com.asiainfo.hlog.agent.runtime;
 import com.asiainfo.hlog.agent.runtime.dto.SqlInfoDto;
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
 import com.asiainfo.hlog.client.config.HLogConfig;
-
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
@@ -110,7 +110,7 @@ public class LogAgentContext {
     public static void clear(){
         threadLogGroupId.remove();
         threadCurrentLogId.remove();
-        threadSession.remove();
+        clearThreadSession();
         threadCurrentIndex.set(new Integer(0));
         keepContext.set(false);
         clearThreadSession();
@@ -164,6 +164,18 @@ public class LogAgentContext {
 
     public static Map<String, Object> getThreadSession() {
         return threadSession.get();
+    }
+
+    public static void addThreadSession(String key,Object val){
+        if(key == null || val == null){
+            return;
+        }
+        Map<String, Object> map = threadSession.get();
+        if(map == null){
+            map = new HashMap<String, Object>();
+        }
+        map.put(key,val);
+        setThreadSession(map);
     }
 
     public static void setThreadSession(Map<String, Object> map){
