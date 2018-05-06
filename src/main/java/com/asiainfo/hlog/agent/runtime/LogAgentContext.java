@@ -3,6 +3,7 @@ package com.asiainfo.hlog.agent.runtime;
 import com.asiainfo.hlog.agent.runtime.dto.SqlInfoDto;
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
 import com.asiainfo.hlog.client.config.HLogConfig;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -43,6 +44,20 @@ public class LogAgentContext {
     private static final ThreadLocal<Map<String,Object>> threadSession = new ThreadLocal<Map<String,Object>>();
 
     private static final ThreadLocal<SqlInfoDto> hibernateSqlContext = new ThreadLocal<SqlInfoDto>();
+
+    private static final ThreadLocal<Boolean> isHttp = new ThreadLocal<Boolean>();
+
+    public static void setIsHttp(boolean keep){
+        isHttp.set(keep);
+    }
+
+    public static boolean isHttp(){
+        Boolean flag = isHttp.get();
+        if(flag == null || !flag){
+            return false;
+        }
+        return true;
+    }
 
 
     public static void setKeepContext(boolean keep){
@@ -115,6 +130,12 @@ public class LogAgentContext {
         keepContext.set(false);
         clearThreadSession();
         tranCostContext.remove();
+        if(!isHttp()){//http的由http请求入口进行clear
+            clearCollectTag();
+        }
+    }
+
+    public static void clearCollectTag(){
         collectTag.remove();
     }
 

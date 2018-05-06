@@ -52,18 +52,17 @@ public class CollectRateKit {
         }
         boolean isCollect = true;
 
-        Long _currNum = currNum.get() + 1;
-        Long _total = total.get() + 1;
+        Long _currNum = getCurrNum() + 1;
+        Long _total = incrTotal();
         Double r = (_currNum/(_total * 1.0)) * 100;
         if(_currNum == 1 || r.intValue() <= rate){
             isCollect = true;
+            incrCurrNum();
             LogAgentContext.setCollectTag("Y");
         }else {
             isCollect = false;
             LogAgentContext.setCollectTag("N");
         }
-        incrCurrNum();
-        incrTotal();
         return isCollect;
     }
 }

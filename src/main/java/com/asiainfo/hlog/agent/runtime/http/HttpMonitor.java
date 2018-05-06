@@ -62,6 +62,8 @@ public class HttpMonitor {
 
     public static void receiveHlogId(String _gid,String _pid,String  _tag,String  _deviceId,String  _staffCode){
         HttpMonitor.clearReceiveHlogId();
+        LogAgentContext.clearCollectTag();
+        LogAgentContext.setIsHttp(true);
         //如果没有上游系统传递gId的话,从当前线程中获取
         if(_gid==null){
             _gid = LogAgentContext.getThreadLogGroupId();
