@@ -156,9 +156,9 @@ public class HttpMonitor {
         HLogHttpRequest req = new HLogHttpRequest(httpReq0);
         String  url = requestUrl.toString();
         try {
-            String srvCode = req.getParameter("serviceCode");
+            String srvCode = req.getParameter("servicecode");
             if(srvCode != null){
-                url = url + "?serviceCode=" + srvCode;
+                url = url + "?servicecode=" + srvCode;
             }
         } catch (Exception e) {
         }

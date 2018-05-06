@@ -745,7 +745,7 @@ public class HLogMonitor {
         logData.setTime(System.currentTimeMillis());
 
         Map<String,Object> session = LogAgentContext.getThreadSession();
-        if(HLogConfig.getInstance().isEnableSession() && session != null){
+        if(HLogConfig.getInstance().isEnableSession() && session != null && !session.isEmpty()){
             logData.put("sesinfo",session);
         }
         return logData;
