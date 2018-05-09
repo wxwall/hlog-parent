@@ -43,8 +43,9 @@ public class HLogGidPidMethodVistor extends AbstractMethodVisitor {
         }
 
         if ("addSession".equals(methodName)) {
+            visitVarInsn(Opcodes.ALOAD, 0);
+            visitVarInsn(Opcodes.ALOAD, 1);
             ASMUtils.visitStaticMethod(mv, LogAgentContext.class,"addThreadSession",String.class,Object.class);
-            visitInsn(Opcodes.ARETURN);
         }
 
         if ("fetchSession".equals(methodName)) {

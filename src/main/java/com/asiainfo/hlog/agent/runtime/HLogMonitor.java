@@ -709,6 +709,13 @@ public class HLogMonitor {
     }
     private static void doIntercept(String mcode,String className, String methodName, String[] paramNames, Object[] params) {
         if(paramNames!=null && paramNames.length>0){
+            //ddal sql采集，也参加采样率控制
+            if("ddal".equals(mcode) && params.length >= 2 && "sql_process".equals(params[1]) ){
+                if(!CollectRateKit.isCollect()){
+                    return;
+                }
+            }
+
             String id = RuntimeContext.logId();
             String pid = LogAgentContext.getThreadCurrentLogId();
             LogData logData = createLogData(mcode, id, pid);
