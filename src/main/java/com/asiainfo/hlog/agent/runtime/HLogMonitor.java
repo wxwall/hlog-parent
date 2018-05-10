@@ -305,6 +305,7 @@ public class HLogMonitor {
             enableProcess = node.enableProcess;
 
             //发生异常时记录,在异常源头保存异常数据,同时将上级node设为非源头
+            boolean isSendErrorLog = false;
             if(isError && node.enableError){
                 Node pnode = null;
                 if(!stack.isEmpty()){
@@ -319,6 +320,7 @@ public class HLogMonitor {
                     checkNodeId(node);
 
                     doSendErrorLog(node, node.logId, pid, (Throwable) returnObj);
+                    isSendErrorLog = true;
                     //如果没有开启记录该方法时,又发生异常了,就记录该方法
                     if(!enableProcess){
                         enableProcess = true;
@@ -346,7 +348,7 @@ public class HLogMonitor {
 
             //保存入参
             if(havWriteLog && config.isEnableSaveWithoutParams()){
-                doWriteMethodParams(node);
+                doWriteMethodParams(node,isSendErrorLog);
             }
         }catch (Throwable t){
             Logger.error("HLogMonitor end异常",t);
@@ -386,13 +388,13 @@ public class HLogMonitor {
     }
 
 
-    private static void doWriteMethodParams(Node node){
+    private static void doWriteMethodParams(Node node,boolean isSendErrorLog){
         if(node==null){
             return;
         }
         //采样率判断
         boolean isCollect = CollectRateKit.isCollect();
-        if(!isCollect){
+        if(!isCollect && !isSendErrorLog){
             return;
         }
 
