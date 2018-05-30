@@ -1,5 +1,6 @@
 package com.asiainfo.hlog.agent.runtime.http;
 
+import com.asiainfo.hlog.agent.CollectRateKit;
 import com.asiainfo.hlog.agent.HLogAgentConst;
 import com.asiainfo.hlog.agent.runtime.HLogMonitor;
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
@@ -58,10 +59,11 @@ public class HttpMonitor {
         //TODO 增加可配置
     }
 
-    private static HLogConfig config = HLogConfig.getInstance();
 
-    public static void receiveHlogId(String _gid,String _pid){
+    public static void receiveHlogId(String _gid,String _pid,String  _tag,String  _deviceId,String  _staffCode){
         HttpMonitor.clearReceiveHlogId();
+        LogAgentContext.clearCollectTag();
+        LogAgentContext.setIsHttp(true);
         //如果没有上游系统传递gId的话,从当前线程中获取
         if(_gid==null){
             _gid = LogAgentContext.getThreadLogGroupId();
@@ -77,7 +79,19 @@ public class HttpMonitor {
 
         LogAgentContext.setThreadLogGroupId(_gid);
         LogAgentContext.setThreadCurrentLogId(_pid);
+        LogAgentContext.setCollectTag(_tag);
         LogAgentContext.setKeepContext(true);
+
+        Map<String,Object> session = new HashMap<String, Object>();
+        if(_deviceId != null){
+            session.put("deviceId",_deviceId);
+        }
+        if(_staffCode != null){
+            session.put("staffCode",_staffCode);
+        }
+        if(!session.isEmpty()) {
+            LogAgentContext.setThreadSession(session);
+        }
     }
 
     public static void clearReceiveHlogId(){
@@ -108,10 +122,16 @@ public class HttpMonitor {
         return  null;
     }
 
-    public static void request(StringBuffer requestUrl, String addr, long start, int status, HLogMonitor.Node node){
+    public static void request(StringBuffer requestUrl, String addr, long start, int status, HLogMonitor.Node node,Object httpReq0){
         HLogMonitor.removeLoopMonitor(node);
         //判断是否开启收集
-        if(!config.isEnableRequest()){
+        if(!HLogConfig.getInstance().isEnableRequest()){
+            return;
+        }
+
+        //采样率判断
+        boolean isCollect = CollectRateKit.isCollect();
+        if(!isCollect){
             return;
         }
 
@@ -133,25 +153,38 @@ public class HttpMonitor {
             //System.out.println("2-----url="+requestUrl+",id="+id+",pid="+pid);
         }
 
+        String  url = requestUrl.toString();
+        try {
+            HLogHttpRequest req = new HLogHttpRequest(httpReq0);
+            String srvCode = req.getParameter("serviceCode");
+            if(srvCode != null){
+                url = url + "?serviceCode=" + srvCode;
+            }
+        } catch (Exception e) {
+        }
+
         //String pid = RuntimeContext.getLogId();
         //String id = RuntimeContext.logId();
         LogData logData = HLogMonitor.createLogData("request",id,pid);
-        logData.put("url",requestUrl.toString());
+        logData.put("url",url);
         logData.put("remoteAddr",addr);
         long spend = System.currentTimeMillis()-start;
         logData.put("spend",spend);
         logData.put("status",status);
-        if(config.isEnableSession()){
+        if(HLogConfig.getInstance().isEnableSession()){
            Map session = LogAgentContext.getThreadSession();
             if(session != null && !session.isEmpty()){
                 logData.put("sesinfo",session);
             }
         }
+        if(pid == null || pid.equals("nvl") || id.equals(pid) || pid.equals(logData.getGId())){
+            logData.put("isTop",1);
+        }
         RuntimeContext.writeEvent("request.log",null,logData);
 
         //将url也当作process写入
         node.speed=spend;
-        HLogMonitor.doSendProcessLog(node,id,pid,status,"nvl".equals(pid),false);
+        //HLogMonitor.doSendProcessLog(node,id,pid,status,"nvl".equals(pid),false);
 
         LogAgentContext.clear();
     }
@@ -199,7 +232,7 @@ public class HttpMonitor {
     }
 
     public static void sessionInfo(Object req0){
-        if(!config.isEnableSession()){
+        if(!HLogConfig.getInstance().isEnableSession()){
             return;
         }
         try{
@@ -214,7 +247,10 @@ public class HttpMonitor {
                 return;
             }
 
-            Map<String,Object> sessionMap = new HashMap<String, Object>();
+            Map<String,Object> sessionMap = LogAgentContext.getThreadSession();
+            if(sessionMap == null){
+                sessionMap = new HashMap<String, Object>();
+            }
             for(String keypath : sessionKeyExpr.keySet()){
                 try{
                     String[] keypathArray = keypath.split(":");

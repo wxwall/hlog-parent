@@ -4,6 +4,7 @@ import com.asiainfo.hlog.agent.runtime.dto.SqlInfoDto;
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
 import com.asiainfo.hlog.client.config.HLogConfig;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
@@ -13,6 +14,10 @@ import java.util.Stack;
  */
 public class LogAgentContext {
 
+    /**
+     * 采样标识
+     */
+    private static final ThreadLocal<String> collectTag = new ThreadLocal<String>();
 
     /**
      * 日志组ID
@@ -39,6 +44,20 @@ public class LogAgentContext {
     private static final ThreadLocal<Map<String,Object>> threadSession = new ThreadLocal<Map<String,Object>>();
 
     private static final ThreadLocal<SqlInfoDto> hibernateSqlContext = new ThreadLocal<SqlInfoDto>();
+
+    private static final ThreadLocal<Boolean> isHttp = new ThreadLocal<Boolean>();
+
+    public static void setIsHttp(boolean keep){
+        isHttp.set(keep);
+    }
+
+    public static boolean isHttp(){
+        Boolean flag = isHttp.get();
+        if(flag == null || !flag){
+            return false;
+        }
+        return true;
+    }
 
 
     public static void setKeepContext(boolean keep){
@@ -106,11 +125,18 @@ public class LogAgentContext {
     public static void clear(){
         threadLogGroupId.remove();
         threadCurrentLogId.remove();
-        threadSession.remove();
+        clearThreadSession();
         threadCurrentIndex.set(new Integer(0));
         keepContext.set(false);
         clearThreadSession();
         tranCostContext.remove();
+        if(!isHttp()){//http的由http请求入口进行clear
+            clearCollectTag();
+        }
+    }
+
+    public static void clearCollectTag(){
+        collectTag.remove();
     }
 
     public static int getIndex(){
@@ -161,6 +187,18 @@ public class LogAgentContext {
         return threadSession.get();
     }
 
+    public static void addThreadSession(String key,Object val){
+        if(key == null || val == null){
+            return;
+        }
+        Map<String, Object> map = threadSession.get();
+        if(map == null){
+            map = new HashMap<String, Object>();
+        }
+        map.put(key,val);
+        setThreadSession(map);
+    }
+
     public static void setThreadSession(Map<String, Object> map){
         threadSession.set(map);
     }
@@ -178,6 +216,14 @@ public class LogAgentContext {
 
     public static void clearHibernateSql(){
         hibernateSqlContext.remove();
+    }
+
+    public static String getCollectTag(){
+        return collectTag.get();
+    }
+
+    public static void setCollectTag(String tag){
+        collectTag.set(tag);
     }
 }
 

@@ -115,8 +115,9 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
         //mv.visitInsn(LCONST_1);
         mv.visitIntInsn(BIPUSH, status);
         mv.visitVarInsn(ALOAD,_nodeSlot);
+        mv.visitVarInsn(ALOAD,paramIndex);
         mv.visitMethodInsn(Opcodes.INVOKESTATIC,"com/asiainfo/hlog/agent/runtime/http/HttpMonitor","request",
-                "(Ljava/lang/StringBuffer;Ljava/lang/String;JILcom/asiainfo/hlog/agent/runtime/HLogMonitor$Node;)V", false);
+                "(Ljava/lang/StringBuffer;Ljava/lang/String;JILcom/asiainfo/hlog/agent/runtime/HLogMonitor$Node;Ljava/lang/Object;)V", false);
 
     }
 }

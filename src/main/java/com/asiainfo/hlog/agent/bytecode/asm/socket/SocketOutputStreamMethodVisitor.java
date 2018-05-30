@@ -23,4 +23,6 @@ public class SocketOutputStreamMethodVisitor extends MethodVisitor {
             super.visitMethodInsn(opcode, owner, name, desc, itf);
         }
     }
+
+
 }

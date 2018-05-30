@@ -1,4 +1,4 @@
-package com.asiainfo.hlog.agent.bytecode.asm;
+package com.asiainfo.hlog.agent.bytecode.asm.socket;
 
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
 import com.asiainfo.hlog.client.helper.LogUtil;
@@ -35,6 +35,17 @@ public class TestASM {
         return _id;
     }
 
+    public String _getHeader(){
+        try{
+            return (String)Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.asiainfo.hlog.agent.bytecode.asm.socket.SocketUtils")
+                    .getMethod("buildHeader").invoke(null,new Object[0]);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public void test(FileDescriptor fd,byte b[], int off, int len) throws IOException {
         System.out.println(getClass().getClassLoader());
         socketWrite0(fd, b, off, len);
@@ -57,7 +68,7 @@ public class TestASM {
                     }
                 }else if(isHttp && b[index]==10 && b[index-1]==13){
                     int newIndex = index+1;
-                    String head = SocketUtils.buildHeader();
+                    String head = _getHeader();
                     byte[] headBytes = head.getBytes();
                     byte[] newdatas = new byte[len+headBytes.length];
 
