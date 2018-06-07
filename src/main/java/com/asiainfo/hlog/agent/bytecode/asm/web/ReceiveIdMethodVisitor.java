@@ -48,30 +48,27 @@ public class ReceiveIdMethodVisitor extends AbstractMethodVisitor {
             super.visitCode();
             return ;
         }
+//        mv.visitIntInsn(ALOAD,paramIndex);
+//        mv.visitLdcInsn("hloggid");
+//        mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getHeader", "(Ljava/lang/String;)Ljava/lang/String;", true);
+//
+//        mv.visitIntInsn(ALOAD,paramIndex);
+//        mv.visitLdcInsn("hlogpid");
+//        mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getHeader", "(Ljava/lang/String;)Ljava/lang/String;", true);
+//
+//        mv.visitIntInsn(ALOAD,paramIndex);
+//        mv.visitLdcInsn("hlogctag");
+//        mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getHeader", "(Ljava/lang/String;)Ljava/lang/String;", true);
+//
+//        mv.visitIntInsn(ALOAD,paramIndex);
+//        mv.visitLdcInsn("hlog-deviceid");
+//        mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getHeader", "(Ljava/lang/String;)Ljava/lang/String;", true);
+//
+//        mv.visitIntInsn(ALOAD,paramIndex);
+//        mv.visitLdcInsn("hlog-staffcode");
+//        mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getHeader", "(Ljava/lang/String;)Ljava/lang/String;", true);
         mv.visitIntInsn(ALOAD,paramIndex);
-        mv.visitLdcInsn("hloggid");
-        mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getHeader", "(Ljava/lang/String;)Ljava/lang/String;", true);
-
-        mv.visitIntInsn(ALOAD,paramIndex);
-        mv.visitLdcInsn("hlogpid");
-        mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getHeader", "(Ljava/lang/String;)Ljava/lang/String;", true);
-
-        mv.visitIntInsn(ALOAD,paramIndex);
-        mv.visitLdcInsn("hlogctag");
-        mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getHeader", "(Ljava/lang/String;)Ljava/lang/String;", true);
-
-        mv.visitIntInsn(ALOAD,paramIndex);
-        mv.visitLdcInsn("hlog-deviceid");
-        mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getHeader", "(Ljava/lang/String;)Ljava/lang/String;", true);
-
-        mv.visitIntInsn(ALOAD,paramIndex);
-        mv.visitLdcInsn("hlog-staffcode");
-        mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getHeader", "(Ljava/lang/String;)Ljava/lang/String;", true);
-
-
-
-        visitMethodInsn(Opcodes.INVOKESTATIC,"com/asiainfo/hlog/agent/runtime/http/HttpMonitor","receiveHlogId",
-                "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
+        visitMethodInsn(Opcodes.INVOKESTATIC,"com/asiainfo/hlog/agent/runtime/http/HttpMonitor","receiveHlogId","(Ljava/lang/Object;)V", false);
         super.visitCode();
     }
 

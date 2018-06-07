@@ -1,10 +1,11 @@
 package com.asiainfo.hlog.agent.bytecode.asm.socket;
 
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
-import com.asiainfo.hlog.client.helper.LogUtil;
+import sun.reflect.MethodAccessor;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.lang.reflect.Method;
 
 /**
  * Created by chenfeng on 2016/4/22.
@@ -37,9 +38,21 @@ public class TestASM {
 
     public String _getHeader(){
         try{
-            return (String)Thread.currentThread().getContextClassLoader()
+            Method buildHeader = Thread.currentThread().getContextClassLoader()
                     .loadClass("com.asiainfo.hlog.agent.bytecode.asm.socket.SocketUtils")
-                    .getMethod("buildHeader").invoke(null,new Object[0]);
+                    .getMethod("buildHeader");
+            return (String)buildHeader.invoke(null);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public String _getHeader2(){
+        try{
+            Method buildHeader = Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.asiainfo.hlog.agent.bytecode.asm.socket.SocketUtils")
+                    .getMethod("buildHeader");
+            return (String)buildHeader.invoke(null);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -128,7 +141,7 @@ public class TestASM {
     }
 
     public static void main(String[] args) throws IOException {
-        LogAgentContext.setThreadLogGroupId(LogUtil.logId());
+        //LogAgentContext.setThreadLogGroupId(LogUtil.logId());
         TestASM testASM = new TestASM();
         //byte[] b = "GET sssssssssssss\r\nTest:test\r\nName:flll\r\n\r\nttttttttttttttttttt11".getBytes();
         byte[] b = "GET sssssssssssss\r\nTest:test\r\nName:flll\r\n\r\nttttttttttttttttttt11".getBytes();

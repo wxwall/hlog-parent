@@ -13,6 +13,7 @@ import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
 import com.asiainfo.hlog.web.HLogHttpRequest;
+import com.asiainfo.hlog.web.HLogHttpResponse;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -60,10 +61,29 @@ public class HttpMonitor {
     }
 
 
-    public static void receiveHlogId(String _gid,String _pid,String  _tag,String  _deviceId,String  _staffCode){
+    public static void receiveHlogId(Object _req){
         HttpMonitor.clearReceiveHlogId();
         LogAgentContext.clearCollectTag();
         LogAgentContext.setIsHttp(true);
+
+        HLogHttpRequest req = new HLogHttpRequest(_req);
+        String _gid = req.getHeader("hloggid");
+        String _pid = req.getHeader("hlogpid");
+        String _tag = req.getHeader("hlogctag");
+
+        //csf参数方式
+        if(_gid == null){
+            _gid = req.getHeader("hlog-gid");
+        }
+        if(_pid == null){
+            _pid = req.getHeader("hlog-pid");
+        }
+        if(_tag == null){
+            _tag = req.getHeader("hlog-ctag");
+        }
+
+        String _deviceId = req.getHeader("hlog-deviceid");
+        String _staffCode = req.getHeader("hlog-staffcode");
         //如果没有上游系统传递gId的话,从当前线程中获取
         if(_gid==null){
             _gid = LogAgentContext.getThreadLogGroupId();
@@ -72,9 +92,9 @@ public class HttpMonitor {
         //如果当前线程也是空的,产生一个gId
         if(_gid==null){
             _gid = RuntimeContext.logId();
-            _pid = RuntimeContext.buildLogPId(_gid);
+            _pid = "nvl";//RuntimeContext.buildLogPId(_gid);
         }else if(_pid==null){
-            _pid = RuntimeContext.buildLogPId(_gid);
+            _pid = "nvl";// RuntimeContext.buildLogPId(_gid);
         }
 
         LogAgentContext.setThreadLogGroupId(_gid);
@@ -122,7 +142,9 @@ public class HttpMonitor {
         return  null;
     }
 
-    public static void request(StringBuffer requestUrl, String addr, long start, int status, HLogMonitor.Node node,Object httpReq0){
+    public static void request(StringBuffer requestUrl, String addr, long start, int status, HLogMonitor.Node node,Object httpReq0,Object httpResp0){
+        HLogHttpResponse resp = new HLogHttpResponse(httpResp0);
+        resp.addHeader("hloggid",node.logGid);
         HLogMonitor.removeLoopMonitor(node);
         //判断是否开启收集
         if(!HLogConfig.getInstance().isEnableRequest()){

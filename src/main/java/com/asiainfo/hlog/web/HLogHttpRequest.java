@@ -67,4 +67,16 @@ public class HLogHttpRequest {
         }
         return methodMap.get("getSession").invoke(req);
     }
+
+    public String getHeader(String key){
+        if(key == null){
+            return null;
+        }
+        try {
+            return (String) getMethod("getHeader").invoke(req, key);
+        }catch (Exception e){
+
+        }
+        return null;
+    }
 }

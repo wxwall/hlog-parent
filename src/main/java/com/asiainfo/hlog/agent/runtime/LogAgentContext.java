@@ -94,6 +94,9 @@ public class LogAgentContext {
                 System.out.println("--" + st.getClassName() + "." + st.getMethodName());
             }
         }
+        if(logGroupId == null || logGroupId.isEmpty()){
+            return;
+        }
         threadLogGroupId.set(logGroupId);
     }
     public static String getThreadLogGroupId(){
@@ -115,6 +118,9 @@ public class LogAgentContext {
     }
 
     public static void setThreadCurrentLogId(String currentLogId){
+        if(currentLogId == null || currentLogId.isEmpty()){
+            return;
+        }
         threadCurrentLogId.set(currentLogId);
     }
 
@@ -223,6 +229,9 @@ public class LogAgentContext {
     }
 
     public static void setCollectTag(String tag){
+        if(tag == null || tag.isEmpty()){
+            return;
+        }
         collectTag.set(tag);
     }
 }
