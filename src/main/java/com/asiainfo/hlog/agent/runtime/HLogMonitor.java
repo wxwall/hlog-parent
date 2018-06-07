@@ -636,6 +636,14 @@ public class HLogMonitor {
         return false;
     }
 
+
+    public static boolean isCollectLogger(String level){
+        if("error".equals(level)){
+            return true;
+        }
+        return CollectRateKit.isCollect();
+    }
+
     /**
      * 采集第三方日志框架输出的内容
      * @param className
@@ -647,8 +655,7 @@ public class HLogMonitor {
             return;
         }
         //采样率判断
-        boolean isCollect = CollectRateKit.isCollect();
-        if(!isCollect){
+        if(!isCollectLogger(level)){
             return;
         }
         try{

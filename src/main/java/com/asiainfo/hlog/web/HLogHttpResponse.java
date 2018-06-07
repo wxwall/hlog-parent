@@ -1,5 +1,7 @@
 package com.asiainfo.hlog.web;
 
+import com.sun.corba.se.impl.orbutil.CacheTable;
+
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
@@ -41,6 +43,16 @@ public class HLogHttpResponse  {
 
     public PrintWriter getWriter() throws Exception{
         return (PrintWriter)getMethod("getWriter").invoke(resp);
+    }
+
+    public void addHeader(String key,String value){
+        try{
+            if(value != null) {
+                getMethod("addHeader").invoke(resp, key, value);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }
