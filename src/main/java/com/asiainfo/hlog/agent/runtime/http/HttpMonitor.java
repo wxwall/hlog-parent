@@ -13,7 +13,6 @@ import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
 import com.asiainfo.hlog.web.HLogHttpRequest;
-import com.asiainfo.hlog.web.HLogHttpResponse;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -99,19 +98,21 @@ public class HttpMonitor {
 
         LogAgentContext.setThreadLogGroupId(_gid);
         LogAgentContext.setThreadCurrentLogId(_pid);
-        LogAgentContext.setCollectTag(_tag);
         LogAgentContext.setKeepContext(true);
+        if(_tag!=null){
+            LogAgentContext.setCollectTag(_tag);
+        }else{
+            //采样计算
+            boolean ctagFlag = CollectRateKit.isCollect();
+        }
 
-        Map<String,Object> session = new HashMap<String, Object>();
         if(_deviceId != null){
-            session.put("deviceId",_deviceId);
+            LogAgentContext.addThreadSession("deviceId",_deviceId);
         }
         if(_staffCode != null){
-            session.put("staffCode",_staffCode);
+            LogAgentContext.addThreadSession("staffCode",_staffCode);
         }
-        if(!session.isEmpty()) {
-            LogAgentContext.setThreadSession(session);
-        }
+        sessionInfo(_req);
     }
 
     public static void clearReceiveHlogId(){
@@ -121,6 +122,18 @@ public class HttpMonitor {
     public static HLogMonitor.Node requestBegin(StringBuffer requestUrl,long beginTime,String className, String methodName){
         //String logId,String logPid,String className, String methodName, Long beginTime
         try {
+            //排除一些资源的请求
+            String expand = getExpand(requestUrl);
+            if(excludeExpands.contains(expand)){
+                return null;
+            }
+
+            //采样率判断
+            boolean isCollect = CollectRateKit.isCollect();
+            if(!isCollect){
+                return null;
+            }
+
             String id = LogUtil.logId();
             HLogMonitor.Node node = new HLogMonitor.Node(id,RuntimeContext.buildLogPId(id),className,methodName,beginTime);
             node.requestUrl = requestUrl.toString();
@@ -143,17 +156,9 @@ public class HttpMonitor {
     }
 
     public static void request(StringBuffer requestUrl, String addr, long start, int status, HLogMonitor.Node node,Object httpReq0,Object httpResp0){
-        HLogHttpResponse resp = new HLogHttpResponse(httpResp0);
-        resp.addHeader("hloggid",node.logGid);
         HLogMonitor.removeLoopMonitor(node);
         //判断是否开启收集
         if(!HLogConfig.getInstance().isEnableRequest()){
-            return;
-        }
-
-        //采样率判断
-        boolean isCollect = CollectRateKit.isCollect();
-        if(!isCollect){
             return;
         }
 
@@ -163,34 +168,58 @@ public class HttpMonitor {
         if(excludeExpands.contains(expand)){
             return ;
         }
+
+        long spend = System.currentTimeMillis()-start;
+
+        //请求耗时小于方法耗时也不采集
+        if(spend < HLogConfig.getInstance().getProcessTime()){
+            return;
+        }
+
+        //采样判断
+        boolean isCollect = CollectRateKit.isCollect();
+        if(!isCollect){
+            return;
+        }
+
         String pid = null;
         String id = null;
         if(node!=null){
             pid = node.logPid;
             id = node.logId;
-            //System.out.println("1-----url="+requestUrl+",id="+id+",pid="+pid);
         }else{
             pid = RuntimeContext.getLogId();
             id = RuntimeContext.logId();
-            //System.out.println("2-----url="+requestUrl+",id="+id+",pid="+pid);
         }
-
+        LogData logData = HLogMonitor.createLogData("request",id,pid);
         String  url = requestUrl.toString();
         try {
             HLogHttpRequest req = new HLogHttpRequest(httpReq0);
-            String srvCode = req.getParameter("serviceCode");
-            if(srvCode != null){
-                url = url + "?serviceCode=" + srvCode;
+            logData.put("srcServer",req.getHeader("hlog-src-server"));
+            Map<String,String[]> parameterMap = req.getParameterMap();
+            if(parameterMap != null && !parameterMap.isEmpty()) {
+                int idx = 0;
+                for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
+                    if("params".equals(entry.getKey())){//crm3的vita框架数据很多在key为params里
+                        continue;
+                    }
+                    if(idx == 0 && entry.getValue() != null){
+                        idx++;
+                        requestUrl.append("?").append(entry.getKey()).append("=").append(entry.getValue()[0]);
+                    }else if(entry.getValue() != null){
+                        requestUrl.append("&").append(entry.getKey()).append("=").append(entry.getValue()[0]);
+                    }
+                }
+                url = requestUrl.toString();
             }
         } catch (Exception e) {
         }
 
         //String pid = RuntimeContext.getLogId();
         //String id = RuntimeContext.logId();
-        LogData logData = HLogMonitor.createLogData("request",id,pid);
+
         logData.put("url",url);
         logData.put("remoteAddr",addr);
-        long spend = System.currentTimeMillis()-start;
         logData.put("spend",spend);
         logData.put("status",status);
         if(HLogConfig.getInstance().isEnableSession()){
@@ -205,7 +234,7 @@ public class HttpMonitor {
         RuntimeContext.writeEvent("request.log",null,logData);
 
         //将url也当作process写入
-        node.speed=spend;
+        //node.speed=spend;
         //HLogMonitor.doSendProcessLog(node,id,pid,status,"nvl".equals(pid),false);
 
         LogAgentContext.clear();

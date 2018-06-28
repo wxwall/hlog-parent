@@ -2,9 +2,12 @@ package com.asiainfo.hlog.agent;
 
 import com.asiainfo.hlog.agent.classloader.ClassLoaderHolder;
 import com.asiainfo.hlog.client.config.HLogConfig;
-import com.asiainfo.hlog.client.helper.IdHepler;
 import com.asiainfo.hlog.client.helper.LoaderHelper;
+import com.google.common.base.Charsets;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
@@ -26,7 +29,8 @@ public class HLogAgent {
 
     private static void domain(Instrumentation inst){
 
-        System.out.println("========== Asiainfo HLog Agent ["+HLogConfig.VERSION+"] ==============\n");
+        System.out.println("========== Asiainfo HLog Agent ["+HLogConfig.VERSION+"] ==============");
+        printAsciiImage();
         printVersionInfo();
 
         if (HLogAgent.inst == null) {
@@ -74,6 +78,31 @@ public class HLogAgent {
             e.printStackTrace(System.err);
         }
         return null;
+    }
+
+    private static void printAsciiImage(){
+        InputStream fis = null;
+        try{
+            fis = HLogAgent.class.getResourceAsStream("/ascii.txt");
+            ByteArrayOutputStream result = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = fis.read(buffer)) != -1) {
+                result.write(buffer, 0, length);
+            }
+            String str = result.toString(Charsets.UTF_8.name());
+            System.out.println(str);
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if(fis != null){
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
 

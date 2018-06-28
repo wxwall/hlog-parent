@@ -1,9 +1,9 @@
 package com.asiainfo.hlog.web;
 
-import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by lenovo on 2016/9/14.
@@ -36,6 +36,10 @@ public class HLogHttpRequest {
 
     public String getParameter(String name) throws Exception{
         return (String)getMethod("getParameter").invoke(req,name);
+    }
+
+    public Map<String, String[]> getParameterMap() throws Exception{
+        return (Map<String, String[]> )getMethod("getParameterMap").invoke(req);
     }
 
     public String getContextPath() throws Exception{
