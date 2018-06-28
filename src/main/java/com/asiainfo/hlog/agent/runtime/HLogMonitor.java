@@ -66,6 +66,7 @@ public class HLogMonitor {
         excludeParamTypePaths.add("java.io");
         excludeParamTypePaths.add("java.nio");
         excludeParamTypePaths.add("sun.nio");
+        excludeParamTypePaths.add("org.aspectj");
 
         excludeParamType();
         //jvm信息监控
@@ -273,7 +274,6 @@ public class HLogMonitor {
     }
 
     public static void end(String mcode,Object returnObj,boolean isError){
-
         //local.get().pop();
         Stack<Node> stack = null;
         String pid = null;
@@ -492,9 +492,13 @@ public class HLogMonitor {
      */
     public static void doSendProcessLog(Node node ,String id,String pid,int status,boolean isTop,boolean isWriteErrLog){
         //采样率判断
-        boolean isCollect = CollectRateKit.isCollect();
-        if(!isCollect){
-            return;
+        if(!isWriteErrLog) {
+            boolean isCollect = CollectRateKit.isCollect();
+            if (!isCollect) {
+                return;
+            }
+        }else{//异常，不采样标识设置为采集
+            LogAgentContext.setCollectTag("Y");
         }
         LogData logData = createLogData(HLogAgentConst.MV_CODE_PROCESS,id,pid);
         logData.put("status",status);
@@ -549,6 +553,11 @@ public class HLogMonitor {
         if(!isCollect){
             return;
         }
+        //sql耗时控制
+        long  spend = System.currentTimeMillis()-start;
+        if(spend < config.getSqlTime()){
+            return;
+        }
         try{
             Node node = getCurrentNode();
             String clsName ;
@@ -566,7 +575,7 @@ public class HLogMonitor {
             }
             int size = 0 ;
             LogData logData = createLogData(HLogAgentConst.MV_CODE_SQL,id,pid);
-            logData.put("spend",System.currentTimeMillis()-start);
+            logData.put("spend",spend);
             logData.put("sql",sql);
             logData.put("sqlc","s"+sql.hashCode());
             logData.put("params",params);
@@ -638,7 +647,8 @@ public class HLogMonitor {
 
 
     public static boolean isCollectLogger(String level){
-        if("error".equals(level)){
+        String enable = HLogConfig.getInstance().getProperty("hlog.rate.enable.logger.error","true");
+        if("error".equalsIgnoreCase(level) && "true".equalsIgnoreCase(enable)){
             return true;
         }
         return CollectRateKit.isCollect();
@@ -723,6 +733,11 @@ public class HLogMonitor {
                 if(!CollectRateKit.isCollect()){
                     return;
                 }
+            }
+
+            //crmsrv类型，单独控制采样率
+            if("crmsrv".equals(mcode) && !CollectRateKit.isCollectCrmSrv()){
+                return;
             }
 
             String id = RuntimeContext.logId();
