@@ -77,8 +77,9 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
         //mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/RuntimeContext", "getLogId", "()Ljava/lang/String;", false);
         mv.visitLdcInsn(className);
         mv.visitLdcInsn(methodName);
+        mv.visitVarInsn(ALOAD,respIndex);
         //,StringBuffer requestUrl,long start,String logId,String pId,String className, String methodName
-        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/http/HttpMonitor", "requestBegin", "(Ljava/lang/StringBuffer;JLjava/lang/String;Ljava/lang/String;)Lcom/asiainfo/hlog/agent/runtime/HLogMonitor$Node;", false);
+        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/http/HttpMonitor", "requestBegin", "(Ljava/lang/StringBuffer;JLjava/lang/String;Ljava/lang/String;Ljava/lang/Object;)Lcom/asiainfo/hlog/agent/runtime/HLogMonitor$Node;", false);
         mv.visitVarInsn(ASTORE, _nodeSlot);
 
         //mv.visitVarInsn(ALOAD, _nodeSlot);
@@ -97,15 +98,6 @@ public class HttpRequestMethodVisitor extends AbstractTryCatchMethodVisitor {
         }
     }
     private void doEnd(int status){
-
-
-        //将gid回写到head中
-        if(respIndex!=-1){
-            mv.visitVarInsn(ALOAD, respIndex);
-            mv.visitLdcInsn("_hGid");
-            mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/LogAgentContext", "getThreadLogGroupId", "()Ljava/lang/String;", false);
-            mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletResponse", "setHeader", "(Ljava/lang/String;Ljava/lang/String;)V", true);
-        }
 
         mv.visitVarInsn(ALOAD,paramIndex);
         mv.visitMethodInsn(INVOKEINTERFACE, "javax/servlet/http/HttpServletRequest", "getRequestURL", "()Ljava/lang/StringBuffer;", true);

@@ -234,5 +234,14 @@ public class LogAgentContext {
         }
         collectTag.set(tag);
     }
+
+    public static String getLogGroupIdOrNull(){
+        String tag = getCollectTag();
+        String gId = threadLogGroupId.get();
+        if("Y".equals(tag) && gId != null){
+            return gId;
+        }
+        return "nvl";
+    }
 }
 

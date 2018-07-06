@@ -13,6 +13,7 @@ import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
 import com.asiainfo.hlog.web.HLogHttpRequest;
+import com.asiainfo.hlog.web.HLogHttpResponse;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -119,7 +120,7 @@ public class HttpMonitor {
         LogAgentContext.clear();
     }
 
-    public static HLogMonitor.Node requestBegin(StringBuffer requestUrl,long beginTime,String className, String methodName){
+    public static HLogMonitor.Node requestBegin(StringBuffer requestUrl,long beginTime,String className, String methodName,Object resp0){
         //String logId,String logPid,String className, String methodName, Long beginTime
         try {
             //排除一些资源的请求
@@ -127,6 +128,9 @@ public class HttpMonitor {
             if(excludeExpands.contains(expand)){
                 return null;
             }
+
+            HLogHttpResponse resp = new HLogHttpResponse(resp0);
+            resp.addHeader("_hGid",LogAgentContext.getLogGroupIdOrNull());
 
             //采样率判断
             boolean isCollect = CollectRateKit.isCollect();
@@ -157,6 +161,7 @@ public class HttpMonitor {
 
     public static void request(StringBuffer requestUrl, String addr, long start, int status, HLogMonitor.Node node,Object httpReq0,Object httpResp0){
         HLogMonitor.removeLoopMonitor(node);
+
         //判断是否开启收集
         if(!HLogConfig.getInstance().isEnableRequest()){
             return;
