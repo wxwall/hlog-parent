@@ -1,6 +1,7 @@
 package com.asiainfo.hlog.agent;
 
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
+import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
 
 import java.util.Arrays;
@@ -58,6 +59,32 @@ public class CollectRateKit {
         return currNumCrmSrv.get();
     }
 
+
+    public static long getSqlTime(long sqlTime){
+        Map<String,Object> session = LogAgentContext.getThreadSession();
+        String staffArray = HLogConfig.getInstance().getProperty("hlog.collect.staffCode","");
+        if(session != null && !session.isEmpty() && !staffArray.isEmpty()){
+            String staffCode = (String) session.get("staffCode");
+            List<String> staffList = Arrays.asList(staffArray.split(","));
+            if(staffList.contains(staffCode)){
+                sqlTime = Integer.parseInt(HLogConfig.getInstance().getProperty(Constants.KEY_HLOG_COLLECT_STAFFCODE_SQL_TIME,""+sqlTime));
+            }
+        }
+        return sqlTime;
+    }
+
+    public static long getProcessTime(long processTime){
+        Map<String,Object> session = LogAgentContext.getThreadSession();
+        String staffArray = HLogConfig.getInstance().getProperty("hlog.collect.staffCode","");
+        if(session != null && !session.isEmpty() && !staffArray.isEmpty()){
+            String staffCode = (String) session.get("staffCode");
+            List<String> staffList = Arrays.asList(staffArray.split(","));
+            if(staffList.contains(staffCode)){
+                processTime = Integer.parseInt(HLogConfig.getInstance().getProperty(Constants.KEY_HLOG_COLLECT_STAFFCODE_PROCESS_TIME,""+processTime));
+            }
+        }
+        return processTime;
+    }
 
     public static boolean isCollect(){
         //配置全量的，全部采集，不受标识限制

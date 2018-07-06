@@ -172,7 +172,7 @@ public class HttpMonitor {
         long spend = System.currentTimeMillis()-start;
 
         //请求耗时小于方法耗时也不采集
-        if(spend < HLogConfig.getInstance().getProcessTime()){
+        if(spend < CollectRateKit.getProcessTime(HLogConfig.getInstance().getProcessTime())){
             return;
         }
 

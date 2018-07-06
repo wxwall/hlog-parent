@@ -330,7 +330,7 @@ public class HLogMonitor {
                 }
             }
 
-            long ptime = config.getProcessTime();
+            long ptime = CollectRateKit.getProcessTime(config.getProcessTime());
             //耗时达到某值时或出现异常时记录
             if(enableProcess && (node.speed>=ptime||isError)){
                 //记录运行耗时超过
@@ -532,7 +532,7 @@ public class HLogMonitor {
      * @return
      */
     public static long getConfigSqlSpeed(){
-        long time = config.getSqlTime();
+        long time = CollectRateKit.getSqlTime(config.getSqlTime());
         return time;
     }
 
@@ -555,7 +555,8 @@ public class HLogMonitor {
         }
         //sql耗时控制
         long  spend = System.currentTimeMillis()-start;
-        if(spend < config.getSqlTime()){
+        long sqlTime = CollectRateKit.getSqlTime(config.getSqlTime());
+        if(spend < sqlTime){
             return;
         }
         try{
