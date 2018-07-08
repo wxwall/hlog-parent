@@ -200,7 +200,8 @@ public class HttpMonitor {
         String  url = requestUrl.toString();
         try {
             HLogHttpRequest req = new HLogHttpRequest(httpReq0);
-            logData.put("srcServer",req.getHeader("hlog-src-server"));
+            //logData.put("srcServer",req.getHeader("hlog-src-server"));
+            logData.put("srcServer",req.getHeader("_logApp"));
             Map<String,String[]> parameterMap = req.getParameterMap();
             if(parameterMap != null && !parameterMap.isEmpty()) {
                 int idx = 0;

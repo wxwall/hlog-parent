@@ -34,6 +34,7 @@ public abstract class HLogMethodVisitorFactory {
             mvClassMap.put(InterceptMethodVisitor.CODE,InterceptMethodVisitor.class);
             mvClassMap.put(InterceptRetMethodVisitor.CODE,InterceptRetMethodVisitor.class);
             mvClassMap.put(Hibernate3MethodVisitor.CODE,Hibernate3MethodVisitor.class);
+            mvClassMap.put(CsfRequestHeaderVisitor.CODE,CsfRequestHeaderVisitor.class);
         }
     }
 

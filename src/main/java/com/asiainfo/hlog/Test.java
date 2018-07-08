@@ -11,7 +11,7 @@ import java.util.Map;
 public class Test {
 
     public static void test(String srvCode, Map sysMap, Map busiMap){
-        HLogMonitor.csfService(srvCode,sysMap,busiMap);
+       // HLogMonitor.csfService(srvCode,sysMap,busiMap);
     }
 
 }

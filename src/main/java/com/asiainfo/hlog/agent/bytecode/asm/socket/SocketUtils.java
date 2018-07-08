@@ -26,7 +26,7 @@ public class SocketUtils {
         if(ctag != null){
             head.append("hlogctag: ").append(ctag).append("\r\n");
         }
-        head.append("hlog-src-server: ").append(srcServer).append("\r\n");
+        head.append("_logApp: ").append(srcServer).append("\r\n");
 
         Map<String,Object> session = LogAgentContext.getThreadSession();
         if(session != null) {

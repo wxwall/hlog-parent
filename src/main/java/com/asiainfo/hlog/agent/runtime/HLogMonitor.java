@@ -7,6 +7,7 @@ import com.asiainfo.hlog.agent.runtime.dto.SqlInfoDto;
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
 import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
+import com.asiainfo.hlog.client.helper.CsfUtils;
 import com.asiainfo.hlog.client.helper.IdHepler;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
@@ -1018,10 +1019,15 @@ public class HLogMonitor {
         }
     }
 
-    public static void csfService(String srvCode, Map sysMap, Map busiMap){
-        String pId = LogAgentContext.getThreadCurrentLogId();
-        if(pId != null){
-            busiMap.put("_pId",pId);
+    public static void csfClientHeader(Map body, Object httpPost){
+        try{
+            Map busiParams = (Map) body.get("busiParams");
+            String _logApp = (String) busiParams.get("_logApp");
+            String _logAppGrp = (String) busiParams.get("_logAppGrp");
+            CsfUtils.addHeader(httpPost,"_logApp",_logApp);
+            CsfUtils.addHeader(httpPost,"_logAppGrp",_logAppGrp);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
