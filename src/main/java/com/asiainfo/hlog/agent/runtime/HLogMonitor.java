@@ -1024,11 +1024,43 @@ public class HLogMonitor {
             Map busiParams = (Map) body.get("busiParams");
             String _logApp = (String) busiParams.get("_logApp");
             String _logAppGrp = (String) busiParams.get("_logAppGrp");
-            CsfUtils.addHeader(httpPost,"_logApp",_logApp);
-            CsfUtils.addHeader(httpPost,"_logAppGrp",_logAppGrp);
+            CsfUtils.addHeader(httpPost,"hlog-src-server",_logApp);
+            CsfUtils.addHeader(httpPost,"hlog-src-server-grp",_logAppGrp);
         }catch (Exception e){
             e.printStackTrace();
         }
     }
+
+    public static void angelInvokeHeader(Map header){
+        try{
+            String gid = LogAgentContext.getThreadLogGroupId();
+            String pid = LogAgentContext.getThreadCurrentLogId();
+            String ctag = LogAgentContext.getCollectTag();
+            String srcServer = System.getProperty(Constants.SYS_KEY_HLOG_SERVER_ALIAS,"unknown");
+            String srcGrp = System.getProperty(Constants.SYS_KEY_HLOG_SERVER_GROUP,"unknown");
+            if(header == null){
+                header = new HashMap();
+            }
+            header.put("hloggid",gid);
+            header.put("hlogpid",pid);
+            header.put("hlogctag",ctag);
+            header.put("hlog-src-server",srcServer);
+            header.put("hlog-src-server-grp",srcGrp);
+            Map<String,Object> session = LogAgentContext.getThreadSession();
+            if(session != null) {
+                String deviceId = (String) session.get("deviceId");
+                if(deviceId != null){
+                    header.put("hlog-deviceid",deviceId);
+                }
+                String staffCode = (String) session.get("staffCode");
+                if(staffCode != null){
+                    header.put("hlog-staffcode",staffCode);
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
 
 }

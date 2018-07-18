@@ -87,6 +87,11 @@ public class CollectRateKit {
     }
 
     public static boolean isCollect(){
+        String ctag = LogAgentContext.getCollectTag();
+        if("Y".equals(ctag)){
+            return true;
+        }
+
         //配置全量的，全部采集，不受标识限制
         int rate = Integer.parseInt(HLogConfig.getInstance().getProperty("hlog.rate","100"));
         if(rate >= 100){
@@ -106,16 +111,11 @@ public class CollectRateKit {
             }
         }
 
-        String ctag = LogAgentContext.getCollectTag();
-        if("Y".equals(ctag)){
-            return true;
-        }else if("N".equals(ctag)){
+        if("N".equals(ctag)){
             return false;
         }
 
-
         boolean isCollect = true;
-
         Long _currNum = getCurrNum() + 1;
         Long _total = incrTotal();
         Double r = (_currNum/(_total * 1.0)) * 100;

@@ -17,6 +17,7 @@ public class SocketUtils {
         String pid = LogAgentContext.getThreadCurrentLogId();
         String ctag = LogAgentContext.getCollectTag();
         String srcServer = System.getProperty(Constants.SYS_KEY_HLOG_SERVER_ALIAS,"unknown");
+        String srcGrp = System.getProperty(Constants.SYS_KEY_HLOG_SERVER_GROUP,"unknown");
         if(gid != null){
             head.append("hloggid: ").append(gid).append("\r\n");
         }
@@ -26,7 +27,8 @@ public class SocketUtils {
         if(ctag != null){
             head.append("hlogctag: ").append(ctag).append("\r\n");
         }
-        head.append("_logApp: ").append(srcServer).append("\r\n");
+        head.append("hlog-src-server: ").append(srcServer).append("\r\n");
+        head.append("hlog-src-server-grp: ").append(srcGrp).append("\r\n");
 
         Map<String,Object> session = LogAgentContext.getThreadSession();
         if(session != null) {

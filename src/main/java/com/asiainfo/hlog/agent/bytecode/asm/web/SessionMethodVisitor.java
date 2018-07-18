@@ -31,8 +31,9 @@ public class SessionMethodVisitor extends AbstractMethodVisitor {
     public void visitCode() {
         //Label start = new Label();
         //mv.visitLabel(start);
-        mv.visitVarInsn(ALOAD, reqIdx);
-        mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/http/HttpMonitor", "sessionInfo", "(Ljava/lang/Object;)V", false);
+        //TODO 该功能迁移到HttpMonitor.receiveHlogId方法里一起处理
+        //mv.visitVarInsn(ALOAD, reqIdx);
+        //mv.visitMethodInsn(INVOKESTATIC, "com/asiainfo/hlog/agent/runtime/http/HttpMonitor", "sessionInfo", "(Ljava/lang/Object;)V", false);
         super.visitCode();
     }
 }
