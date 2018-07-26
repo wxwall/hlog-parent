@@ -179,6 +179,7 @@ public class HLogMonitor {
     private static HLogConfig config = HLogConfig.getInstance();
 
     public static void start(boolean isProcess,boolean isError,String className,String methodName,String desc,String[] paramNames,Object[] params){
+        loopCounter(className,methodName,LogAgentContext.getThreadCurrentLogId());
         boolean enableProcess = isProcess;
         boolean enableError = isError;
         if(config.isEnableDynamicProcessSwitch()){
@@ -229,6 +230,41 @@ public class HLogMonitor {
         node.type = HLogAgentConst.LOOP_TYPE_METHOD;
         pushNode(node);
         //System.out.println(Thread.currentThread().getId()+","+className+"."+methodName+"-----------------------------start 4 id="+id+" _pid="+pid+",size="+size);
+    }
+
+    public static void loopCounter(String clazz,String method,String pId){
+        HashMap<String, Integer> map = LogAgentContext.loopCounter.get();
+        if(map == null){
+            LogAgentContext.loopCounter.set(new HashMap<String, Integer>());
+        }
+        String key = clazz+"#"+method+"#"+pId;
+        Integer count = LogAgentContext.loopCounter.get().get(key);
+        if(count == null){
+            count = 1;
+        }else if(count.intValue() >= 0){
+            count += 1;
+        }else{
+            count -= 1;
+        }
+        int maxTimes = Integer.parseInt(HLogConfig.getInstance().getProperty("hlog.loop.times","100"));
+        LogAgentContext.loopCounter.get().put(key,count);
+        if(count >= maxTimes){
+            //告警发出，计数改为负数，负数用于累计方法总的执行次数
+            LogAgentContext.loopCounter.get().put(key,count*-1);
+            LogData data = new LogData();
+            data.setMc("loopalarm");
+            data.setIp(HLogConfig.getInstance().getServerIp());
+            data.setGId(LogAgentContext.getThreadLogGroupId());
+            data.setServer(HLogConfig.hlogServerAlias);
+            data.setServerGrp(HLogConfig.hlogServerGroup);
+            data.setPId(pId);
+            data.setId(LogUtil.logId());
+            data.put("clazz",clazz);
+            data.put("method",method);
+            data.put("count", count);
+            //data.put("mkey",key);
+            RuntimeContext.writeEvent(clazz,method,data);
+        }
     }
 
     private static void pushNode(Node node) {
@@ -1056,6 +1092,9 @@ public class HLogMonitor {
                 if(staffCode != null){
                     header.put("hlog-staffcode",staffCode);
                 }
+            }
+            if(HLogConfig.getInstance().hlogGidTrace){
+                System.out.println("hlog header================>"+header);
             }
         }catch (Exception e){
             e.printStackTrace();

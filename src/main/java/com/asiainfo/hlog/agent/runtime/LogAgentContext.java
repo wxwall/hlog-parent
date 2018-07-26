@@ -3,10 +3,13 @@ package com.asiainfo.hlog.agent.runtime;
 import com.asiainfo.hlog.agent.runtime.dto.SqlInfoDto;
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
 import com.asiainfo.hlog.client.config.HLogConfig;
+import com.asiainfo.hlog.client.model.LogData;
+import sun.java2d.SurfaceDataProxy;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 运行时的各类变量值
@@ -46,6 +49,11 @@ public class LogAgentContext {
     private static final ThreadLocal<SqlInfoDto> hibernateSqlContext = new ThreadLocal<SqlInfoDto>();
 
     private static final ThreadLocal<Boolean> isHttp = new ThreadLocal<Boolean>();
+
+    /**
+     * 同一个方法下的子方法被循环次数计数
+     */
+    public static final ThreadLocal<HashMap<String,Integer>> loopCounter = new ThreadLocal<HashMap<String,Integer>>();
 
     public static void setIsHttp(boolean keep){
         isHttp.set(keep);
@@ -136,6 +144,7 @@ public class LogAgentContext {
         keepContext.set(false);
         clearThreadSession();
         tranCostContext.remove();
+        clearLoopCounter();
         if(!isHttp()){//http的由http请求入口进行clear
             clearCollectTag();
         }
@@ -242,6 +251,10 @@ public class LogAgentContext {
             return gId;
         }
         return "nvl";
+    }
+
+    public static void clearLoopCounter(){
+        loopCounter.remove();
     }
 }
 

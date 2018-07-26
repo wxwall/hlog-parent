@@ -8,7 +8,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>hlog-agent</artifactId>
-  <version>3.12.2</version>
+  <version>3.13.0</version>
   <build>
     <finalName>hlog-agent</finalName>
     <plugins>
@@ -161,9 +161,9 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <version-num>122</version-num>
+    <version-num>130</version-num>
     <shade.package>com.asiainfo.hlog.dependencies</shade.package>
-    <hlog-client.version>3.12.2</hlog-client.version>
+    <hlog-client.version>3.13.0</hlog-client.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
     <premain.class>com.asiainfo.hlog.agent.HLogAgent</premain.class>
