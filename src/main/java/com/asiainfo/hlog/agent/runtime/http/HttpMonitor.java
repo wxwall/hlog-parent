@@ -63,6 +63,7 @@ public class HttpMonitor {
 
     public static void receiveHlogId(Object _req){
         HttpMonitor.clearReceiveHlogId();
+        LogAgentContext.clear();
         LogAgentContext.clearCollectTag();
         LogAgentContext.setIsHttp(true);
 

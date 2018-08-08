@@ -142,7 +142,6 @@ public class LogAgentContext {
         clearThreadSession();
         threadCurrentIndex.set(new Integer(0));
         keepContext.set(false);
-        clearThreadSession();
         tranCostContext.remove();
         clearLoopCounter();
         if(!isHttp()){//http的由http请求入口进行clear
