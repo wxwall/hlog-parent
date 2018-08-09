@@ -1,8 +1,6 @@
 package com.asiainfo.hlog.agent;
 
-import com.asiainfo.hlog.agent.classloader.ClassLoaderHolder;
 import com.asiainfo.hlog.client.config.HLogConfig;
-import com.asiainfo.hlog.client.helper.LoaderHelper;
 import com.google.common.base.Charsets;
 
 import java.io.ByteArrayOutputStream;
@@ -30,6 +28,7 @@ public class HLogAgent {
     private static void domain(Instrumentation inst){
 
         System.out.println("========== Asiainfo HLog Agent ["+HLogConfig.VERSION+"] ==============");
+
         printAsciiImage();
         printVersionInfo();
 
@@ -46,8 +45,6 @@ public class HLogAgent {
         }
 
         inst.addTransformer(classPreProcessorAgentAdapter);
-
-        LoaderHelper.setLoader(ClassLoaderHolder.getInstance().getClassLoader());
     }
 
     private static void printVersionInfo(){
@@ -69,15 +66,15 @@ public class HLogAgent {
 
 
     private static ClassFileTransformer createClassFileTransformer() {
-        try{
-            Class c = ClassLoaderHolder.getInstance()
-                    .loadClass(DEF_CLASS_PRE_AGENT_ADAPTER);
-            ClassFileTransformer classFileTransformer = (ClassFileTransformer) c.newInstance();
-            return classFileTransformer;
-        }catch (Throwable e){
-            e.printStackTrace(System.err);
-        }
-        return null;
+//        try{
+//            Class c = ClassLoaderHolder.getInstance()
+//                    .loadClass(DEF_CLASS_PRE_AGENT_ADAPTER);
+//            ClassFileTransformer classFileTransformer = (ClassFileTransformer) c.newInstance();
+//            return classFileTransformer;
+//        }catch (Throwable e){
+//            e.printStackTrace(System.err);
+//        }
+        return new ClassPreProcessorAgentAdapter();
     }
 
     private static void printAsciiImage(){

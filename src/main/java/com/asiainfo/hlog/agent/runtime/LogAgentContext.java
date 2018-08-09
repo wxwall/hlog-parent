@@ -3,13 +3,10 @@ package com.asiainfo.hlog.agent.runtime;
 import com.asiainfo.hlog.agent.runtime.dto.SqlInfoDto;
 import com.asiainfo.hlog.agent.runtime.dto.TranCostDto;
 import com.asiainfo.hlog.client.config.HLogConfig;
-import com.asiainfo.hlog.client.model.LogData;
-import sun.java2d.SurfaceDataProxy;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 运行时的各类变量值

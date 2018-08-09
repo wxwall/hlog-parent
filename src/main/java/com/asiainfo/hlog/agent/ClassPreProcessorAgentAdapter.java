@@ -1,7 +1,7 @@
 package com.asiainfo.hlog.agent;
 
 import com.asiainfo.hlog.agent.bytecode.asm.HLogPreProcessor;
-import com.asiainfo.hlog.client.helper.LoaderHelper;
+import com.asiainfo.hlog.agent.classloader.ClassLoaderHolder;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -17,10 +17,9 @@ import java.security.ProtectionDomain;
 public class ClassPreProcessorAgentAdapter implements ClassFileTransformer {
 
     private IHLogPreProcessor preProcessor;
-
     public ClassPreProcessorAgentAdapter(){
 
-        LoaderHelper.setLoader(this.getClass().getClassLoader());
+        //LoaderHelper.setLoader(this.getClass().getClassLoader());
         //获取配置实例
         //HLogConfig config = HLogConfig.getInstance(true);
         //初始化配置信息,后需要从properties文件或服务端来获取
@@ -29,6 +28,7 @@ public class ClassPreProcessorAgentAdapter implements ClassFileTransformer {
         //TODO 可根据配置来创建不同的实现
         preProcessor = new HLogPreProcessor();
         preProcessor.initialize();
+
     }
 
     /**
@@ -42,6 +42,7 @@ public class ClassPreProcessorAgentAdapter implements ClassFileTransformer {
      * @throws IllegalClassFormatException
      */
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
+        ClassLoaderHolder.setClassLoader(loader);
         return preProcessor.preProcess(loader,className,protectionDomain,classfileBuffer);
     }
 }

@@ -29,6 +29,8 @@
  */
 package com.asiainfo.hlog.org.objectweb.asm;
 
+import com.asiainfo.hlog.agent.classloader.ClassLoaderHolder;
+
 /**
  * A {@link ClassVisitor} that generates classes in bytecode form. More
  * precisely this visitor generates a byte array conforming to the Java class
@@ -1711,7 +1713,13 @@ public class ClassWriter extends ClassVisitor {
      */
     protected String getCommonSuperClass(final String type1, final String type2) {
         Class<?> c, d;
-        ClassLoader classLoader = getClass().getClassLoader();
+        //TODO 操蛋的ClassLoader，不知道为什么会classLoader不对，ClassNotFoundException，这么改太可怕了哈哈哈哈
+        //ClassLoader classLoader = getClass().getClassLoader();
+        ClassLoader classLoader = ClassLoaderHolder.getClassLoader();
+        if(classLoader == null){
+            classLoader = getClass().getClassLoader();
+        }
+
         try {
             c = Class.forName(type1.replace('/', '.'), false, classLoader);
             d = Class.forName(type2.replace('/', '.'), false, classLoader);

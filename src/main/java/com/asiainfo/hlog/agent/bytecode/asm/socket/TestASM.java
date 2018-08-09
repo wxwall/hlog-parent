@@ -1,7 +1,6 @@
 package com.asiainfo.hlog.agent.bytecode.asm.socket;
 
 import com.asiainfo.hlog.agent.runtime.LogAgentContext;
-import sun.reflect.MethodAccessor;
 
 import java.io.FileDescriptor;
 import java.io.IOException;

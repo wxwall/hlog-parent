@@ -190,7 +190,14 @@ public abstract class AbstractPreProcessor implements IHLogPreProcessor {
 
         isSaveWeaveClass = "yes".equals(System.getProperty(Constants.SYS_KEY_HLOG_SAVE_WEAVE_CLASS));
 
-        String base = HLogConfig.tmpdir + File.separator + "log-agent" + File.separator;
+        String base = HLogConfig.getHLogAgentDir();
+        String server = System.getProperty(Constants.SYS_KEY_HLOG_SERVER_ALIAS);
+        if(server == null || server.length()==0){
+            server = "defApp";
+        }
+        base = base + "log-agent"+ File.separator + server + File.separator;
+
+        //String base = HLogConfig.tmpdir + File.separator + "log-agent" + File.separator;
         if(isSaveWeaveClass){
             saveWeaveClassPath = base+"weave-class"+ File.separator;
         }

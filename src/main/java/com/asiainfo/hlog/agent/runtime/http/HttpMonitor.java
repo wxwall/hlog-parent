@@ -8,7 +8,6 @@ import com.asiainfo.hlog.agent.runtime.RuntimeContext;
 import com.asiainfo.hlog.agent.runtime.RutimeCallFactory;
 import com.asiainfo.hlog.client.config.Constants;
 import com.asiainfo.hlog.client.config.HLogConfig;
-import com.asiainfo.hlog.client.helper.ClassHelper;
 import com.asiainfo.hlog.client.helper.LogUtil;
 import com.asiainfo.hlog.client.helper.Logger;
 import com.asiainfo.hlog.client.model.LogData;
@@ -273,7 +272,7 @@ public class HttpMonitor {
         try {
             if(pageRedirectMethod == null){
                 synchronized (HttpMonitor.class){
-                    Class webPageParserClass = ClassHelper.loadClass("com.asiainfo.hlog.web.WebPageParser");
+                    Class webPageParserClass = Class.forName("com.asiainfo.hlog.web.WebPageParser"); //ClassHelper.loadClass("com.asiainfo.hlog.web.WebPageParser");
                     Method[] methods = webPageParserClass.getMethods();
                     for (Method method : methods){
                         if(method.getName().equals("pageRedirect")){

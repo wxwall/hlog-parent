@@ -1,7 +1,5 @@
 package com.asiainfo.hlog.web;
 
-import com.sun.corba.se.impl.orbutil.CacheTable;
-
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;

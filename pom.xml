@@ -10,11 +10,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>hlog-agent</artifactId>
-    <version>3.13.0</version>
+    <version>3.15.0</version>
     <properties>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
-        <version-num>130</version-num>
-        <hlog-client.version>3.13.0</hlog-client.version>
+        <version-num>150</version-num>
+        <hlog-client.version>3.15.0</hlog-client.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <premain.class>com.asiainfo.hlog.agent.HLogAgent</premain.class>
         <shade.package>com.asiainfo.hlog.dependencies</shade.package>
@@ -88,23 +88,16 @@
                             </transformers>
                             <artifactSet>
                                 <excludes>
-                                    <exclude>com.alibaba:*</exclude>
-                                    <exclude>org.mvel:*</exclude>
                                     <exclude>org.apache.commons:*</exclude>
                                     <exclude>javax.servlet:*</exclude>
-                                    <exclude>studio.raptor:*</exclude>
                                     <exclude>ognl:*</exclude>
-                                    <exclude>com.google.code.gson:*</exclude>
                                     <exclude>jline:*</exclude>
                                     <exclude>io.netty:*</exclude>
                                     <exclude>log4j:*</exclude>
                                     <exclude>javassist:*</exclude>
-                                    <exclude>javax.inject:*</exclude>
                                     <exclude>org.codehaus.plexus:*</exclude>
                                     <exclude>org.apache.xbean:*</exclude>
-                                    <exclude>com.google.inject:*</exclude>
                                     <exclude>com.al:*</exclude>
-                                    <exclude>aopalliance:*</exclude>
                                     <exclude>ch.qos.logback:*</exclude>
                                     <exclude>org.apache.logging.log4j:*</exclude>
                                 </excludes>
@@ -134,7 +127,30 @@
                                     <pattern>org.apache.commons.logging</pattern>
                                     <shadedPattern>${shade.package}.org.apache.commons.logging</shadedPattern>
                                 </relocation>
-
+                                <relocation>
+                                    <pattern>studio.raptor.cmdb</pattern>
+                                    <shadedPattern>${shade.package}.studio.raptor.cmdb</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.alibaba.fastjson</pattern>
+                                    <shadedPattern>${shade.package}.com.alibaba.fastjson</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.kafka</pattern>
+                                    <shadedPattern>${shade.package}.org.apache.kafka</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.mvel2</pattern>
+                                    <shadedPattern>${shade.package}.org.mvel2</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>javax.inject</pattern>
+                                    <shadedPattern>${shade.package}.javax.inject</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.aopalliance</pattern>
+                                    <shadedPattern>${shade.package}.org.aopalliance</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>
