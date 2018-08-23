@@ -1,5 +1,7 @@
 package com.asiainfo.hlog.web;
 
+import com.asiainfo.hlog.client.helper.Logger;
+
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
@@ -23,7 +25,7 @@ public class HLogHttpResponse  {
         Method[] methods = resp.getClass().getMethods();
         for(Method method : methods){
             if(method.getName().equals(name)){
-                methodMap.put(name,method);
+                //methodMap.put(name,method);
                 return method;
             }
         }
@@ -49,7 +51,7 @@ public class HLogHttpResponse  {
                 getMethod("addHeader").invoke(resp, key, value);
             }
         }catch (Exception e){
-            e.printStackTrace();
+            Logger.error("",e);
         }
     }
 

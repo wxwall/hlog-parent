@@ -296,12 +296,20 @@ public class HttpMonitor {
         if(!HLogConfig.getInstance().isEnableSession()){
             return;
         }
+
         try{
             //排除一些资源的请求
             HLogHttpRequest req = new HLogHttpRequest(req0);
-            String expand = getExpand(req.getRequestURL());
-            if(excludeExpands.contains(expand)){
-                return ;
+            try {
+                String url = req.getRequestURL();
+                if (url != null) {
+                    String expand = getExpand(new StringBuffer(url));
+                    if (excludeExpands.contains(expand)) {
+                        return;
+                    }
+                }
+            }catch (Exception e){
+                Logger.error("exclude url失败",e);
             }
             Object session = req.getSession();
             if(session == null){

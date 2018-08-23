@@ -1,1 +1,1 @@
-com.asiainfo.hlog.dependencies.studio.raptor.cmdb.foundation.spi.ProviderManager
+com.asiainfo.hlog.dependencies.studio.raptor.cmdb.foundation.internals.DefaultProviderManager
