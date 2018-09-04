@@ -15,10 +15,7 @@ import com.asiainfo.hlog.web.HLogHttpRequest;
 import com.asiainfo.hlog.web.HLogHttpResponse;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * <p>用于监控各种http方式的请求处理:</p>
@@ -48,6 +45,7 @@ public class HttpMonitor {
         excludeExpands.add("rar");
         excludeExpands.add("doc");
         excludeExpands.add("xsl");
+        excludeExpands.add("map");
 
         Map<String,String> keyPaths = HLogConfig.getInstance().getSessionKeyPath();
         if(keyPaths!=null){
@@ -59,6 +57,25 @@ public class HttpMonitor {
         //TODO 增加可配置
     }
 
+    public static boolean excludeUrlSuffix(HLogHttpRequest req,String url){
+        try {
+            if(req != null) {
+                url = req.getRequestURL();
+            }
+            Set<String> set = HLogConfig.getInstance().getExcludeUrlSuffix();
+            Iterator<String> it = set.iterator();
+            while (it.hasNext()) {
+                String suffix = it.next();
+                if(url.endsWith(suffix)){
+                    LogAgentContext.setCollectTag("N");
+                    return true;
+                }
+            }
+        }catch (Exception e){
+            Logger.warn("",e);
+        }
+        return false;
+    }
 
     public static void receiveHlogId(Object _req){
         HttpMonitor.clearReceiveHlogId();
@@ -67,6 +84,10 @@ public class HttpMonitor {
         LogAgentContext.setIsHttp(true);
 
         HLogHttpRequest req = new HLogHttpRequest(_req);
+        if(excludeUrlSuffix(req,null)){
+            return;
+        }
+
         String _gid = req.getHeader("hloggid");
         String _pid = req.getHeader("hlogpid");
         String _tag = req.getHeader("hlogctag");
@@ -129,6 +150,10 @@ public class HttpMonitor {
                 return null;
             }
 
+            if(excludeUrlSuffix(null,requestUrl.toString())){
+                return null;
+            }
+
             HLogHttpResponse resp = new HLogHttpResponse(resp0);
             resp.addHeader("_hGid",LogAgentContext.getLogGroupIdOrNull());
 
@@ -172,6 +197,10 @@ public class HttpMonitor {
 
         if(excludeExpands.contains(expand)){
             return ;
+        }
+
+        if(excludeUrlSuffix(null,requestUrl.toString())){
+            return;
         }
 
         long spend = System.currentTimeMillis()-start;

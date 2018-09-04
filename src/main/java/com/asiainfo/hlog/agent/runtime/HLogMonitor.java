@@ -511,6 +511,9 @@ public class HLogMonitor {
         if(err==null){
             return;
         }
+        if(HLogConfig.getInstance().getExcludeExceptionTypes().contains(err.getClass().getName())){
+            return;
+        }
         LogData logData = createLogData(HLogAgentConst.MV_CODE_ERROR,id,pid);
         String errMsg = RuntimeContext.error(err);
         logData.setDesc(errMsg);
